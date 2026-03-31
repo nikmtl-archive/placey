@@ -1,5 +1,5 @@
 # Placey
-Airbnb clone
+A modern, full-stack property rental platform inspired by Airbnb. Built with Vue 3, Tailwind CSS, and ASP.NET Core, Placey enables hosts to manage listings and guests to discover and book accommodations.
 
 ## Functions
 - [ ] Property listings with photos, location, amenities
@@ -22,5 +22,5 @@ Optional:
 ## Contributors
 | Name | Matrikel number | Github account |
 | --- | --- | --- |
-| Michelle Niedersberg | 8569189 | michelle128n |
-| Dominik Mitzek | 6633800 | nikmtl |
+| Michelle Niedersberg | 8569189 | [@michelle128n](https://github.com/michelle128n) |
+| Dominik Mitzek | 6633800 | [@nikmtl](https://github.com/nikmtl) |
