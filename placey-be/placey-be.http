@@ -1,0 +1,6 @@
+@placey_be_HostAddress = http://localhost:5286
+
+GET {{placey_be_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
