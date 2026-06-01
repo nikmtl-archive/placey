@@ -1,22 +1,22 @@
 # Placey
 
-## Description
-Placey is a modern property rental platform inspired by Airbnb. It is designed for two main user groups: hosts who publish and manage accommodations, and guests who search for suitable stays and book them online.
+Placey is a short-term property rental platform inspired by Airbnb. Hosts publish and manage accommodations; guests search, check availability, and book stays.
 
-The project focuses on solving the core problems of short-term rental platforms: structured property presentation, availability management, booking coordination, and a clear separation between host and guest workflows.
+---
 
 ## Features
-### Agreed Scope
-- [ ] Property listings
-- [ ] Search 
+
+### Agreed scope
+- [ ] Property listings with photos and availability
+- [ ] Search and filter by location, dates, and guest count
 - [ ] Availability checks during the booking flow
-- [ ] Host dashboard for managing listings and viewing bookings
-- [ ] Guest dashboard for viewing bookings
+- [ ] Host dashboard — manage listings and view incoming reservations
+- [ ] Guest dashboard — view and manage own bookings
 
 ### Optional Scope
 - [ ] Reviews and ratings for listings
 - [ ] Messaging between host and guest
-- [ ] Payments, for example through PayPal Sandbox
+- [ ] Payments via PayPal Sandbox
 
 <!--
 ### Out of Scope
@@ -24,74 +24,138 @@ The project focuses on solving the core problems of short-term rental platforms:
 - [ ] Item that is intentionally not part of the project
 -->
 
-## Technologies
-- Frontend: Vue, Vue Router, Tailwind CSS
-- Backend: ASP.NET Core Web API
-- Database / Storage: MariaDB
-<!--
-- Frameworks and Services: 
-- Additional Tools: 
--->
+---
 
-## Project Structure
-<!-- TODO
-- `src/...` – Description  
-- `app/...` – Description
-- `docs/...` – Description
--->
+## Technologies
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Vue 3, Vue Router, Tailwind CSS |
+| Backend | ASP.NET Core 8 Web API |
+| Database | PostgreSQL 16 |
+| Auth | JWT Bearer + refresh tokens |
+| Container | Docker, Docker Compose |
+
+---
+
+## Project structure
+
+> [!NOTE]
+> For detailed technical documentation, see the documentation section below.
+
+```
+placey/
+├── placey-be/      ASP.NET Core backend (REST API)
+├── placey-fe/      Vue 3 frontend
+├── docs/           Architecture and API documentation
+│   ├── backend.md          Backend architecture & developer guide
+│   └── api-endpoints.md    Full API reference
+├── .env.example    Environment variable template
+└── docker-compose.yml
+```
+
+---
 
 ## Setup
-<!-- TODO
+
 ### Requirements
-- ...
-- ...
 
-### Local Start
-1. Clone the repository
-2. Install dependencies
-3. Start the project
+- [Docker](https://www.docker.com/) and Docker Compose
+- .NET 8 SDK (for local backend development)
+- Node.js 20 + pnpm (for local frontend development)
 
-### Container Start
-- How is the project started with Docker / Docker Compose / Kubernetes?
-- Which commands are required?
-- Which services are started?
+### Quick start with Docker Compose
+
+```bash
+# 1. Copy the env template and fill in your values
+cp .env.example .env
+
+# 2. Build and start all services
+docker compose up --build
+```
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:8080 |
+| API | http://localhost:5001 |
+| Swagger UI | http://localhost:5001/swagger |
+
+### Local backend development
+
+```bash
+# Start only the database
+docker compose up postgres -d
+
+cd placey-be
+dotnet restore
+
+# First time: create and apply the schema
+dotnet ef migrations add Init
+dotnet ef database update
+
+dotnet run
+# API available at https://localhost:7220
+```
+
+### Local frontend development
+
+```bash
+cd placey-fe
+pnpm install
+pnpm dev
+```
+
+### Environment variables
+
+Copy `.env.example` to `.env` and set:
+
+| Variable | Description |
+|----------|-------------|
+| `POSTGRES_USER` | Database username |
+| `POSTGRES_PASSWORD` | Database password |
+| `POSTGRES_DB` | Database name |
+| `JWT_SECRET` | HMAC signing key — must be ≥ 32 characters |
+| `ASPNETCORE_ENVIRONMENT` | `Development` or `Production` |
+
 
 ### Test Data
 *Test users*:
-| Name | Password |
-| --- | --- |
-| admin | Admin-1234! |
-| user1 | User1-1234! |
-| user2 | User2-1234! |
--->
+- _To be filled in_
+
+
+## Documentation
+
+Detailed documentation is available in the `docs/` folder:
+
+| Document | Description |
+|----------|-------------|
+| [docs/backend.md](docs/backend.md) | Architecture, auth flow, database schema, error handling, migrations |
+| [docs/api-endpoints.md](docs/api-endpoints.md) | Full REST API reference with request/response shapes |
+
+---
 
 ## Tests
-<!-- TODO
-### What Was Tested?
-- Which important functions or critical areas were tested?
-- Which edge cases were considered?
 
-### How Was It Tested?
-- Manually tested:
-  - ...
-- Automated tested:
-  - ...
+### What was tested
+- _To be filled in_
 
-### Testing the Project
-1. ...
-2. ...
-3. ...
- -->
+### Running tests
+- _To be filled in_
 
+---
 
 <!--
 ## Known Limitations
 - Which points are still open?
 - What limitations does the project have?
 - What would be improved in a future version?
+
+---
 -->
+
 ## Contributors
-| Name | Student ID | GitHub account |
-| --- | --- | --- |
+
+| Name | Student ID | GitHub |
+|------|-----------|--------|
 | Michelle Niedersberg | 8569189 | [@michelle128n](https://github.com/michelle128n) |
 | Dominik Mitzel | 6633800 | [@nikmtl](https://github.com/nikmtl) |
