@@ -130,38 +130,96 @@ Pending → Confirmed → Completed
 
 ---
 
-## Authentication
+## Authentication & Authorization
+
+**Authentication** = verifying who the caller is (login).  
+**Authorization** = deciding what they are allowed to do (protected endpoints, ownership checks).
 
 ### Token strategy
 
 | Token | Lifetime | Storage |
 |-------|----------|---------|
-| Access token | 15 minutes | Client memory / Authorization header |
-| Refresh token | 7 days | Database (`RefreshTokens` table) |
+| Access token (JWT) | 15 minutes | Client memory — sent in `Authorization` header |
+| Refresh token | 7 days | `RefreshTokens` DB table |
 
-The access token is a signed HS256 JWT containing `sub` (user ID) and `email` claims. It is passed as a Bearer token on every authenticated request.
+### What is a JWT?
 
-The refresh token is an opaque random 64-byte string. It is rotated on every use — the old token is revoked and a new one is issued. Logout simply marks the token as revoked in the database.
+A JWT (JSON Web Token) is a self-contained signed string with three base64-encoded parts:
+
+```
+header.payload.signature
+```
+
+The **payload** carries claims about the user. The claims embedded in the access token are:
+
+| Claim | Value |
+|-------|-------|
+| `sub` | User GUID — used to identify the caller in every service |
+| `email` | User's email |
+| `jti` | Random GUID — makes each token unique |
+
+The whole token is signed with **HMAC-SHA256** using `Jwt:Secret`. If anyone tampers with the payload the signature won't match and the token is rejected. This means the server can verify the token without a database lookup — the signature alone is proof of authenticity.
+
+Because the server never needs to look up the token, JWTs cannot be invalidated before they expire. This is why the access token lifetime is kept short at 15 minutes.
 
 ### Auth flow
 
 ```
-POST /auth/register  ─→  hash password, create User, return token pair
-POST /auth/login     ─→  verify password, return token pair
-POST /auth/refresh   ─→  validate DB token, rotate, return new pair
+POST /auth/register  ─→  hash password with BCrypt, create User, issue token pair
+POST /auth/login     ─→  verify BCrypt hash, issue token pair
+POST /auth/refresh   ─→  validate refresh token in DB, rotate, issue new pair
 POST /auth/logout    ─→  mark refresh token as revoked in DB
 ```
 
-### Authorization
+Sequence for a typical client session:
 
-There are no user roles. Any user can become a "host" by creating a listing. Authorization for host-only actions (update/delete listing, approve bookings) is enforced in the service layer by checking resource ownership:
+```
+Client                          Server
+  |                               |
+  |-- POST /auth/login ---------->|  password verified, tokens issued
+  |<- { accessToken, refreshToken}|
+  |                               |
+  |-- GET /listings               |
+  |   Authorization: Bearer <jwt>->  JWT middleware validates signature + expiry
+  |<- 200 OK --------------------|  [Authorize] passes, request handled
+  |                               |
+  |  (15 min later — token expired)|
+  |-- POST /auth/refresh -------->|  refresh token validated, both tokens rotated
+  |<- { new accessToken, ... } ---|
+```
+
+### How `[Authorize]` works
+
+The JWT middleware (configured in `ServiceExtensions.AddJwtAuth`) runs on every request before the controller. It:
+
+1. Reads the token from the `Authorization: Bearer ...` header
+2. Validates the signature, issuer, audience, and expiry
+3. If valid, populates `HttpContext.User` with the token's claims
+
+`[Authorize]` on a controller or action simply checks that `HttpContext.User` was populated by step 3. If it wasn't (missing token, expired, bad signature) ASP.NET returns **401 Unauthorized** before the controller method is even called.
+
+Endpoints without `[Authorize]` (`POST /auth/login`, `POST /auth/register`) are public.
+
+### Resource-level authorization
+
+There are no user roles. Any authenticated user can become a host by creating a listing. Authorization for owner-only actions (edit/delete listing, approve bookings) is enforced in the **service layer** by comparing the caller's ID against the resource's owner field:
 
 ```csharp
 if (listing.HostId != requesterId)
     throw new UnauthorizedAccessException("Only the host can update this listing.");
 ```
 
-The error middleware converts `UnauthorizedAccessException` → `403 Forbidden`.
+The error middleware maps `UnauthorizedAccessException` → **403 Forbidden**.
+
+The caller's ID is read from the `sub` claim via the `ClaimsPrincipalExtensions.GetUserId()` helper and passed into the service from the controller.
+
+### Refresh token rotation
+
+The refresh token is an opaque random 64-byte string stored in the database. Unlike JWTs it can be revoked:
+
+- On every `POST /auth/refresh` the old token's `RevokedAt` is set and a new token is created — so each refresh token can only be used once.
+- On `POST /auth/logout` the token is revoked immediately.
+- `IsActive` checks both expiry (`ExpiresAt`) and revocation (`RevokedAt`).
 
 ---
 
