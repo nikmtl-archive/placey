@@ -82,6 +82,8 @@ docker compose up --build
 
 ### Local backend development
 
+JWT config and the dev database connection string are already set in `placey-be/appsettings.Development.json` — no extra environment setup needed.
+
 ```bash
 # Start only the database
 docker compose up postgres -d
@@ -89,8 +91,7 @@ docker compose up postgres -d
 cd placey-be
 dotnet restore
 
-# First time: create and apply the schema
-dotnet ef migrations add Init
+# First time only: apply existing migrations
 dotnet ef database update
 
 dotnet run
@@ -107,15 +108,17 @@ pnpm dev
 
 ### Environment variables
 
-Copy `.env.example` to `.env` and set:
+Used by Docker Compose only. Copy `.env.example` to `.env` and fill in:
 
 | Variable | Description |
 |----------|-------------|
 | `POSTGRES_USER` | Database username |
 | `POSTGRES_PASSWORD` | Database password |
 | `POSTGRES_DB` | Database name |
-| `JWT_SECRET` | HMAC signing key — must be ≥ 32 characters |
+| `JWT_SECRET` | HMAC signing key — must be ≥ 32 characters (`openssl rand -base64 32`) |
 | `ASPNETCORE_ENVIRONMENT` | `Development` or `Production` |
+
+JWT issuer and audience are hardcoded to `placey` in `docker-compose.yml`. For local development outside Docker they are set in `appsettings.Development.json`.
 
 
 ### Test Data
