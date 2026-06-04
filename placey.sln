@@ -1,8 +1,10 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "placey-be", "placey-be\placey-be.csproj", "{11B74E2B-8F7A-E11B-A313-06B46CA3D3A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "placey-be.Tests", "placey-be.Tests\placey-be.Tests.csproj", "{A9CD1CAF-4ED7-4367-A1D2-884295FCF27A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,6 +16,10 @@ Global
 		{11B74E2B-8F7A-E11B-A313-06B46CA3D3A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11B74E2B-8F7A-E11B-A313-06B46CA3D3A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11B74E2B-8F7A-E11B-A313-06B46CA3D3A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9CD1CAF-4ED7-4367-A1D2-884295FCF27A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9CD1CAF-4ED7-4367-A1D2-884295FCF27A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9CD1CAF-4ED7-4367-A1D2-884295FCF27A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9CD1CAF-4ED7-4367-A1D2-884295FCF27A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
