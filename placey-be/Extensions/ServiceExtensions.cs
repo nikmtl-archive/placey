@@ -57,6 +57,7 @@ public static class ServiceExtensions
         services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Placey API", Version = "v1" });
+            c.SchemaFilter<SwaggerExamplesFilter>();
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Name = "Authorization",
