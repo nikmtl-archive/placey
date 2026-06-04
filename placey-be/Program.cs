@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using placey_be.Data;
 using placey_be.Extensions;
 using placey_be.Middleware;
 
@@ -17,6 +19,11 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+    await DbSeeder.SeedAsync(db);
 }
 
 app.UseStaticFiles();

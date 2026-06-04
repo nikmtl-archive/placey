@@ -28,13 +28,13 @@ Placey is a short-term property rental platform inspired by Airbnb. Hosts publis
 
 ## Technologies
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Vue 3, Vue Router, Tailwind CSS |
-| Backend | ASP.NET Core 8 Web API |
-| Database | PostgreSQL 16 |
-| Auth | JWT Bearer + refresh tokens |
-| Container | Docker, Docker Compose |
+| Layer     | Technology                      |
+| --------- | ------------------------------- |
+| Frontend  | Vue 3, Vue Router, Tailwind CSS |
+| Backend   | ASP.NET Core 8 Web API          |
+| Database  | PostgreSQL 16                   |
+| Auth      | JWT Bearer + refresh tokens     |
+| Container | Docker, Docker Compose          |
 
 ---
 
@@ -75,10 +75,10 @@ cp .env.example .env
 docker compose up --build
 ```
 
-| Service | URL |
-|---------|-----|
-| Frontend | http://localhost:8080 |
-| API | http://localhost:5001 |
+| Service    | URL                           |
+| ---------- | ----------------------------- |
+| Frontend   | http://localhost:8080         |
+| API        | http://localhost:5001         |
 | Swagger UI | http://localhost:5001/swagger |
 
 ### Local backend development
@@ -111,30 +111,50 @@ pnpm dev
 
 Used by Docker Compose only. Copy `.env.example` to `.env` and fill in:
 
-| Variable | Description |
-|----------|-------------|
-| `POSTGRES_USER` | Database username |
-| `POSTGRES_PASSWORD` | Database password |
-| `POSTGRES_DB` | Database name |
-| `JWT_SECRET` | HMAC signing key — must be ≥ 32 characters (`openssl rand -base64 32`) |
-| `ASPNETCORE_ENVIRONMENT` | `Development` or `Production` |
+| Variable                 | Description                                                            |
+| ------------------------ | ---------------------------------------------------------------------- |
+| `POSTGRES_USER`          | Database username                                                      |
+| `POSTGRES_PASSWORD`      | Database password                                                      |
+| `POSTGRES_DB`            | Database name                                                          |
+| `JWT_SECRET`             | HMAC signing key — must be ≥ 32 characters (`openssl rand -base64 32`) |
+| `ASPNETCORE_ENVIRONMENT` | `Development` or `Production`                                          |
 
 JWT issuer and audience are hardcoded to `placey` in `docker-compose.yml`. For local development outside Docker they are set in `appsettings.Development.json`.
 
 
-### Test Data
-*Test users*:
-- _To be filled in_
+### Example seed data
+
+When running in `Development` mode, the backend automatically seeds example data on startup. All seed accounts share the password **`password123`**.
+
+**Users**
+
+| Name          | Email             | Role         | Password    |
+| ------------- | ----------------- | ------------ | ----------- |
+| Alice Müller  | alice@example.com | Host & Guest | password123 |
+| Bob Schneider | bob@example.com   | Host         | password123 |
+| Carol Jensen  | carol@example.com | Guest        | password123 |
+
+**Listings**
+
+| Title                           | Location               | Price/night | Max guests |
+| ------------------------------- | ---------------------- | ----------- | ---------- |
+| Cozy Studio in Mitte            | Berlin, Germany        | €85         | 2          |
+| Modern Loft with Rooftop Access | Vienna, Austria        | €140        | 4          |
+| Architect-Designed Townhouse    | Prague, Czech Republic | €195        | 6          |
+| Lakeside Cabin Retreat          | Bled, Slovenia         | €120        | 4          |
+| Bright Apartment near Old Town  | Tallinn, Estonia       | €70         | 2          |
+
+Seed data also includes completed bookings, reviews, and favorites so all API endpoints return realistic data immediately.
 
 
 ## Documentation
 
 Detailed documentation is available in the `docs/` folder:
 
-| Document | Description |
-|----------|-------------|
-| [docs/backend.md](docs/backend.md) | Architecture, auth flow, database schema, error handling, migrations |
-| [docs/api-endpoints.md](docs/api-endpoints.md) | Full REST API reference with request/response shapes |
+| Document                                       | Description                                                          |
+| ---------------------------------------------- | -------------------------------------------------------------------- |
+| [docs/backend.md](docs/backend.md)             | Architecture, auth flow, database schema, error handling, migrations |
+| [docs/api-endpoints.md](docs/api-endpoints.md) | Full REST API reference with request/response shapes                 |
 
 ---
 
@@ -144,14 +164,14 @@ Detailed documentation is available in the `docs/` folder:
 
 Unit tests cover all six service layers of the backend using an in-memory database (EF Core InMemory). No external dependencies (database, running server) are needed to run the suite.
 
-| Service | Scenarios tested |
-|---------|-----------------|
-| `AuthService` | Register (happy path, duplicate email), login (valid, unknown email, wrong password), refresh (valid, invalid, revoked token), logout |
-| `BookingService` | Create (instant-book → Confirmed, non-instant → Pending, host self-booking, invalid dates, date conflicts, cancelled-then-rebook), get by ID (as guest, as host, unauthorized), cancel (guest, host, unauthorized, completed booking), update status (host, non-host) |
-| `ListingService` | Create, get by ID (found, not found), update (host, non-host, not found), delete (host, non-host), search (no filter, location, guest count, pagination), set/get availability (host, non-host) |
-| `ReviewService` | Create (valid completed booking, wrong guest, booking not completed, duplicate, booking not found), delete (author, non-author), get by listing, get by host user |
-| `FavoriteService` | Add (valid, listing not found, idempotent), remove (existing, idempotent), get favorites |
-| `UserService` | Get me (found, not found), update me (fields updated, null fields preserved), delete me, get public profile |
+| Service           | Scenarios tested                                                                                                                                                                                                                                                      |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AuthService`     | Register (happy path, duplicate email), login (valid, unknown email, wrong password), refresh (valid, invalid, revoked token), logout                                                                                                                                 |
+| `BookingService`  | Create (instant-book → Confirmed, non-instant → Pending, host self-booking, invalid dates, date conflicts, cancelled-then-rebook), get by ID (as guest, as host, unauthorized), cancel (guest, host, unauthorized, completed booking), update status (host, non-host) |
+| `ListingService`  | Create, get by ID (found, not found), update (host, non-host, not found), delete (host, non-host), search (no filter, location, guest count, pagination), set/get availability (host, non-host)                                                                       |
+| `ReviewService`   | Create (valid completed booking, wrong guest, booking not completed, duplicate, booking not found), delete (author, non-author), get by listing, get by host user                                                                                                     |
+| `FavoriteService` | Add (valid, listing not found, idempotent), remove (existing, idempotent), get favorites                                                                                                                                                                              |
+| `UserService`     | Get me (found, not found), update me (fields updated, null fields preserved), delete me, get public profile                                                                                                                                                           |
 
 **Total: 66 tests**
 
@@ -178,7 +198,7 @@ dotnet test placey.sln
 
 ## Contributors
 
-| Name | Matr.-Nr. | GitHub |
-|------|-----------|--------|
-| Michelle Niedersberg | 8569189 | [@michelle128n](https://github.com/michelle128n) |
-| Dominik Mitzel | 6633800 | [@nikmtl](https://github.com/nikmtl) |
+| Name                 | Matr.-Nr. | GitHub                                           |
+| -------------------- | --------- | ------------------------------------------------ |
+| Michelle Niedersberg | 8569189   | [@michelle128n](https://github.com/michelle128n) |
+| Dominik Mitzel       | 6633800   | [@nikmtl](https://github.com/nikmtl)             |
