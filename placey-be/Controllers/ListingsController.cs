@@ -66,6 +66,23 @@ public class ListingsController(
         return Ok(result);
     }
 
+    [Authorize]
+    [HttpPost("{id:guid}/photos")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UploadPhoto(Guid id, IFormFile file)
+    {
+        var result = await listingService.UploadPhotoAsync(id, User.GetUserId(), file);
+        return Ok(result);
+    }
+
+    [Authorize]
+    [HttpDelete("{id:guid}/photos/{photoId:guid}")]
+    public async Task<IActionResult> DeletePhoto(Guid id, Guid photoId)
+    {
+        await listingService.DeletePhotoAsync(id, photoId, User.GetUserId());
+        return NoContent();
+    }
+
     [HttpGet("{id:guid}/reviews")]
     public async Task<IActionResult> GetReviews(Guid id)
     {

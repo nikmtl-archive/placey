@@ -6,7 +6,7 @@ using placey_be.Services.Interfaces;
 
 namespace placey_be.Services;
 
-public class ListingService(AppDbContext db) : IListingService
+public class ListingService(AppDbContext db, IWebHostEnvironment env) : IListingService
 {
     public async Task<(List<ListingResponse> Items, int Total)> SearchAsync(ListingSearchParams p)
     {
@@ -133,6 +133,57 @@ public class ListingService(AppDbContext db) : IListingService
         await db.SaveChangesAsync();
 
         return new AvailabilityResponse(entry.Id, entry.StartDate, entry.EndDate, entry.IsBlocked);
+    }
+
+    public async Task<ListingPhotoResponse> UploadPhotoAsync(Guid listingId, Guid requesterId, IFormFile file)
+    {
+        var listing = await db.Listings.Include(l => l.Photos).FirstOrDefaultAsync(l => l.Id == listingId)
+            ?? throw new KeyNotFoundException("Listing not found.");
+
+        if (listing.HostId != requesterId)
+            throw new UnauthorizedAccessException("Only the host can upload photos.");
+
+        var uploads = Path.Combine(env.WebRootPath ?? "wwwroot", "listing-photos");
+        Directory.CreateDirectory(uploads);
+
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var filename = $"{Guid.NewGuid()}{ext}";
+        var fullPath = Path.Combine(uploads, filename);
+
+        await using var stream = new FileStream(fullPath, FileMode.Create);
+        await file.CopyToAsync(stream);
+
+        var order = listing.Photos.Count > 0 ? listing.Photos.Max(p => p.Order) + 1 : 0;
+        var photo = new ListingPhoto
+        {
+            ListingId = listingId,
+            Url = $"/listing-photos/{filename}",
+            Order = order
+        };
+
+        db.ListingPhotos.Add(photo);
+        await db.SaveChangesAsync();
+
+        return new ListingPhotoResponse(photo.Id, photo.Url, photo.Order);
+    }
+
+    public async Task DeletePhotoAsync(Guid listingId, Guid photoId, Guid requesterId)
+    {
+        var listing = await db.Listings.FindAsync(listingId)
+            ?? throw new KeyNotFoundException("Listing not found.");
+
+        if (listing.HostId != requesterId)
+            throw new UnauthorizedAccessException("Only the host can delete photos.");
+
+        var photo = await db.ListingPhotos.FirstOrDefaultAsync(p => p.Id == photoId && p.ListingId == listingId)
+            ?? throw new KeyNotFoundException("Photo not found.");
+
+        var physicalPath = Path.Combine(env.WebRootPath ?? "wwwroot", photo.Url.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+        if (File.Exists(physicalPath))
+            File.Delete(physicalPath);
+
+        db.ListingPhotos.Remove(photo);
+        await db.SaveChangesAsync();
     }
 
     private static ListingResponse ToResponse(Listing l) => new(
