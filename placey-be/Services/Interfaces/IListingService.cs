@@ -11,4 +11,6 @@ public interface IListingService
     Task DeleteAsync(Guid listingId, Guid requesterId);
     Task<List<AvailabilityResponse>> GetAvailabilityAsync(Guid listingId);
     Task<AvailabilityResponse> SetAvailabilityAsync(Guid listingId, Guid requesterId, SetAvailabilityRequest request);
+    Task<ListingPhotoResponse> UploadPhotoAsync(Guid listingId, Guid requesterId, IFormFile file);
+    Task DeletePhotoAsync(Guid listingId, Guid photoId, Guid requesterId);
 }

@@ -46,6 +46,12 @@ public record ListingSearchParams(
     int Limit = 20
 );
 
+public record ListingPhotoResponse(
+    Guid Id,
+    string Url,
+    int Order
+);
+
 public record SetAvailabilityRequest(
     [Required] DateOnly StartDate,
     [Required] DateOnly EndDate,
