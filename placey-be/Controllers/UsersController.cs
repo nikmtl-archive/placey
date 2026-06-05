@@ -62,7 +62,7 @@ public class UsersController(
             .ToListAsync();
 
         return Ok(listings.Select(l => new {
-            l.Id, l.Title, l.Location, l.PricePerNight, l.MaxGuests, l.CreatedAt
+            l.Id, l.Title, Location = $"{l.City}, {l.Country}", l.City, l.Country, l.PricePerNight, l.Bedrooms, l.MaxGuests, l.Category, l.PropertyType, l.CreatedAt
         }));
     }
 

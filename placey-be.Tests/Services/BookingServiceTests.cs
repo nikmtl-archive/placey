@@ -24,7 +24,8 @@ public class BookingServiceTests
             HostId = host.Id,
             Title = "Beach House",
             Description = "Nice",
-            Location = "Cape Town",
+            City = "Cape Town",
+            Country = "South Africa",
             PricePerNight = 100m,
             MaxGuests = 4,
             IsInstantBook = instantBook

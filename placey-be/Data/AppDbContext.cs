@@ -24,6 +24,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         model.Entity<Listing>(e =>
         {
             e.Property(l => l.PricePerNight).HasColumnType("numeric(10,2)");
+            e.Property(l => l.Amenities).HasColumnType("text[]");
             e.HasOne(l => l.Host)
                 .WithMany(u => u.Listings)
                 .HasForeignKey(l => l.HostId)

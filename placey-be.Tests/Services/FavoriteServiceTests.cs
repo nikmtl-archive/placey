@@ -19,7 +19,8 @@ public class FavoriteServiceTests
             HostId = host.Id,
             Title = "Loft",
             Description = "Cool",
-            Location = "NYC",
+            City = "NYC",
+            Country = "USA",
             PricePerNight = 200m,
             MaxGuests = 2
         };

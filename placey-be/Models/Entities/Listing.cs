@@ -8,10 +8,21 @@ public class Listing
 
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public string Location { get; set; } = string.Empty;
+
+    public string Street { get; set; } = string.Empty;
+    public string City { get; set; } = string.Empty;
+    public string Country { get; set; } = string.Empty;
+
+    public int Bedrooms { get; set; }
+    public int Bathrooms { get; set; }
     public decimal PricePerNight { get; set; }
     public int MaxGuests { get; set; }
     public bool IsInstantBook { get; set; }
+
+    public List<string> Amenities { get; set; } = new();
+    public ListingCategory Category { get; set; }
+    public PropertyType PropertyType { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<ListingPhoto> Photos { get; set; } = new List<ListingPhoto>();

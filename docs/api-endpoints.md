@@ -1,13 +1,13 @@
 # API Endpoints
 
-Base URL (local): `http://localhost:5001`  
-Swagger UI (dev): `http://localhost:5001/swagger`
+Base URL (local): `http://localhost:5286`  
+Swagger UI (dev): `http://localhost:5286/swagger`
 
 All authenticated endpoints require an `Authorization: Bearer <access-token>` header.
 
 > [!NOTE]
 > For detailed technical documentation on the backend architecture, auth flow, database schema, error handling, migrations, and more, see [docs/backend.md](./backend.md).
-> A automatically generated API reference is generated with Swagger and available at `http://localhost:5001/swagger` when running in Development.
+> A automatically generated API reference is generated with Swagger and available at `http://localhost:5286/swagger` when running in Development.
 ---
 
 ## Auth
