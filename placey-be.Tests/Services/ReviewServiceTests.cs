@@ -20,7 +20,8 @@ public class ReviewServiceTests
             HostId = host.Id,
             Title = "Cabin",
             Description = "Cozy",
-            Location = "Forest",
+            City = "Forest",
+            Country = "Germany",
             PricePerNight = 80m,
             MaxGuests = 2
         };
@@ -74,7 +75,7 @@ public class ReviewServiceTests
         db.Users.AddRange(host2, guest2);
         var listing2 = new Listing
         {
-            HostId = host2.Id, Title = "T", Description = "D", Location = "L", PricePerNight = 1m, MaxGuests = 1
+            HostId = host2.Id, Title = "T", Description = "D", City = "City", Country = "Country", PricePerNight = 1m, MaxGuests = 1
         };
         db.Listings.Add(listing2);
         var pendingBooking = new Booking

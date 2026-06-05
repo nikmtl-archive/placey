@@ -6,7 +6,7 @@ using placey_be.Services.Interfaces;
 
 namespace placey_be.Services;
 
-public class ListingService(AppDbContext db, IWebHostEnvironment env) : IListingService
+public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : IListingService
 {
     public async Task<(List<ListingResponse> Items, int Total)> SearchAsync(ListingSearchParams p)
     {
@@ -17,10 +17,31 @@ public class ListingService(AppDbContext db, IWebHostEnvironment env) : IListing
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(p.Location))
-            query = query.Where(l => l.Location.ToLower().Contains(p.Location.ToLower()));
+        {
+            var loc = p.Location.ToLower();
+            query = query.Where(l =>
+                l.City.ToLower().Contains(loc) ||
+                l.Country.ToLower().Contains(loc) ||
+                l.Street.ToLower().Contains(loc));
+        }
 
         if (p.Guests.HasValue)
             query = query.Where(l => l.MaxGuests >= p.Guests.Value);
+
+        if (p.Category.HasValue)
+            query = query.Where(l => l.Category == p.Category.Value);
+
+        if (p.PropertyType.HasValue)
+            query = query.Where(l => l.PropertyType == p.PropertyType.Value);
+
+        if (p.MinBedrooms.HasValue)
+            query = query.Where(l => l.Bedrooms >= p.MinBedrooms.Value);
+
+        if (p.MinPrice.HasValue)
+            query = query.Where(l => l.PricePerNight >= p.MinPrice.Value);
+
+        if (p.MaxPrice.HasValue)
+            query = query.Where(l => l.PricePerNight <= p.MaxPrice.Value);
 
         if (p.CheckIn.HasValue && p.CheckOut.HasValue)
         {
@@ -61,10 +82,17 @@ public class ListingService(AppDbContext db, IWebHostEnvironment env) : IListing
             HostId = hostId,
             Title = request.Title,
             Description = request.Description,
-            Location = request.Location,
+            Street = request.Street ?? string.Empty,
+            City = request.City,
+            Country = request.Country,
+            Bedrooms = request.Bedrooms,
+            Bathrooms = request.Bathrooms,
             PricePerNight = request.PricePerNight,
             MaxGuests = request.MaxGuests,
-            IsInstantBook = request.IsInstantBook
+            IsInstantBook = request.IsInstantBook,
+            Amenities = request.Amenities ?? new List<string>(),
+            Category = request.Category,
+            PropertyType = request.PropertyType
         };
 
         db.Listings.Add(listing);
@@ -83,10 +111,17 @@ public class ListingService(AppDbContext db, IWebHostEnvironment env) : IListing
 
         if (request.Title is not null) listing.Title = request.Title;
         if (request.Description is not null) listing.Description = request.Description;
-        if (request.Location is not null) listing.Location = request.Location;
+        if (request.City is not null) listing.City = request.City;
+        if (request.Country is not null) listing.Country = request.Country;
+        if (request.Street is not null) listing.Street = request.Street;
         if (request.PricePerNight.HasValue) listing.PricePerNight = request.PricePerNight.Value;
         if (request.MaxGuests.HasValue) listing.MaxGuests = request.MaxGuests.Value;
+        if (request.Bedrooms.HasValue) listing.Bedrooms = request.Bedrooms.Value;
+        if (request.Bathrooms.HasValue) listing.Bathrooms = request.Bathrooms.Value;
         if (request.IsInstantBook.HasValue) listing.IsInstantBook = request.IsInstantBook.Value;
+        if (request.Amenities is not null) listing.Amenities = request.Amenities;
+        if (request.Category.HasValue) listing.Category = request.Category.Value;
+        if (request.PropertyType.HasValue) listing.PropertyType = request.PropertyType.Value;
 
         await db.SaveChangesAsync();
         return await GetByIdAsync(listingId);
@@ -143,7 +178,8 @@ public class ListingService(AppDbContext db, IWebHostEnvironment env) : IListing
         if (listing.HostId != requesterId)
             throw new UnauthorizedAccessException("Only the host can upload photos.");
 
-        var uploads = Path.Combine(env.WebRootPath ?? "wwwroot", "listing-photos");
+        var webRoot = env?.WebRootPath ?? "wwwroot";
+        var uploads = Path.Combine(webRoot, "listing-photos");
         Directory.CreateDirectory(uploads);
 
         var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
@@ -178,7 +214,8 @@ public class ListingService(AppDbContext db, IWebHostEnvironment env) : IListing
         var photo = await db.ListingPhotos.FirstOrDefaultAsync(p => p.Id == photoId && p.ListingId == listingId)
             ?? throw new KeyNotFoundException("Photo not found.");
 
-        var physicalPath = Path.Combine(env.WebRootPath ?? "wwwroot", photo.Url.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+        var webRoot = env?.WebRootPath ?? "wwwroot";
+        var physicalPath = Path.Combine(webRoot, photo.Url.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
         if (File.Exists(physicalPath))
             File.Delete(physicalPath);
 
@@ -193,10 +230,18 @@ public class ListingService(AppDbContext db, IWebHostEnvironment env) : IListing
         l.Host.AvatarUrl,
         l.Title,
         l.Description,
-        l.Location,
+        l.City,
+        l.Country,
+        string.IsNullOrEmpty(l.Street) ? null : l.Street,
+        $"{l.City}, {l.Country}",
         l.PricePerNight,
+        l.Bedrooms,
+        l.Bathrooms,
         l.MaxGuests,
         l.IsInstantBook,
+        l.Amenities,
+        l.Category,
+        l.PropertyType,
         l.Photos.OrderBy(p => p.Order).Select(p => p.Url).ToList(),
         l.Reviews.Count > 0 ? l.Reviews.Average(r => r.Rating) : null,
         l.Reviews.Count,
