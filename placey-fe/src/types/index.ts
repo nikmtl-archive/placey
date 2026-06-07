@@ -49,6 +49,13 @@ export interface Category {
   icon: object
 }
 
+export interface AvailabilityRange {
+  id: string
+  startDate: string
+  endDate: string
+  isBlocked: boolean
+}
+
 export interface Review {
   id: string
   listingId: string

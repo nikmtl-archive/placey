@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import ListingCard from '@/components/ListingCard.vue'
-import { useListings } from '@/composables/useListings'
-import type { ListingCategory } from '@/types'
+import type { Listing, ListingCategory } from '@/types'
 
 const props = defineProps<{
   category: ListingCategory
@@ -13,10 +12,22 @@ const props = defineProps<{
 const emit = defineEmits<{ empty: [] }>()
 
 const router = useRouter()
-const { listings, isLoading, fetchListings } = useListings()
+
+const listings  = ref<Listing[]>([])
+const isLoading = ref(false)
 
 onMounted(async () => {
-  await fetchListings({ category: props.category, limit: 5 })
+  isLoading.value = true
+  try {
+    const res = await fetch(`/api/listings?category=${props.category}&limit=5&page=1`)
+    if (!res.ok) throw new Error()
+    const data = await res.json()
+    listings.value = data.items ?? []
+  } catch {
+    listings.value = []
+  } finally {
+    isLoading.value = false
+  }
   if (!listings.value.length) emit('empty')
 })
 
@@ -28,7 +39,6 @@ function viewAll() {
 <template>
   <section v-if="isLoading || listings.length" class="py-8">
     <div class="max-w-7xl mx-auto px-10">
-      <!-- Section header -->
       <div class="flex items-center justify-between mb-4">
         <h2 class="font-serif text-lg font-medium text-ink tracking-tight">{{ label }}</h2>
         <button
@@ -49,10 +59,7 @@ function viewAll() {
       </div>
 
       <!-- Card grid -->
-      <div
-        v-else
-        class="grid grid-cols-2 lg:grid-cols-4 gap-6"
-      >
+      <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-6">
         <ListingCard
           v-for="listing in listings"
           :key="listing.id"

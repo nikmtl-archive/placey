@@ -1,3 +1,4 @@
+import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Listing, ListingSearchParams, ListingsResponse } from '@/types'
 
@@ -17,11 +18,12 @@ function buildQueryString(params: ListingSearchParams): string {
   return q.toString()
 }
 
-export function useListings() {
-  const listings = ref<Listing[]>([])
-  const total = ref(0)
+export const useListingsStore = defineStore('listings', () => {
+  const listings  = ref<Listing[]>([])
+  const total     = ref(0)
   const isLoading = ref(false)
-  const error = ref<string | null>(null)
+  const error     = ref<string | null>(null)
+
   let controller: AbortController | null = null
 
   async function fetchListings(params: ListingSearchParams = {}) {
@@ -36,7 +38,7 @@ export function useListings() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data: ListingsResponse = await res.json()
       listings.value = data.items
-      total.value = data.total
+      total.value    = data.total
     } catch (e: unknown) {
       if ((e as Error).name !== 'AbortError') {
         error.value = e instanceof Error ? e.message : 'Failed to load listings'
@@ -47,4 +49,4 @@ export function useListings() {
   }
 
   return { listings, total, isLoading, error, fetchListings }
-}
+})
