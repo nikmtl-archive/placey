@@ -28,7 +28,7 @@ function select(id: string) {
           "
           @click="select(cat.id)"
         >
-          <span class="text-xl leading-none">{{ cat.icon }}</span>
+          <component :is="cat.icon" class="w-5 h-5" :stroke-width="1.75" />
           <span class="text-[9.5px] font-bold tracking-widest whitespace-nowrap uppercase">
             {{ cat.label }}
           </span>

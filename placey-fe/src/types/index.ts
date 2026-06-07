@@ -46,5 +46,5 @@ export interface ListingSearchParams {
 export interface Category {
   id: string
   label: string
-  icon: string
+  icon: object
 }
