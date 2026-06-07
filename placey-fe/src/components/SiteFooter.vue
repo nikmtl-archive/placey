@@ -4,7 +4,7 @@
       <div class="grid grid-cols-4 gap-10 mb-10">
         <!-- Brand column -->
         <div>
-          <span class="font-serif text-xl font-semibold text-ink tracking-tight">placey</span>
+          <RouterLink to="/" class="font-serif text-xl font-semibold text-ink tracking-tight">placey</RouterLink>
           <p class="text-[13px] text-muted mt-2 leading-relaxed">
             Unique spaces for every kind of escape.
           </p>
@@ -14,20 +14,26 @@
           <h3 class="text-[9px] font-bold tracking-widest text-ink/50 uppercase mb-4">{{ col.title }}</h3>
           <ul class="flex flex-col gap-2.5">
             <li v-for="link in col.links" :key="link.label">
-              <a href="#" class="text-[13px] text-ink hover:text-muted transition-colors">
-                {{ link.label }}
-              </a>
+              <RouterLink
+                v-if="link.to"
+                :to="link.to"
+                class="text-[13px]"
+              >{{ link.label }}</RouterLink>
+              <span v-else class="text-[13px] text-ink/30 cursor-default">{{ link.label }}</span>
             </li>
           </ul>
         </div>
       </div>
 
       <div class="flex items-center justify-between pt-6 border-t border-divider-light">
-        <span class="text-[12px] text-muted">© 2026 Placey, Inc. All rights reserved.</span>
+        <span class="text-[12px] text-muted">© 2026 Placey, University Project</span>
         <nav class="flex gap-6">
-          <a v-for="link in legalLinks" :key="link" href="#" class="text-[12px] text-muted hover:text-ink transition-colors">
-            {{ link }}
-          </a>
+          <RouterLink
+            v-for="link in legalLinks"
+            :key="link.label"
+            :to="link.to"
+            class="text-[12px]"
+          >{{ link.label }}</RouterLink>
         </nav>
       </div>
     </div>
@@ -38,17 +44,28 @@
 const columns = [
   {
     title: 'Booking',
-    links: [{ label: 'Find a place' }, { label: 'Manage bookings' }, { label: 'Cancellation options' }],
+    links: [
+      { label: 'Find a place', to: '/search' },
+      { label: 'Manage bookings' },
+      { label: 'Cancellation options' },
+    ],
   },
   {
     title: 'Hosting',
-    links: [{ label: 'Become a host' }, { label: 'Create a listing' }, { label: 'Manage bookings' }],
+    links: [
+      { label: 'Become a host', to: '/become-a-host' },
+      { label: 'Create a listing' },
+      { label: 'Manage bookings' },
+    ],
   },
   {
-    title: 'Company',
-    links: [{ label: 'About' }, { label: 'Careers' }, { label: 'Press' }],
+    title: 'Placey',
+    links: [{ label: 'About', to: '/about' }],
   },
 ]
 
-const legalLinks = ['Privacy', 'Terms', 'Sitemap']
+const legalLinks = [
+  { label: 'Privacy', to: '/privacy' },
+  { label: 'Terms', to: '/terms' },
+]
 </script>
