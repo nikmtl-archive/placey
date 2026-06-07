@@ -1,13 +1,14 @@
+import { WavesLadder, MountainSnow, Building2, Gem, Sprout, TreePalm, Droplets } from '@lucide/vue'
 import type { Category } from '@/types'
 
 export const CATEGORIES: Category[] = [
-  { id: 'Beach',       label: 'BEACH',       icon: '🏖️' },
-  { id: 'Mountains',   label: 'MOUNTAINS',   icon: '⛰️' },
-  { id: 'Urban',       label: 'URBAN',       icon: '🏙️' },
-  { id: 'Luxe',        label: 'LUXE',        icon: '💎' },
-  { id: 'Countryside', label: 'COUNTRYSIDE', icon: '🌿' },
-  { id: 'Island',      label: 'ISLAND',      icon: '🏝️' },
-  { id: 'Lake',        label: 'LAKE',        icon: '🏞️' },
+  { id: 'Beach',       label: 'Beach',       icon: WavesLadder  },
+  { id: 'Mountains',   label: 'Mountains',   icon: MountainSnow },
+  { id: 'Urban',       label: 'Urban',       icon: Building2    },
+  { id: 'Luxe',        label: 'Luxe',        icon: Gem          },
+  { id: 'Countryside', label: 'Countryside', icon: Sprout       },
+  { id: 'Island',      label: 'Island',      icon: TreePalm     },
+  { id: 'Lake',        label: 'Lake',        icon: Droplets     },
 ]
 
 export function useCategories() {
