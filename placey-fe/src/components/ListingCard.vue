@@ -2,19 +2,29 @@
 import type { Listing } from '@/types'
 
 defineProps<Listing>()
-
-const PLACEHOLDER = 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=600&q=80'
 </script>
 
 <template>
   <RouterLink :to="`/listing/${id}`" class="group block">
     <div class="aspect-square rounded-xl overflow-hidden bg-[#e0dbd4] mb-3">
       <img
-        :src="photoUrls[0] ?? PLACEHOLDER"
+        v-if="photoUrls[0]"
+        :src="photoUrls[0]"
         :alt="title"
         loading="lazy"
         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
       />
+      <div
+        v-else
+        class="w-full h-full flex flex-col items-center justify-center gap-2 text-[#b5afa8]"
+      >
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <path d="M21 15l-5-5L5 21" />
+        </svg>
+        <span class="text-xs font-medium tracking-wide">No photo</span>
+      </div>
     </div>
     <div class="px-0.5">
       <div class="flex items-center justify-between mb-0.5">
