@@ -48,3 +48,14 @@ export interface Category {
   label: string
   icon: object
 }
+
+export interface Review {
+  id: string
+  listingId: string
+  authorId: string
+  authorName: string
+  authorAvatarUrl: string | null
+  rating: number
+  comment: string
+  createdAt: string
+}

@@ -19,7 +19,7 @@ const router = createRouter({
     },
 
     // ── Listings ────────────────────────────────────────────────────────────
-    // { path: '/listing/:id', name: 'listing', component: () => import('@/views/ListingView.vue') },
+    { path: '/listing/:id', name: 'listing', component: () => import('@/views/ListingView.vue'), meta: { title: 'Placey – Listing' } },
     {
       path: '/search',
       name: 'search',

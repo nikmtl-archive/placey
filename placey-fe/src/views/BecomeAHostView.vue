@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Home, DollarSign, Shield, Star, ChevronRight, Clock, Users } from '@lucide/vue'
+import { DollarSign, Star, ChevronRight, Clock } from '@lucide/vue'
 </script>
 
 <template>
