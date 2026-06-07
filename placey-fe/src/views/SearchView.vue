@@ -49,7 +49,8 @@ function applyFilter(partial: Partial<Record<string, string | number | undefined
   const next: Record<string, string> = {}
   const merged = { ...route.query, ...partial, page: 1 }
   for (const [k, v] of Object.entries(merged)) {
-    if (v !== undefined && v !== '' && v !== null) next[k] = String(v)
+    // coerce to string when checking emptiness to avoid comparing different primitive types
+    if (v !== undefined && v !== null && String(v) !== '') next[k] = String(v)
   }
   router.replace({ query: next })
 }
