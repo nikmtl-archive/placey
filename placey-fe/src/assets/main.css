@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand colors */
+  --color-cream: #F7F2EC;
+  --color-page-bg: #FAF9F6;
+  --color-ink: #1A1A1A;
+  --color-muted: #717171;
+  --color-dim: #888888;
+  --color-divider: #DDDDDD;
+  --color-divider-light: #EBEBEB;
+  --color-dark: #222222;
+
+  /* Typography */
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Georgia', serif;
+  --font-script: 'Luxurious Script', cursive;
+}
+
+@utility scrollbar-hide {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+html,
+body {
+  @apply font-sans bg-page-bg text-ink antialiased;
+}

@@ -101,7 +101,12 @@ dotnet run
 
 ### Local frontend development
 
+
 ```bash
+# Start the backend and database
+docker compose up postgres -d
+docker compose up backend -d
+
 cd placey-fe
 pnpm install
 pnpm dev
