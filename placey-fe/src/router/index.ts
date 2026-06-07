@@ -28,7 +28,7 @@ const router = createRouter({
     },
 
     // ── Hosting ─────────────────────────────────────────────────────────────
-    // { path: '/become-a-host', name: 'become-a-host', component: () => import('@/views/BecomeAHostView.vue') },
+    { path: '/become-a-host', name: 'become-a-host', component: () => import('@/views/BecomeAHostView.vue'), meta: { title: 'Placey – Become a Host' } },
 
     // ── Auth ────────────────────────────────────────────────────────────────
     // { path: '/login',    name: 'login',    component: () => import('@/views/LoginView.vue') },
