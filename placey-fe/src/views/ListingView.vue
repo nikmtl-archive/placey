@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useListing } from '@/composables/useListing'
-import type { Review } from '@/types'
+import { useListingStore } from '@/stores'
+import { storeToRefs } from 'pinia'
+import DateRangePicker from '@/components/DateRangePicker.vue'
 import {
   ChevronLeft,
   ChevronRight,
@@ -34,29 +35,26 @@ import {
 
 const route  = useRoute()
 const router = useRouter()
-const { listing, isLoading, error, fetchListing } = useListing()
 
-// Reviews
-const reviews        = ref<Review[]>([])
-const reviewsLoading = ref(false)
+const listingStore = useListingStore()
+const { listing, isLoading, error, reviews, reviewsLoading, availability } = storeToRefs(listingStore)
 
-async function fetchReviews(id: string) {
-  reviewsLoading.value = true
-  try {
-    const res = await fetch(`/api/listings/${id}/reviews`)
-    if (!res.ok) throw new Error()
-    reviews.value = await res.json()
-  } catch {
-    reviews.value = []
-  } finally {
-    reviewsLoading.value = false
-  }
-}
+const isRangeBlocked = computed(() => {
+  if (!checkIn.value || !checkOut.value || nights.value <= 0) return false
+  const start = new Date(checkIn.value)
+  const end   = new Date(checkOut.value)
+  return availability.value.some(r => {
+    if (!r.isBlocked) return false
+    return start <= new Date(r.endDate) && end >= new Date(r.startDate)
+  })
+})
 
 onMounted(async () => {
   const id = String(route.params.id)
-  await fetchListing(id)
-  fetchReviews(id)
+  listingStore.reset()
+  await listingStore.fetchListing(id)
+  listingStore.fetchReviews(id)
+  listingStore.fetchAvailability(id)
 })
 
 function scrollToReviews() {
@@ -136,10 +134,10 @@ function amenityIcon(name: string): object {
   return amenityIcons[name] ?? Sparkles
 }
 
-// Booking panel
-const checkIn  = ref('')
-const checkOut = ref('')
-const guests   = ref(1)
+// Booking panel — pre-fill from search query params
+const checkIn  = ref(route.query.checkIn  ? String(route.query.checkIn)  : '')
+const checkOut = ref(route.query.checkOut ? String(route.query.checkOut) : '')
+const guests   = ref(route.query.guests   ? Number(route.query.guests)   : 1)
 
 const nights = computed(() => {
   if (!checkIn.value || !checkOut.value) return 0
@@ -147,9 +145,7 @@ const nights = computed(() => {
   return Math.max(0, Math.floor(diff / 86_400_000))
 })
 
-const subtotal   = computed(() => listing.value ? listing.value.pricePerNight * nights.value : 0)
-const serviceFee = computed(() => Math.round(subtotal.value * 0.12))
-const total      = computed(() => subtotal.value + serviceFee.value)
+const total = computed(() => listing.value ? listing.value.pricePerNight * nights.value : 0)
 
 // Review helpers
 function reviewDate(iso: string) {
@@ -379,15 +375,14 @@ function reviewDate(iso: string) {
             <div id="booking" class="lg:hidden pb-10 border-b border-divider-light">
               <h3 class="text-xl font-semibold text-ink mb-5">Check availability</h3>
               <div class="rounded-2xl border border-divider shadow-[0_4px_32px_rgba(0,0,0,0.08)] p-6 bg-white">
-                <div class="grid grid-cols-2 border border-divider rounded-xl overflow-hidden mb-3 text-sm">
-                  <div class="px-3 py-2.5 border-r border-divider">
-                    <p class="text-[10px] font-semibold text-ink uppercase tracking-wider mb-1">Check-in</p>
-                    <input v-model="checkIn" type="date" class="w-full bg-transparent text-ink text-xs outline-none cursor-pointer" :min="new Date().toISOString().split('T')[0]" />
-                  </div>
-                  <div class="px-3 py-2.5">
-                    <p class="text-[10px] font-semibold text-ink uppercase tracking-wider mb-1">Check-out</p>
-                    <input v-model="checkOut" type="date" class="w-full bg-transparent text-ink text-xs outline-none cursor-pointer" :min="checkIn || new Date().toISOString().split('T')[0]" />
-                  </div>
+                <div class="mb-3">
+                  <p class="text-[10px] font-semibold text-ink uppercase tracking-wider mb-1.5">Dates</p>
+                  <DateRangePicker
+                    :check-in="checkIn"
+                    :check-out="checkOut"
+                    @update:check-in="checkIn = $event"
+                    @update:check-out="checkOut = $event"
+                  />
                 </div>
                 <div class="border border-divider rounded-xl px-3 py-2.5 mb-4 text-sm">
                   <p class="text-[10px] font-semibold text-ink uppercase tracking-wider mb-1">Guests</p>
@@ -399,13 +394,18 @@ function reviewDate(iso: string) {
                     </div>
                   </div>
                 </div>
-                <button class="w-full bg-ink text-white text-sm font-semibold py-3.5 rounded-xl hover:bg-black transition-colors cursor-pointer">
+                <div v-if="isRangeBlocked" class="mb-3 px-3 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
+                  These dates are not available. Please choose different dates.
+                </div>
+                <button
+                  class="w-full text-sm font-semibold py-3.5 rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  :class="isRangeBlocked ? 'bg-gray-200 text-gray-500' : 'bg-ink text-white hover:bg-black'"
+                  :disabled="isRangeBlocked"
+                >
                   {{ checkIn && checkOut && nights > 0 ? 'Reserve' : 'Check availability' }}
                 </button>
-                <div v-if="nights > 0" class="mt-5 pt-5 border-t border-divider-light space-y-2.5 text-sm">
-                  <div class="flex justify-between text-muted"><span>${{ listing.pricePerNight }} × {{ nights }} {{ nights === 1 ? 'night' : 'nights' }}</span><span class="text-ink">${{ subtotal }}</span></div>
-                  <div class="flex justify-between text-muted"><span>Service fee</span><span class="text-ink">${{ serviceFee }}</span></div>
-                  <div class="flex justify-between font-semibold text-ink pt-2.5 border-t border-divider-light"><span>Total</span><span>${{ total }}</span></div>
+                <div v-if="nights > 0 && !isRangeBlocked" class="mt-5 pt-5 border-t border-divider-light text-sm">
+                  <div class="flex justify-between font-semibold text-ink"><span>${{ listing.pricePerNight }} × {{ nights }} {{ nights === 1 ? 'night' : 'nights' }}</span><span>${{ total }}</span></div>
                 </div>
                 <p class="text-xs text-muted text-center mt-3">You won't be charged yet</p>
               </div>
@@ -469,15 +469,14 @@ function reviewDate(iso: string) {
                 <span class="text-2xl font-bold text-ink">${{ listing.pricePerNight }}</span>
                 <span class="text-sm text-muted font-normal">/ night</span>
               </div>
-              <div class="grid grid-cols-2 border border-divider rounded-xl overflow-hidden mb-3 text-sm">
-                <div class="px-3 py-2.5 border-r border-divider">
-                  <p class="text-[10px] font-semibold text-ink uppercase tracking-wider mb-1">Check-in</p>
-                  <input v-model="checkIn" type="date" class="w-full bg-transparent text-ink text-xs outline-none cursor-pointer" :min="new Date().toISOString().split('T')[0]" />
-                </div>
-                <div class="px-3 py-2.5">
-                  <p class="text-[10px] font-semibold text-ink uppercase tracking-wider mb-1">Check-out</p>
-                  <input v-model="checkOut" type="date" class="w-full bg-transparent text-ink text-xs outline-none cursor-pointer" :min="checkIn || new Date().toISOString().split('T')[0]" />
-                </div>
+              <div class="mb-3">
+                <p class="text-[10px] font-semibold text-ink uppercase tracking-wider mb-1.5">Dates</p>
+                <DateRangePicker
+                  :check-in="checkIn"
+                  :check-out="checkOut"
+                  @update:check-in="checkIn = $event"
+                  @update:check-out="checkOut = $event"
+                />
               </div>
               <div class="border border-divider rounded-xl px-3 py-2.5 mb-4 text-sm">
                 <p class="text-[10px] font-semibold text-ink uppercase tracking-wider mb-1">Guests</p>
@@ -489,13 +488,18 @@ function reviewDate(iso: string) {
                   </div>
                 </div>
               </div>
-              <button class="w-full bg-ink text-white text-sm font-semibold py-3.5 rounded-xl hover:bg-black transition-colors cursor-pointer">
+              <div v-if="isRangeBlocked" class="mb-3 px-3 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
+                These dates are not available. Please choose different dates.
+              </div>
+              <button
+                class="w-full text-sm font-semibold py-3.5 rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                :class="isRangeBlocked ? 'bg-gray-200 text-gray-500' : 'bg-ink text-white hover:bg-black'"
+                :disabled="isRangeBlocked"
+              >
                 {{ checkIn && checkOut && nights > 0 ? 'Reserve' : 'Check availability' }}
               </button>
-              <div v-if="nights > 0" class="mt-5 pt-5 border-t border-divider-light space-y-2.5 text-sm">
-                <div class="flex justify-between text-muted"><span>${{ listing.pricePerNight }} × {{ nights }} {{ nights === 1 ? 'night' : 'nights' }}</span><span class="text-ink">${{ subtotal }}</span></div>
-                <div class="flex justify-between text-muted"><span>Service fee</span><span class="text-ink">${{ serviceFee }}</span></div>
-                <div class="flex justify-between font-semibold text-ink pt-2.5 border-t border-divider-light"><span>Total</span><span>${{ total }}</span></div>
+              <div v-if="nights > 0 && !isRangeBlocked" class="mt-5 pt-5 border-t border-divider-light text-sm">
+                <div class="flex justify-between font-semibold text-ink"><span>${{ listing.pricePerNight }} × {{ nights }} {{ nights === 1 ? 'night' : 'nights' }}</span><span>${{ total }}</span></div>
               </div>
               <p class="text-xs text-muted text-center mt-3">You won't be charged yet</p>
             </div>

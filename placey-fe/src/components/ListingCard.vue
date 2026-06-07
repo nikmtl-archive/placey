@@ -1,16 +1,26 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
 import type { Listing } from '@/types'
 
 defineProps<Listing>()
 
 const saved = ref(false)
+const route = useRoute()
+
+function listingTo(id: string) {
+  const q: Record<string, string> = {}
+  if (route.query.checkIn)  q.checkIn  = String(route.query.checkIn)
+  if (route.query.checkOut) q.checkOut = String(route.query.checkOut)
+  if (route.query.guests)   q.guests   = String(route.query.guests)
+  return { path: `/listing/${id}`, query: q }
+}
 </script>
 
 <template>
   <div class="group">
     <!-- Image area -->
-    <RouterLink :to="`/listing/${id}`" class="block">
+    <RouterLink :to="listingTo(id)" class="block">
       <div class="relative aspect-4/3 rounded-3xl overflow-hidden bg-[#e8e3dc] mb-3">
         <img
           v-if="photoUrls[0]"
@@ -46,7 +56,7 @@ const saved = ref(false)
     </RouterLink>
 
     <!-- Info -->
-    <RouterLink :to="`/listing/${id}`" class="block px-0.5">
+    <RouterLink :to="listingTo(id)" class="block px-0.5">
       <div class="flex items-start justify-between gap-2 mb-0.5">
         <span class="text-[13px] font-semibold text-ink truncate leading-snug">{{ city }}, {{ country }}</span>
         <span

@@ -5,14 +5,17 @@ import type { LocationQuery } from 'vue-router'
 import { SlidersHorizontal, X } from '@lucide/vue'
 import ListingCard from '@/components/ListingCard.vue'
 import SearchBar from '@/components/SearchBar.vue'
-import { useListings } from '@/composables/useListings'
+import { useListingsStore } from '@/stores'
+import { storeToRefs } from 'pinia'
 import { useCategories } from '@/composables/useCategories'
 import type { ListingSearchParams, ListingCategory, PropertyType } from '@/types'
 
 const route  = useRoute()
 const router = useRouter()
 const { categories } = useCategories()
-const { listings, total, isLoading, error, fetchListings } = useListings()
+const listingsStore = useListingsStore()
+const { listings, total, isLoading, error } = storeToRefs(listingsStore)
+const { fetchListings } = listingsStore
 
 const LIMIT = 20
 
