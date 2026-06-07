@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -18,7 +19,7 @@ const router = createRouter({
       meta: { title: 'Placey – Find your next escape' },
     },
 
-    // ── Listings ────────────────────────────────────────────────────────────
+    // Listings
     { path: '/listing/:id', name: 'listing', component: () => import('@/views/ListingView.vue'), meta: { title: 'Placey – Listing' } },
     {
       path: '/search',
@@ -27,21 +28,29 @@ const router = createRouter({
       meta: { title: 'Placey – Search' },
     },
 
-    // ── Hosting ─────────────────────────────────────────────────────────────
+    // Hosting
     { path: '/become-a-host', name: 'become-a-host', component: () => import('@/views/BecomeAHostView.vue'), meta: { title: 'Placey – Become a Host' } },
 
-    // ── Auth ────────────────────────────────────────────────────────────────
-    // { path: '/login',    name: 'login',    component: () => import('@/views/LoginView.vue') },
-    // { path: '/register', name: 'register', component: () => import('@/views/RegisterView.vue') },
+    // Auth
+    { path: '/login',    name: 'login',    component: () => import('@/views/AuthView.vue'), meta: { title: 'Placey – Log in' } },
+    { path: '/register', name: 'register', component: () => import('@/views/AuthView.vue'), meta: { title: 'Placey – Sign up' } },
 
-    // ── Info / placeholder ───────────────────────────────────────────────────
+    // Info / placeholder
     { path: '/about',   name: 'about',   component: () => import('@/views/PlaceholderView.vue'), meta: { title: 'Placey – About' } },
     { path: '/privacy', name: 'privacy', component: () => import('@/views/PlaceholderView.vue'), meta: { title: 'Placey – Privacy' } },
     { path: '/terms',   name: 'terms',   component: () => import('@/views/PlaceholderView.vue'), meta: { title: 'Placey – Terms' } },
 
-    // ── Catch-all ───────────────────────────────────────────────────────────
-    // { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/views/NotFoundView.vue') },
+    // Catch-all
+    { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/views/PlaceholderView.vue') },
   ],
+})
+
+router.beforeEach((to, _from, next) => {
+  if (to.meta.requiresAuth && !useAuthStore().isLoggedIn) {
+    next({ name: 'login', query: { redirect: to.fullPath } })
+  } else {
+    next()
+  }
 })
 
 router.afterEach((to) => {

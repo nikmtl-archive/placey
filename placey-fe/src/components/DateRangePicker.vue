@@ -14,7 +14,7 @@ const emit = defineEmits<{
   'update:checkOut': [value: string]
 }>()
 
-// ── Parse / fmt ────────────────────────────────────────────────────
+// Parse / fmt 
 function parseDate(s?: string): Date | null {
   if (!s) return null
   const d = new Date(s + 'T00:00:00')
@@ -27,14 +27,14 @@ function toISO(d: Date) {
   return d.toISOString().slice(0, 10)
 }
 
-// ── Internal date state ────────────────────────────────────────────
+// Internal date state
 const internalIn  = ref<Date | null>(parseDate(props.checkIn))
 const internalOut = ref<Date | null>(parseDate(props.checkOut))
 
 watch(() => props.checkIn,  v => { internalIn.value  = parseDate(v) })
 watch(() => props.checkOut, v => { internalOut.value = parseDate(v) })
 
-// ── Popup state ────────────────────────────────────────────────────
+// Popup state 
 const open              = ref(false)
 const selectingCheckout = ref(false)
 const hoverDate         = ref<Date | null>(null)
@@ -126,14 +126,14 @@ function closePicker() { open.value = false }
 
 defineExpose({ openPicker, closePicker })
 
-// ── Label ──────────────────────────────────────────────────────────
+// Label
 const label = computed(() => {
   if (internalIn.value && internalOut.value) return `${fmt(internalIn.value)} – ${fmt(internalOut.value)}`
   if (internalIn.value) return `${fmt(internalIn.value)} – ?`
   return null
 })
 
-// ── Click outside ──────────────────────────────────────────────────
+// Click outside
 const rootRef = ref<HTMLElement | null>(null)
 function onClickOutside(e: MouseEvent) {
   if (rootRef.value && !rootRef.value.contains(e.target as Node)) open.value = false

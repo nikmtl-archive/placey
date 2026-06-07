@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useListingStore } from '@/stores'
+import { useListingStore, useAuthStore, useFavoritesStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import DateRangePicker from '@/components/DateRangePicker.vue'
 import {
@@ -36,7 +36,9 @@ import {
 const route  = useRoute()
 const router = useRouter()
 
-const listingStore = useListingStore()
+const authStore      = useAuthStore()
+const favoritesStore = useFavoritesStore()
+const listingStore   = useListingStore()
 const { listing, isLoading, error, reviews, reviewsLoading, availability } = storeToRefs(listingStore)
 
 const isRangeBlocked = computed(() => {
@@ -67,10 +69,25 @@ function scrollToBooking() {
   if (el) el.scrollIntoView({ behavior: 'smooth' })
 }
 
-// Image gallery 
+// Image gallery
 const lightboxOpen  = ref(false)
 const lightboxIndex = ref(0)
-const saved         = ref(false)
+
+// Favorites / save
+const showSaveHint = ref(false)
+let saveHintTimer: ReturnType<typeof setTimeout> | null = null
+
+function handleSave() {
+  if (authStore.isLoggedIn) {
+    if (listing.value) favoritesStore.toggleFavorite(listing.value.id)
+  } else {
+    showSaveHint.value = true
+    if (saveHintTimer) clearTimeout(saveHintTimer)
+    saveHintTimer = setTimeout(() => { showSaveHint.value = false }, 3000)
+  }
+}
+
+onUnmounted(() => { if (saveHintTimer) clearTimeout(saveHintTimer) })
 
 function openLightbox(i: number) {
   lightboxIndex.value = i
@@ -224,14 +241,42 @@ function reviewDate(iso: string) {
             {{ shareCopied ? 'Copied!' : 'Share' }}
           </button>
           <!-- Save -->
-          <button
-            class="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg hover:bg-black/5 transition-colors cursor-pointer"
-            :class="saved ? 'text-rose-500' : 'text-ink/70 hover:text-ink'"
-            @click="saved = !saved"
-          >
-            <Heart :size="15" :class="saved ? 'fill-rose-500' : ''" />
-            {{ saved ? 'Saved' : 'Save' }}
-          </button>
+          <div class="relative">
+            <button
+              class="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg hover:bg-black/5 transition-colors cursor-pointer"
+              :class="authStore.isLoggedIn && listing && favoritesStore.isFavorited(listing.id) ? 'text-rose-500' : 'text-ink/70 hover:text-ink'"
+              @click="handleSave"
+            >
+              <Heart
+                :size="15"
+                :class="authStore.isLoggedIn && listing && favoritesStore.isFavorited(listing.id) ? 'fill-rose-500' : ''"
+              />
+              {{ authStore.isLoggedIn && listing && favoritesStore.isFavorited(listing.id) ? 'Saved' : 'Save' }}
+            </button>
+
+            <!-- Login hint -->
+            <Transition name="fade">
+              <div
+                v-if="showSaveHint"
+                class="absolute right-0 top-[calc(100%+6px)] bg-white border border-divider rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.12)] px-3.5 py-2.5 text-xs whitespace-nowrap z-10 flex items-center gap-2"
+                @click.stop
+              >
+                <span class="text-muted">Log in to save favorites</span>
+                <RouterLink to="/login" class="font-semibold text-ink underline underline-offset-2 hover:opacity-70 transition-opacity">
+                  Log in
+                </RouterLink>
+                <button
+                  class="ml-0.5 text-muted/60 hover:text-muted transition-colors cursor-pointer"
+                  aria-label="Dismiss"
+                  @click.stop="showSaveHint = false"
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <path d="M18 6 6 18M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            </Transition>
+          </div>
         </div>
       </div>
 
@@ -464,7 +509,7 @@ function reviewDate(iso: string) {
 
           <!-- Right column: Booking card (desktop only) -->
           <div class="hidden lg:block lg:sticky lg:top-24">
-            <div class="rounded-2xl border border-divider shadow-[0_4px_32px_rgba(0,0,0,0.08)] p-6 bg-white">
+            <div class="rounded-3xl border border-divider shadow-[0_4px_32px_rgba(0,0,0,0.08)] p-6 bg-white">
               <div class="flex items-baseline gap-1 mb-5">
                 <span class="text-2xl font-bold text-ink">${{ listing.pricePerNight }}</span>
                 <span class="text-sm text-muted font-normal">/ night</span>
@@ -567,3 +612,14 @@ function reviewDate(iso: string) {
 
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 150ms ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
