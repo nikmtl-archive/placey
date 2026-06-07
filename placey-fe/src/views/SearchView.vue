@@ -254,6 +254,7 @@ const drawerOpen = ref(false)
           <p class="font-serif text-2xl text-ink mb-2">No places found</p>
           <p class="text-sm text-muted mb-6">Try adjusting your filters or search somewhere new.</p>
           <button
+            v-if="hasFilters"
             class="text-sm font-medium text-ink border border-divider rounded-full px-5 py-2.5 hover:border-ink/40 transition-colors cursor-pointer"
             @click="clearFilters"
           >Clear all filters</button>
