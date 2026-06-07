@@ -1,12 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAuthStore, useFavoritesStore } from '@/stores'
 import type { Listing } from '@/types'
 
-defineProps<Listing>()
+const props = defineProps<Listing>()
 
-const saved = ref(false)
-const route = useRoute()
+const route          = useRoute()
+const authStore      = useAuthStore()
+const favoritesStore = useFavoritesStore()
+
+const showLoginHint = ref(false)
+let hintTimer: ReturnType<typeof setTimeout> | null = null
 
 function listingTo(id: string) {
   const q: Record<string, string> = {}
@@ -15,10 +20,22 @@ function listingTo(id: string) {
   if (route.query.guests)   q.guests   = String(route.query.guests)
   return { path: `/listing/${id}`, query: q }
 }
+
+function handleWishlist() {
+  if (authStore.isLoggedIn) {
+    favoritesStore.toggleFavorite(props.id)
+  } else {
+    showLoginHint.value = true
+    if (hintTimer) clearTimeout(hintTimer)
+    hintTimer = setTimeout(() => { showLoginHint.value = false }, 3000)
+  }
+}
+
+onUnmounted(() => { if (hintTimer) clearTimeout(hintTimer) })
 </script>
 
 <template>
-  <div class="group">
+  <div class="group relative">
     <!-- Image area -->
     <RouterLink :to="listingTo(id)" class="block">
       <div class="relative aspect-4/3 rounded-3xl overflow-hidden bg-[#e8e3dc] mb-3">
@@ -41,19 +58,49 @@ function listingTo(id: string) {
           <span class="text-xs font-medium tracking-wide opacity-70">No photo yet</span>
         </div>
 
-        <!-- Wishlist button TODO: For not logged in users this should redirect to login after a small uopup informing the user-->
+        <!-- Wishlist button -->
         <button
           class="absolute top-2.5 right-2.5 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm transition-all duration-150 hover:scale-110 active:scale-95 cursor-pointer"
-          :class="saved ? 'text-rose-500' : 'text-ink/60 hover:text-ink'"
+          :class="authStore.isLoggedIn && favoritesStore.isFavorited(id) ? 'text-rose-500' : 'text-ink/60 hover:text-ink'"
           aria-label="Save to wishlist"
-          @click.prevent="saved = !saved"
+          @click.prevent="handleWishlist"
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" :fill="saved ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            width="15" height="15" viewBox="0 0 24 24"
+            :fill="authStore.isLoggedIn && favoritesStore.isFavorited(id) ? 'currentColor' : 'none'"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          >
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
         </button>
       </div>
     </RouterLink>
+
+    <!-- Login hint popup — anchored below the heart button (top-right) -->
+    <Transition name="fade">
+      <div
+        v-if="showLoginHint"
+        class="absolute top-12 right-2.5 bg-white border border-divider rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.12)] px-3.5 py-2.5 text-xs whitespace-nowrap z-10 flex items-center gap-2"
+        @click.stop
+      >
+        <span class="text-muted">Log in to save favorites</span>
+        <RouterLink
+          to="/login"
+          class="font-semibold text-ink underline underline-offset-2 hover:opacity-70 transition-opacity"
+        >
+          Log in
+        </RouterLink>
+        <button
+          class="ml-0.5 text-muted/60 hover:text-muted transition-colors cursor-pointer"
+          aria-label="Dismiss"
+          @click.stop="showLoginHint = false"
+        >
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </Transition>
 
     <!-- Info -->
     <RouterLink :to="listingTo(id)" class="block px-0.5">
@@ -79,3 +126,14 @@ function listingTo(id: string) {
     </RouterLink>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 150ms ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

@@ -15,10 +15,10 @@ const emit = defineEmits<{ search: [query: Record<string, string>] }>()
 
 const router = useRouter()
 
-// ── WHERE (inline input, no popup) ────────────────────────────────
+// WHERE (inline input, no popup)
 const location = ref(props.initialLocation ?? '')
 
-// ── WHEN ──────────────────────────────────────────────────────────
+// WHEN
 const checkIn      = ref(props.initialCheckIn  ?? '')
 const checkOut     = ref(props.initialCheckOut ?? '')
 const pickerRef    = ref<InstanceType<typeof DateRangePicker> | null>(null)
@@ -35,7 +35,7 @@ function openWhen() {
 // The picker already self-closes; we just need to sync the highlight.
 // Use a MutationObserver-free approach: listen to the same mousedown outside logic.
 
-// ── WHO ───────────────────────────────────────────────────────────
+// WHO 
 const guests    = ref(props.initialGuests ?? 2)
 const whoActive = ref(false)
 
@@ -46,7 +46,7 @@ function openWho() {
 }
 function closeWho() { whoActive.value = false }
 
-// ── SEARCH ────────────────────────────────────────────────────────
+// SEARCH
 const canSearch = computed(() =>
   location.value.trim().length > 0 && !!checkIn.value && !!checkOut.value
 )
@@ -65,7 +65,7 @@ function handleSearch() {
   router.push({ name: 'search', query })
 }
 
-// ── CLICK OUTSIDE ─────────────────────────────────────────────────
+// CLICK OUTSIDE 
 const barRef = ref<HTMLElement | null>(null)
 function onClickOutside(e: MouseEvent) {
   if (barRef.value && !barRef.value.contains(e.target as Node)) {
@@ -76,7 +76,7 @@ function onClickOutside(e: MouseEvent) {
 onMounted(() => document.addEventListener('mousedown', onClickOutside))
 onUnmounted(() => document.removeEventListener('mousedown', onClickOutside))
 
-// ── Date label for WHEN pill ───────────────────────────────────────
+// Date label for WHEN pill
 const whenLabel = computed(() => {
   if (checkIn.value && checkOut.value) {
     const f = (s: string) => new Date(s + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })

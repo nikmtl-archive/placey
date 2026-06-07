@@ -9,12 +9,25 @@ export interface AuthUser {
   avatarUrl: string | null
 }
 
+const LS_KEY = 'placey_session'
+
 export const useAuthStore = defineStore('auth', () => {
   const user         = ref<AuthUser | null>(null)
   const accessToken  = ref<string | null>(null)
   const refreshToken = ref<string | null>(null)
   const isLoading    = ref(false)
   const error        = ref<string | null>(null)
+
+  // Restore session from localStorage synchronously on store creation
+  const stored = localStorage.getItem(LS_KEY)
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored)
+      user.value         = parsed.user
+      accessToken.value  = parsed.accessToken
+      refreshToken.value = parsed.refreshToken
+    } catch { /* corrupt storage — ignore */ }
+  }
 
   const isLoggedIn = computed(() => !!accessToken.value)
 
@@ -23,6 +36,7 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken.value  = data.accessToken
     refreshToken.value = data.refreshToken
     error.value        = null
+    localStorage.setItem(LS_KEY, JSON.stringify(data))
   }
 
   async function login(email: string, password: string) {
@@ -36,7 +50,7 @@ export const useAuthStore = defineStore('auth', () => {
       })
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
-        throw new Error(body.message ?? `HTTP ${res.status}`)
+        throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
       }
       setSession(await res.json())
     } catch (e: unknown) {
@@ -57,7 +71,7 @@ export const useAuthStore = defineStore('auth', () => {
       })
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
-        throw new Error(body.message ?? `HTTP ${res.status}`)
+        throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
       }
       setSession(await res.json())
     } catch (e: unknown) {
@@ -83,6 +97,7 @@ export const useAuthStore = defineStore('auth', () => {
       user.value         = null
       accessToken.value  = null
       refreshToken.value = null
+      localStorage.removeItem(LS_KEY)
     }
   }
 
