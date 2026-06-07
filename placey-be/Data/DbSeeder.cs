@@ -5,7 +5,6 @@ namespace placey_be.Data;
 
 public static class DbSeeder
 {
-    // Fixed GUIDs so seeding is idempotent
     private static readonly Guid User1Id = new("11111111-0000-0000-0000-000000000001");
     private static readonly Guid User2Id = new("11111111-0000-0000-0000-000000000002");
     private static readonly Guid User3Id = new("11111111-0000-0000-0000-000000000003");
@@ -166,7 +165,6 @@ public static class DbSeeder
             new() { Id = new Guid("44444444-0000-0000-0000-000000000005"), ListingId = Listing5Id, StartDate = new DateOnly(2026, 6, 1), EndDate = new DateOnly(2026, 12, 31), IsBlocked = false },
         };
 
-        // Completed past bookings so reviews can be attached
         var bookings = new List<Booking>
         {
             new()

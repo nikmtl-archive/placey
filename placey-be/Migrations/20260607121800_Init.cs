@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -36,10 +37,16 @@ namespace placey_be.Migrations
                     HostId = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    Location = table.Column<string>(type: "text", nullable: false),
+                    City = table.Column<string>(type: "text", nullable: false),
+                    Country = table.Column<string>(type: "text", nullable: false),
                     PricePerNight = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
                     MaxGuests = table.Column<int>(type: "integer", nullable: false),
+                    Bedrooms = table.Column<int>(type: "integer", nullable: false),
+                    Bathrooms = table.Column<int>(type: "integer", nullable: false),
                     IsInstantBook = table.Column<bool>(type: "boolean", nullable: false),
+                    Amenities = table.Column<List<string>>(type: "jsonb", nullable: false),
+                    Category = table.Column<string>(type: "text", nullable: false),
+                    PropertyType = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>

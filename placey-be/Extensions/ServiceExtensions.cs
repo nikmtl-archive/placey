@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Npgsql;
 using placey_be.Data;
 using placey_be.Services;
 using placey_be.Services.Interfaces;
@@ -13,8 +14,11 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration config)
     {
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(config.GetConnectionString("Default")));
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(config.GetConnectionString("Default"));
+        dataSourceBuilder.EnableDynamicJson();
+        var dataSource = dataSourceBuilder.Build();
+
+        services.AddDbContext<AppDbContext>(options => options.UseNpgsql(dataSource));
 
         return services;
     }
