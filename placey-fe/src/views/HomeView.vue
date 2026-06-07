@@ -1,43 +1,41 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import HeroSection from '@/components/HeroSection.vue'
-import CategoryFilter from '@/components/CategoryFilter.vue'
-import ListingCard from '@/components/ListingCard.vue'
-import { useListings } from '@/composables/useListings'
+import FeaturedSection from '@/components/FeaturedSection.vue'
 import type { ListingCategory } from '@/types'
 
-const { listings, isLoading, fetchListings } = useListings()
-const activeCategory = ref<ListingCategory | undefined>(undefined)
+const sections = [
+  { category: 'Beach'       as ListingCategory, label: 'Beach escapes' },
+  { category: 'Mountains'   as ListingCategory, label: 'Mountain retreats' },
+  { category: 'Urban'       as ListingCategory, label: 'City stays' },
+  { category: 'Luxe'        as ListingCategory, label: 'Luxe properties' },
+  { category: 'Countryside' as ListingCategory, label: 'Countryside hideaways' },
+  { category: 'Island'      as ListingCategory, label: 'Island getaways' },
+  { category: 'Lake'        as ListingCategory, label: 'Lakeside stays' },
+]
 
-function onCategoryChange(cat: ListingCategory | undefined) {
-  activeCategory.value = cat
-  fetchListings({ category: cat })
+const emptyLabels = ref<string[]>([])
+
+function onEmpty(label: string) {
+  emptyLabels.value.push(label)
 }
-
-onMounted(() => fetchListings())
 </script>
 
 <template>
   <HeroSection />
-  <CategoryFilter :model-value="activeCategory" @update:model-value="onCategoryChange" />
 
-  <section class="py-10 pb-20">
-    <div class="max-w-7xl mx-auto px-10">
-      <div v-if="isLoading" class="grid grid-cols-4 gap-7 gap-x-6">
-        <div v-for="n in 8" :key="n" class="animate-pulse">
-          <div class="aspect-square rounded-xl bg-divider-light mb-3" />
-          <div class="h-3.5 bg-divider-light rounded w-3/4 mb-2" />
-          <div class="h-3 bg-divider-light rounded w-1/2" />
-        </div>
-      </div>
+  <div class="divide-y divide-divider-light pb-16">
+    <FeaturedSection
+      v-for="s in sections"
+      :key="s.category"
+      :category="s.category"
+      :label="s.label"
 
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7 gap-x-6">
-        <ListingCard
-          v-for="listing in listings"
-          :key="listing.id"
-          v-bind="listing"
-        />
-      </div>
-    </div>
-  </section>
+      @empty="onEmpty(s.label)"
+    />
+  </div>
+
+  <p v-if="emptyLabels.length" class="max-w-7xl mx-auto px-10 pb-10 text-[12px] text-muted/60">
+    No listings yet for: {{ emptyLabels.join(', ') }}.
+  </p>
 </template>

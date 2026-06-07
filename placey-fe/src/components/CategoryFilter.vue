@@ -14,24 +14,29 @@ function select(id: string) {
 </script>
 
 <template>
-  <div class="border-y border-divider-light">
-    <div class=" max-w-7xl mx-auto px-10 overflow-x-auto scrollbar-hide flex items-center justify-center">
-      <div class="flex gap-1 py-3 w-max">
+  <div class="border-b border-divider-light bg-white">
+    <div class="max-w-7xl mx-auto px-10 overflow-x-auto scrollbar-hide">
+      <div class="flex gap-0.5 py-2 w-max min-w-full justify-center">
         <button
           v-for="cat in categories"
           :key="cat.id"
-          class="flex flex-col items-center gap-1.5 px-4 py-2 border-b-2 transition-all cursor-pointer"
+          class="relative flex flex-col items-center gap-1.5 px-5 py-2.5 rounded-xl transition-all duration-150 cursor-pointer"
           :class="
             modelValue === cat.id
-              ? 'opacity-100 border-ink'
-              : 'opacity-55 border-transparent hover:opacity-85 hover:bg-black/3 rounded-sm'
+              ? 'text-ink'
+              : 'text-ink/40 hover:text-ink/70 hover:bg-black/3'
           "
           @click="select(cat.id)"
         >
-          <span class="text-[22px] leading-none">{{ cat.icon }}</span>
-          <span class="text-[10px] font-semibold tracking-widest text-ink whitespace-nowrap">
+          <span class="text-xl leading-none">{{ cat.icon }}</span>
+          <span class="text-[9.5px] font-bold tracking-widest whitespace-nowrap uppercase">
             {{ cat.label }}
           </span>
+          <!-- Active underline indicator -->
+          <span
+            v-if="modelValue === cat.id"
+            class="absolute bottom-0 left-3 right-3 h-0.5 bg-ink rounded-full"
+          />
         </button>
       </div>
     </div>

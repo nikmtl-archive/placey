@@ -160,14 +160,18 @@ function openWho()   { activeSection.value = 'who' }
 </script>
 
 <template>
-  <section class="pt-20 pb-16 px-10 text-center">
-    <div class="max-w-2xl mx-auto">
-      <h1 class="font-serif text-[clamp(48px,6vw,72px)] font-medium leading-tight tracking-tight text-ink mb-5">
-        Find your next <span class="font-script">escape</span>
+  <section class="relative pt-16 pb-14 px-10 text-center">
+    <!-- Subtle radial gradient blob behind heading -->
+    <div class="pointer-events-none absolute inset-0 overflow-hidden flex items-start justify-center -top-20">
+      <div class="w-[700px] h-[500px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(210,190,160,0.22)_0%,transparent_70%)]" />
+    </div>
+
+    <div class="relative max-w-2xl mx-auto">
+      <h1 class="font-serif text-[clamp(44px,5.5vw,68px)] font-medium leading-[1.08] tracking-tight text-ink mb-4">
+        Find your next <span class="font-script italic">escape</span>
       </h1>
-      <p class="text-base text-muted leading-relaxed mb-10">
-        Discover unique spaces to stay, from cozy mountain cabins to<br class="hidden sm:block" />
-        minimalist beachfront villas.
+      <p class="text-[15px] text-muted leading-relaxed mb-9 max-w-md mx-auto">
+        Discover unique spaces to stay — from cozy mountain cabins to minimalist beachfront villas.
       </p>
 
       <!-- Search bar -->
@@ -242,9 +246,9 @@ function openWho()   { activeSection.value = 'who' }
         <Transition name="popup">
           <div
             v-if="activeSection === 'where'"
-            class="absolute top-[calc(100%+12px)] left-0 w-80 bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.14),0_0_0_1px_rgba(0,0,0,0.06)] z-50 p-4"
+            class="absolute top-[calc(100%+10px)] left-0 w-80 bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.05)] z-50 p-4"
           >
-            <p class="text-[10px] font-semibold tracking-widest text-ink uppercase mb-2">WHERE</p>
+            <p class="text-[9px] font-bold tracking-[0.12em] text-ink/50 uppercase mb-2">WHERE</p>
             <input
               v-model="location"
               type="text"
@@ -260,7 +264,7 @@ function openWho()   { activeSection.value = 'who' }
         <Transition name="popup">
           <div
             v-if="activeSection === 'when'"
-            class="absolute top-[calc(100%+12px)] left-1/2 -translate-x-1/2 bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.14),0_0_0_1px_rgba(0,0,0,0.06)] z-50 p-5"
+            class="absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.05)] z-50 p-5"
           >
             <div class="flex items-center justify-between mb-4 px-1">
               <p class="text-sm font-semibold text-ink">
@@ -366,7 +370,7 @@ function openWho()   { activeSection.value = 'who' }
         <Transition name="popup">
           <div
             v-if="activeSection === 'who'"
-            class="absolute top-[calc(100%+12px)] right-0 w-72 bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.14),0_0_0_1px_rgba(0,0,0,0.06)] z-50 p-5"
+            class="absolute top-[calc(100%+10px)] right-0 w-72 bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.05)] z-50 p-5"
           >
             <div class="flex items-center justify-between">
               <div>
