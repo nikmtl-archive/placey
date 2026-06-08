@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useListingStore, useAuthStore, useFavoritesStore } from '@/stores'
+import { useListingStore, useAuthStore, useFavoritesStore, useBookingStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import DateRangePicker from '@/components/DateRangePicker.vue'
 import {
@@ -39,6 +39,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 const favoritesStore = useFavoritesStore()
 const listingStore = useListingStore()
+const bookingStore = useBookingStore()
 const { listing, isLoading, error, reviews, reviewsLoading, availability } =
   storeToRefs(listingStore)
 
@@ -175,6 +176,25 @@ const nights = computed(() => {
 })
 
 const total = computed(() => (listing.value ? listing.value.pricePerNight * nights.value : 0))
+
+// Booking
+const bookingConfirmed = ref(false)
+const bookingError = ref<string | null>(null)
+
+async function reserve() {
+  if (!authStore.isLoggedIn) {
+    router.push({ path: '/login', query: { redirect: route.fullPath } })
+    return
+  }
+  if (!listing.value || !checkIn.value || !checkOut.value || nights.value <= 0) return
+  bookingError.value = null
+  try {
+    await bookingStore.createBooking(listing.value.id, checkIn.value, checkOut.value, guests.value)
+    bookingConfirmed.value = true
+  } catch (e: unknown) {
+    bookingError.value = e instanceof Error ? e.message : 'Something went wrong'
+  }
+}
 
 // Review helpers
 function reviewDate(iso: string) {
@@ -553,16 +573,39 @@ function reviewDate(iso: string) {
                 >
                   These dates are not available. Please choose different dates.
                 </div>
+                <div
+                  v-if="bookingConfirmed"
+                  class="mb-3 px-3 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium"
+                >
+                  Reservation confirmed! Check your bookings for details.
+                </div>
+                <div
+                  v-if="bookingError"
+                  class="mb-3 px-3 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"
+                >
+                  {{ bookingError }}
+                </div>
                 <button
                   class="w-full text-sm font-semibold py-3.5 rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   :class="
-                    isRangeBlocked
+                    isRangeBlocked || bookingConfirmed
                       ? 'bg-gray-200 text-gray-500'
                       : 'bg-ink text-white hover:bg-black'
                   "
-                  :disabled="isRangeBlocked"
+                  :disabled="isRangeBlocked || bookingStore.isSubmitting || bookingConfirmed"
+                  @click="reserve"
                 >
-                  {{ checkIn && checkOut && nights > 0 ? 'Reserve' : 'Check availability' }}
+                  {{
+                    bookingStore.isSubmitting
+                      ? 'Reserving…'
+                      : bookingConfirmed
+                        ? 'Reserved!'
+                        : checkIn && checkOut && nights > 0
+                          ? authStore.isLoggedIn
+                            ? 'Reserve'
+                            : 'Log in to reserve'
+                          : 'Check availability'
+                  }}
                 </button>
                 <div
                   v-if="nights > 0 && !isRangeBlocked"
@@ -694,14 +737,39 @@ function reviewDate(iso: string) {
               >
                 These dates are not available. Please choose different dates.
               </div>
+              <div
+                v-if="bookingConfirmed"
+                class="mb-3 px-3 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium"
+              >
+                Reservation confirmed! Check your bookings for details.
+              </div>
+              <div
+                v-if="bookingError"
+                class="mb-3 px-3 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"
+              >
+                {{ bookingError }}
+              </div>
               <button
                 class="w-full text-sm font-semibold py-3.5 rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 :class="
-                  isRangeBlocked ? 'bg-gray-200 text-gray-500' : 'bg-ink text-white hover:bg-black'
+                  isRangeBlocked || bookingConfirmed
+                    ? 'bg-gray-200 text-gray-500'
+                    : 'bg-ink text-white hover:bg-black'
                 "
-                :disabled="isRangeBlocked"
+                :disabled="isRangeBlocked || bookingStore.isSubmitting || bookingConfirmed"
+                @click="reserve"
               >
-                {{ checkIn && checkOut && nights > 0 ? 'Reserve' : 'Check availability' }}
+                {{
+                  bookingStore.isSubmitting
+                    ? 'Reserving…'
+                    : bookingConfirmed
+                      ? 'Reserved!'
+                      : checkIn && checkOut && nights > 0
+                        ? authStore.isLoggedIn
+                          ? 'Reserve'
+                          : 'Log in to reserve'
+                        : 'Check availability'
+                }}
               </button>
               <div
                 v-if="nights > 0 && !isRangeBlocked"
