@@ -13,7 +13,7 @@ const emit = defineEmits<{ empty: [] }>()
 
 const router = useRouter()
 
-const listings  = ref<Listing[]>([])
+const listings = ref<Listing[]>([])
 const isLoading = ref(false)
 
 onMounted(async () => {
@@ -60,11 +60,7 @@ function viewAll() {
 
       <!-- Card grid -->
       <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        <ListingCard
-          v-for="listing in listings"
-          :key="listing.id"
-          v-bind="listing"
-        />
+        <ListingCard v-for="listing in listings" :key="listing.id" v-bind="listing" />
       </div>
     </div>
   </section>

@@ -3,12 +3,14 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores'
 import { useClickOutside } from '@/composables/useClickOutside'
 
-const authStore    = useAuthStore()
-const scrolled     = ref(false)
+const authStore = useAuthStore()
+const scrolled = ref(false)
 const dropdownOpen = ref(false)
-const dropdownRef  = ref<HTMLElement | null>(null)
+const dropdownRef = ref<HTMLElement | null>(null)
 
-useClickOutside(dropdownRef, () => { dropdownOpen.value = false })
+useClickOutside(dropdownRef, () => {
+  dropdownOpen.value = false
+})
 
 function onScroll() {
   scrolled.value = window.scrollY > 8
@@ -20,7 +22,12 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 const initials = computed(() => {
   const name = authStore.user?.name
   if (!name) return '?'
-  return name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
+  return name
+    .split(' ')
+    .map((w: string) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 })
 
 async function handleLogout() {
@@ -35,7 +42,10 @@ async function handleLogout() {
     :class="scrolled ? 'shadow-[0_1px_12px_rgba(0,0,0,0.08)]' : 'border-b border-divider-light'"
   >
     <div class="max-w-7xl mx-auto px-10 h-16 flex items-center justify-between gap-6">
-      <RouterLink to="/" class="font-serif text-2xl font-semibold text-ink tracking-tight shrink-0 select-none">
+      <RouterLink
+        to="/"
+        class="font-serif text-2xl font-semibold text-ink tracking-tight shrink-0 select-none"
+      >
         placey
       </RouterLink>
 
@@ -66,21 +76,34 @@ async function handleLogout() {
             :aria-expanded="dropdownOpen"
           >
             <!-- Hamburger lines -->
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-ink/60">
-              <line x1="3" y1="6" x2="21" y2="6"/>
-              <line x1="3" y1="12" x2="21" y2="12"/>
-              <line x1="3" y1="18" x2="21" y2="18"/>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              class="text-ink/60"
+            >
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
 
             <!-- Avatar or initials -->
-            <div class="w-8 h-8 rounded-full bg-[#e8e3dc] border border-divider-light overflow-hidden flex items-center justify-center shrink-0">
+            <div
+              class="w-8 h-8 rounded-full bg-[#e8e3dc] border border-divider-light overflow-hidden flex items-center justify-center shrink-0"
+            >
               <img
                 v-if="authStore.user?.avatarUrl"
                 :src="authStore.user.avatarUrl"
                 :alt="authStore.user.name"
                 class="w-full h-full object-cover"
               />
-              <span v-else class="text-xs font-semibold text-ink/60 select-none">{{ initials }}</span>
+              <span v-else class="text-xs font-semibold text-ink/60 select-none">{{
+                initials
+              }}</span>
             </div>
           </button>
 
@@ -135,7 +158,9 @@ async function handleLogout() {
 <style scoped>
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: opacity 120ms ease, transform 120ms ease;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
 }
 .dropdown-enter-from,
 .dropdown-leave-to {

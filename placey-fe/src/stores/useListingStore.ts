@@ -3,12 +3,12 @@ import { ref } from 'vue'
 import type { Listing, Review, AvailabilityRange } from '@/types'
 
 export const useListingStore = defineStore('listing', () => {
-  const listing     = ref<Listing | null>(null)
-  const reviews     = ref<Review[]>([])
+  const listing = ref<Listing | null>(null)
+  const reviews = ref<Review[]>([])
   const availability = ref<AvailabilityRange[]>([])
 
-  const isLoading          = ref(false)
-  const reviewsLoading     = ref(false)
+  const isLoading = ref(false)
+  const reviewsLoading = ref(false)
   const availabilityLoading = ref(false)
 
   const error = ref<string | null>(null)
@@ -63,9 +63,16 @@ export const useListingStore = defineStore('listing', () => {
   }
 
   return {
-    listing, reviews, availability,
-    isLoading, reviewsLoading, availabilityLoading,
+    listing,
+    reviews,
+    availability,
+    isLoading,
+    reviewsLoading,
+    availabilityLoading,
     error,
-    fetchListing, fetchReviews, fetchAvailability, reset,
+    fetchListing,
+    fetchReviews,
+    fetchAvailability,
+    reset,
   }
 })

@@ -20,7 +20,12 @@ const router = createRouter({
     },
 
     // Listings
-    { path: '/listing/:id', name: 'listing', component: () => import('@/views/ListingView.vue'), meta: { title: 'Placey – Listing' } },
+    {
+      path: '/listing/:id',
+      name: 'listing',
+      component: () => import('@/views/ListingView.vue'),
+      meta: { title: 'Placey – Listing' },
+    },
     {
       path: '/search',
       name: 'search',
@@ -29,22 +34,61 @@ const router = createRouter({
     },
 
     // Favorites
-    { path: '/favorites', name: 'favorites', component: () => import('@/views/FavoritesView.vue'), meta: { title: 'Placey – Favorites', requiresAuth: true } },
+    {
+      path: '/favorites',
+      name: 'favorites',
+      component: () => import('@/views/FavoritesView.vue'),
+      meta: { title: 'Placey – Favorites', requiresAuth: true },
+    },
 
     // Hosting
-    { path: '/become-a-host', name: 'become-a-host', component: () => import('@/views/BecomeAHostView.vue'), meta: { title: 'Placey – Become a Host' } },
+    {
+      path: '/become-a-host',
+      name: 'become-a-host',
+      component: () => import('@/views/BecomeAHostView.vue'),
+      meta: { title: 'Placey – Become a Host' },
+    },
 
     // Auth
-    { path: '/login',    name: 'login',    component: () => import('@/views/AuthView.vue'), meta: { title: 'Placey – Log in' } },
-    { path: '/register', name: 'register', component: () => import('@/views/AuthView.vue'), meta: { title: 'Placey – Sign up' } },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/AuthView.vue'),
+      meta: { title: 'Placey – Log in' },
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: () => import('@/views/AuthView.vue'),
+      meta: { title: 'Placey – Sign up' },
+    },
 
     // Info / placeholder
-    { path: '/about',   name: 'about',   component: () => import('@/views/PlaceholderView.vue'), meta: { title: 'Placey – About' } },
-    { path: '/privacy', name: 'privacy', component: () => import('@/views/PlaceholderView.vue'), meta: { title: 'Placey – Privacy' } },
-    { path: '/terms',   name: 'terms',   component: () => import('@/views/PlaceholderView.vue'), meta: { title: 'Placey – Terms' } },
+    {
+      path: '/about',
+      name: 'about',
+      component: () => import('@/views/PlaceholderView.vue'),
+      meta: { title: 'Placey – About' },
+    },
+    {
+      path: '/privacy',
+      name: 'privacy',
+      component: () => import('@/views/PlaceholderView.vue'),
+      meta: { title: 'Placey – Privacy' },
+    },
+    {
+      path: '/terms',
+      name: 'terms',
+      component: () => import('@/views/PlaceholderView.vue'),
+      meta: { title: 'Placey – Terms' },
+    },
 
     // Catch-all
-    { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/views/PlaceholderView.vue') },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('@/views/PlaceholderView.vue'),
+    },
   ],
 })
 

@@ -5,7 +5,10 @@
     <p class="text-[14px] text-muted max-w-sm leading-relaxed">
       This is a university project. Placey is not a real service.
     </p>
-    <RouterLink to="/" class="mt-8 text-[13px] text-ink underline underline-offset-4 hover:text-muted transition-colors">
+    <RouterLink
+      to="/"
+      class="mt-8 text-[13px] text-ink underline underline-offset-4 hover:text-muted transition-colors"
+    >
       Back to home
     </RouterLink>
   </div>
