@@ -13,6 +13,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<Favorite> Favorites => Set<Favorite>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<Conversation> Conversations => Set<Conversation>();
+    public DbSet<Message> Messages => Set<Message>();
 
     protected override void OnModelCreating(ModelBuilder model)
     {
@@ -52,6 +54,32 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         model.Entity<Favorite>(e =>
         {
             e.HasIndex(f => new { f.UserId, f.ListingId }).IsUnique();
+        });
+
+        model.Entity<Conversation>(e =>
+        {
+            e.HasIndex(c => new { c.User1Id, c.User2Id }).IsUnique();
+            e.HasOne(c => c.User1)
+                .WithMany(u => u.ConversationsAsUser1)
+                .HasForeignKey(c => c.User1Id)
+                .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(c => c.User2)
+                .WithMany(u => u.ConversationsAsUser2)
+                .HasForeignKey(c => c.User2Id)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        model.Entity<Message>(e =>
+        {
+            e.Property(m => m.Body).HasMaxLength(4000);
+            e.HasOne(m => m.Sender)
+                .WithMany(u => u.SentMessages)
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(m => m.Conversation)
+                .WithMany(c => c.Messages)
+                .HasForeignKey(m => m.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
