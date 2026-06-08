@@ -28,6 +28,9 @@ const router = createRouter({
       meta: { title: 'Placey – Search' },
     },
 
+    // Favorites
+    { path: '/favorites', name: 'favorites', component: () => import('@/views/FavoritesView.vue'), meta: { title: 'Placey – Favorites', requiresAuth: true } },
+
     // Hosting
     { path: '/become-a-host', name: 'become-a-host', component: () => import('@/views/BecomeAHostView.vue'), meta: { title: 'Placey – Become a Host' } },
 

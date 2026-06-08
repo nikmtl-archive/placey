@@ -99,6 +99,14 @@ async function handleLogout() {
 
               <!-- Menu items -->
               <RouterLink
+                to="/favorites"
+                class="flex items-center px-4 py-2.5 text-sm text-ink hover:bg-black/5 transition-colors cursor-pointer"
+                role="menuitem"
+                @click="dropdownOpen = false"
+              >
+                Favorites
+              </RouterLink>
+              <RouterLink
                 to="/become-a-host"
                 class="flex items-center px-4 py-2.5 text-sm text-ink hover:bg-black/5 transition-colors cursor-pointer"
                 role="menuitem"
