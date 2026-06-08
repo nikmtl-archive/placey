@@ -32,12 +32,9 @@ export const useBookingStore = defineStore('booking', () => {
     isSubmitting.value = true
     error.value = null
     try {
-      const res = await fetch('/api/bookings', {
+      const res = await authStore.apiFetch('/api/bookings', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authStore.authHeaders(),
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ listingId, checkIn, checkOut, guests }),
       })
       if (!res.ok) {
