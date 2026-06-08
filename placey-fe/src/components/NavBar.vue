@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useAuthStore } from '@/stores'
+import { useAuthStore, useMessagingStore } from '@/stores'
 import { useClickOutside } from '@/composables/useClickOutside'
 
 const authStore = useAuthStore()
+const messagingStore = useMessagingStore()
 const scrolled = ref(false)
 const dropdownOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
@@ -16,7 +17,10 @@ function onScroll() {
   scrolled.value = window.scrollY > 8
 }
 
-onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }))
+onMounted(() => {
+  window.addEventListener('scroll', onScroll, { passive: true })
+  if (authStore.isLoggedIn) messagingStore.fetchUnreadCount()
+})
 onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
 const initials = computed(() => {
@@ -121,6 +125,20 @@ async function handleLogout() {
               </div>
 
               <!-- Menu items -->
+              <RouterLink
+                to="/messages"
+                class="flex items-center justify-between px-4 py-2.5 text-sm text-ink hover:bg-black/5 transition-colors cursor-pointer"
+                role="menuitem"
+                @click="dropdownOpen = false"
+              >
+                Messages
+                <span
+                  v-if="messagingStore.unreadCount > 0"
+                  class="bg-ink text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5 leading-none"
+                >
+                  {{ messagingStore.unreadCount }}
+                </span>
+              </RouterLink>
               <RouterLink
                 to="/favorites"
                 class="flex items-center px-4 py-2.5 text-sm text-ink hover:bg-black/5 transition-colors cursor-pointer"
