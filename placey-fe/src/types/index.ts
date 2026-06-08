@@ -73,3 +73,33 @@ export interface Review {
   comment: string
   createdAt: string
 }
+
+export interface ConversationSummary {
+  id: string
+  otherUserId: string
+  otherUserName: string
+  otherUserAvatarUrl: string | null
+  lastMessageBody: string | null
+  lastMessageAt: string | null
+  unreadCount: number
+  createdAt: string
+}
+
+export interface ChatMessage {
+  id: string
+  conversationId: string
+  senderId: string
+  senderName: string
+  senderAvatarUrl: string | null
+  body: string
+  isRead: boolean
+  createdAt: string
+}
+
+export interface ConversationDetail {
+  id: string
+  otherUserId: string
+  otherUserName: string
+  otherUserAvatarUrl: string | null
+  messages: ChatMessage[]
+}
