@@ -7,15 +7,15 @@ Placey is a short-term property rental platform inspired by Airbnb. Hosts publis
 ## Features
 
 ### Agreed scope
-- [ ] Property listings with photos and availability
-- [ ] Search and filter by location, dates, and guest count
-- [ ] Availability checks during the booking flow
+- [x] Property listings with photos and availability
+- [x] Search and filter by location, dates, and guest count
+- [x] Availability checks during the booking flow
 - [ ] Host dashboard — manage listings and view incoming reservations
 - [ ] Guest dashboard — view and manage own bookings
 
 ### Optional Scope
-- [ ] Reviews and ratings for listings
-- [ ] Messaging between host and guest
+- [x] Reviews and ratings for listings
+- [x] Messaging between host and guest
 - [ ] Payments via PayPal Sandbox
 
 <!--
@@ -50,7 +50,9 @@ placey/
 ├── placey-fe/          Vue 3 frontend
 ├── docs/               Architecture and API documentation
 │   ├── backend.md          Backend architecture & developer guide
-│   └── api-endpoints.md    Full API reference
+│   ├── frontend.md         Frontend architecture & developer guide
+│   ├── messaging.md        Messaging feature design (SSE, stores, components)
+│   └── api-endpoints.md    Full REST API reference
 ├── .env.example        Environment variable template
 └── docker-compose.yml
 ```
@@ -156,10 +158,12 @@ Seed data also includes completed bookings, reviews, and favorites so all API en
 
 Detailed documentation is available in the `docs/` folder:
 
-| Document                                       | Description                                                          |
-| ---------------------------------------------- | -------------------------------------------------------------------- |
-| [docs/backend.md](docs/backend.md)             | Architecture, auth flow, database schema, error handling, migrations |
-| [docs/api-endpoints.md](docs/api-endpoints.md) | Full REST API reference with request/response shapes                 |
+| Document                                         | Description                                                          |
+| ------------------------------------------------ | -------------------------------------------------------------------- |
+| [docs/backend.md](docs/backend.md)               | Architecture, auth flow, database schema, error handling, migrations |
+| [docs/frontend.md](docs/frontend.md)             | Vue 3 app structure, routing, Pinia stores, components               |
+| [docs/messaging.md](docs/messaging.md)           | Messaging feature: SSE design, store, components, data model         |
+| [docs/api-endpoints.md](docs/api-endpoints.md)   | Full REST API reference with request/response shapes                 |
 
 ---
 
