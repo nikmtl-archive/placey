@@ -175,6 +175,8 @@ const nights = computed(() => {
   return Math.max(0, Math.floor(diff / 86_400_000))
 })
 
+const datesReady = computed(() => !!checkIn.value && !!checkOut.value && nights.value > 0)
+
 const total = computed(() => (listing.value ? listing.value.pricePerNight * nights.value : 0))
 
 // Booking
@@ -586,13 +588,13 @@ function reviewDate(iso: string) {
                   {{ bookingError }}
                 </div>
                 <button
-                  class="w-full text-sm font-semibold py-3.5 rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="w-full text-sm font-semibold py-3.5 rounded-xl transition-colors disabled:cursor-not-allowed"
                   :class="
-                    isRangeBlocked || bookingConfirmed
-                      ? 'bg-gray-200 text-gray-500'
-                      : 'bg-ink text-white hover:bg-black'
+                    !datesReady || isRangeBlocked || bookingConfirmed
+                      ? 'bg-gray-100 text-gray-400 cursor-default'
+                      : 'bg-ink text-white hover:bg-black cursor-pointer'
                   "
-                  :disabled="isRangeBlocked || bookingStore.isSubmitting || bookingConfirmed"
+                  :disabled="!datesReady || isRangeBlocked || bookingStore.isSubmitting || bookingConfirmed"
                   @click="reserve"
                 >
                   {{
@@ -600,15 +602,15 @@ function reviewDate(iso: string) {
                       ? 'Reserving…'
                       : bookingConfirmed
                         ? 'Reserved!'
-                        : checkIn && checkOut && nights > 0
-                          ? authStore.isLoggedIn
+                        : !datesReady
+                          ? 'Add dates to check availability'
+                          : authStore.isLoggedIn
                             ? 'Reserve'
                             : 'Log in to reserve'
-                          : 'Check availability'
                   }}
                 </button>
                 <div
-                  v-if="nights > 0 && !isRangeBlocked"
+                  v-if="datesReady && !isRangeBlocked && !bookingConfirmed"
                   class="mt-5 pt-5 border-t border-divider-light text-sm"
                 >
                   <div class="flex justify-between font-semibold text-ink">
@@ -618,7 +620,9 @@ function reviewDate(iso: string) {
                     ><span>${{ total }}</span>
                   </div>
                 </div>
-                <p class="text-xs text-muted text-center mt-3">You won't be charged yet</p>
+                <p v-if="!bookingConfirmed" class="text-xs text-muted text-center mt-3">
+                  You won't be charged yet
+                </p>
               </div>
             </div>
 
@@ -750,13 +754,13 @@ function reviewDate(iso: string) {
                 {{ bookingError }}
               </div>
               <button
-                class="w-full text-sm font-semibold py-3.5 rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                class="w-full text-sm font-semibold py-3.5 rounded-xl transition-colors disabled:cursor-not-allowed"
                 :class="
-                  isRangeBlocked || bookingConfirmed
-                    ? 'bg-gray-200 text-gray-500'
-                    : 'bg-ink text-white hover:bg-black'
+                  !datesReady || isRangeBlocked || bookingConfirmed
+                    ? 'bg-gray-100 text-gray-400 cursor-default'
+                    : 'bg-ink text-white hover:bg-black cursor-pointer'
                 "
-                :disabled="isRangeBlocked || bookingStore.isSubmitting || bookingConfirmed"
+                :disabled="!datesReady || isRangeBlocked || bookingStore.isSubmitting || bookingConfirmed"
                 @click="reserve"
               >
                 {{
@@ -764,15 +768,15 @@ function reviewDate(iso: string) {
                     ? 'Reserving…'
                     : bookingConfirmed
                       ? 'Reserved!'
-                      : checkIn && checkOut && nights > 0
-                        ? authStore.isLoggedIn
+                      : !datesReady
+                        ? 'Add dates to check availability'
+                        : authStore.isLoggedIn
                           ? 'Reserve'
                           : 'Log in to reserve'
-                        : 'Check availability'
                 }}
               </button>
               <div
-                v-if="nights > 0 && !isRangeBlocked"
+                v-if="datesReady && !isRangeBlocked && !bookingConfirmed"
                 class="mt-5 pt-5 border-t border-divider-light text-sm"
               >
                 <div class="flex justify-between font-semibold text-ink">
@@ -782,7 +786,9 @@ function reviewDate(iso: string) {
                   ><span>${{ total }}</span>
                 </div>
               </div>
-              <p class="text-xs text-muted text-center mt-3">You won't be charged yet</p>
+              <p v-if="!bookingConfirmed" class="text-xs text-muted text-center mt-3">
+                You won't be charged yet
+              </p>
             </div>
           </div>
         </div>
