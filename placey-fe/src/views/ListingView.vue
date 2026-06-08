@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useListingStore, useAuthStore, useFavoritesStore, useBookingStore } from '@/stores'
+import { useListingStore, useAuthStore, useFavoritesStore, useBookingStore, useMessagingStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import DateRangePicker from '@/components/DateRangePicker.vue'
 import {
@@ -40,8 +40,26 @@ const authStore = useAuthStore()
 const favoritesStore = useFavoritesStore()
 const listingStore = useListingStore()
 const bookingStore = useBookingStore()
+const messagingStore = useMessagingStore()
 const { listing, isLoading, error, reviews, reviewsLoading, availability } =
   storeToRefs(listingStore)
+
+const isStartingConversation = ref(false)
+
+async function messageHost() {
+  if (!authStore.isLoggedIn) {
+    router.push({ path: '/login', query: { redirect: route.fullPath } })
+    return
+  }
+  if (!listing.value) return
+  isStartingConversation.value = true
+  try {
+    const convId = await messagingStore.getOrCreateConversation(listing.value.hostId)
+    router.push({ name: 'messages', params: { id: convId } })
+  } finally {
+    isStartingConversation.value = false
+  }
+}
 
 const isRangeBlocked = computed(() => {
   if (!checkIn.value || !checkOut.value || nights.value <= 0) return false
@@ -454,10 +472,21 @@ function reviewDate(iso: string) {
                   >
                 </div>
               </div>
-              <div
-                class="w-14 h-14 rounded-full bg-cream border-2 border-divider-light flex items-center justify-center text-xl font-serif font-semibold text-ink/50 shrink-0 select-none"
-              >
-                {{ listing.hostName.charAt(0).toUpperCase() }}
+              <div class="flex items-center gap-2 shrink-0">
+                <button
+                  v-if="authStore.user?.id !== listing.hostId"
+                  class="text-xs font-medium text-ink border border-divider rounded-full px-3 py-1.5 hover:bg-black/5 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed whitespace-nowrap"
+                  :disabled="isStartingConversation"
+                  @click="messageHost"
+                >
+                  {{ isStartingConversation ? 'Opening…' : 'Message Host' }}
+                </button>
+                <div
+                  class="w-14 h-14 rounded-full bg-cream border-2 border-divider-light flex items-center justify-center text-xl font-serif font-semibold text-ink/50 select-none"
+                >
+                  {{ listing.hostName.charAt(0).toUpperCase() }}
+                </div>
+                
               </div>
             </div>
 
