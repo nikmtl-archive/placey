@@ -5,13 +5,13 @@ import FeaturedSection from '@/components/FeaturedSection.vue'
 import type { ListingCategory } from '@/types'
 
 const sections = [
-  { category: 'Beach'       as ListingCategory, label: 'Beach escapes' },
-  { category: 'Mountains'   as ListingCategory, label: 'Mountain retreats' },
-  { category: 'Urban'       as ListingCategory, label: 'City stays' },
-  { category: 'Luxe'        as ListingCategory, label: 'Luxe properties' },
+  { category: 'Beach' as ListingCategory, label: 'Beach escapes' },
+  { category: 'Mountains' as ListingCategory, label: 'Mountain retreats' },
+  { category: 'Urban' as ListingCategory, label: 'City stays' },
+  { category: 'Luxe' as ListingCategory, label: 'Luxe properties' },
   { category: 'Countryside' as ListingCategory, label: 'Countryside hideaways' },
-  { category: 'Island'      as ListingCategory, label: 'Island getaways' },
-  { category: 'Lake'        as ListingCategory, label: 'Lakeside stays' },
+  { category: 'Island' as ListingCategory, label: 'Island getaways' },
+  { category: 'Lake' as ListingCategory, label: 'Lakeside stays' },
 ]
 
 const emptyLabels = ref<string[]>([])
@@ -30,7 +30,6 @@ function onEmpty(label: string) {
       :key="s.category"
       :category="s.category"
       :label="s.label"
-
       @empty="onEmpty(s.label)"
     />
   </div>

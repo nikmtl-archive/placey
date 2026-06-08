@@ -1,4 +1,11 @@
-export type ListingCategory = 'Beach' | 'Mountains' | 'Urban' | 'Luxe' | 'Countryside' | 'Island' | 'Lake'
+export type ListingCategory =
+  | 'Beach'
+  | 'Mountains'
+  | 'Urban'
+  | 'Luxe'
+  | 'Countryside'
+  | 'Island'
+  | 'Lake'
 export type PropertyType = 'Apartment' | 'House'
 
 export interface Listing {

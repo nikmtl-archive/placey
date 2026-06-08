@@ -4,8 +4,8 @@ import { useAuthStore } from './useAuthStore'
 
 export const useFavoritesStore = defineStore('favorites', () => {
   const favoriteIds = ref<string[]>([])
-  const isLoading   = ref(false)
-  const error       = ref<string | null>(null)
+  const isLoading = ref(false)
+  const error = ref<string | null>(null)
 
   function isFavorited(listingId: string): boolean {
     return favoriteIds.value.includes(listingId)
@@ -35,7 +35,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
 
     // Optimistic update
     if (wasFavorited) {
-      favoriteIds.value = favoriteIds.value.filter(id => id !== listingId)
+      favoriteIds.value = favoriteIds.value.filter((id) => id !== listingId)
     } else {
       favoriteIds.value = [...favoriteIds.value, listingId]
     }
@@ -51,7 +51,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
       if (wasFavorited) {
         favoriteIds.value = [...favoriteIds.value, listingId]
       } else {
-        favoriteIds.value = favoriteIds.value.filter(id => id !== listingId)
+        favoriteIds.value = favoriteIds.value.filter((id) => id !== listingId)
       }
       error.value = e instanceof Error ? e.message : 'Failed to update favorite'
     }

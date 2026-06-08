@@ -1,14 +1,14 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   /* Brand colors */
-  --color-cream: #F7F2EC;
-  --color-page-bg: #FAF9F6;
-  --color-ink: #1A1A1A;
+  --color-cream: #f7f2ec;
+  --color-page-bg: #faf9f6;
+  --color-ink: #1a1a1a;
   --color-muted: #717171;
   --color-dim: #888888;
-  --color-divider: #DDDDDD;
-  --color-divider-light: #EBEBEB;
+  --color-divider: #dddddd;
+  --color-divider-light: #ebebeb;
   --color-dark: #222222;
 
   /* Typography */

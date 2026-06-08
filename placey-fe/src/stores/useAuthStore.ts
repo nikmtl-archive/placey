@@ -12,30 +12,32 @@ export interface AuthUser {
 const LS_KEY = 'placey_session'
 
 export const useAuthStore = defineStore('auth', () => {
-  const user         = ref<AuthUser | null>(null)
-  const accessToken  = ref<string | null>(null)
+  const user = ref<AuthUser | null>(null)
+  const accessToken = ref<string | null>(null)
   const refreshToken = ref<string | null>(null)
-  const isLoading    = ref(false)
-  const error        = ref<string | null>(null)
+  const isLoading = ref(false)
+  const error = ref<string | null>(null)
 
   // Restore session from localStorage synchronously on store creation
   const stored = localStorage.getItem(LS_KEY)
   if (stored) {
     try {
       const parsed = JSON.parse(stored)
-      user.value         = parsed.user
-      accessToken.value  = parsed.accessToken
+      user.value = parsed.user
+      accessToken.value = parsed.accessToken
       refreshToken.value = parsed.refreshToken
-    } catch { /* corrupt storage — ignore */ }
+    } catch {
+      /* corrupt storage — ignore */
+    }
   }
 
   const isLoggedIn = computed(() => !!accessToken.value)
 
   function setSession(data: { user: AuthUser; accessToken: string; refreshToken: string }) {
-    user.value         = data.user
-    accessToken.value  = data.accessToken
+    user.value = data.user
+    accessToken.value = data.accessToken
     refreshToken.value = data.refreshToken
-    error.value        = null
+    error.value = null
     localStorage.setItem(LS_KEY, JSON.stringify(data))
   }
 
@@ -88,14 +90,14 @@ export const useAuthStore = defineStore('auth', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken.value}`,
+            Authorization: `Bearer ${accessToken.value}`,
           },
           body: JSON.stringify({ refreshToken: refreshToken.value }),
         })
       }
     } finally {
-      user.value         = null
-      accessToken.value  = null
+      user.value = null
+      accessToken.value = null
       refreshToken.value = null
       localStorage.removeItem(LS_KEY)
     }
@@ -107,8 +109,15 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   return {
-    user, accessToken, refreshToken, isLoading, error,
+    user,
+    accessToken,
+    refreshToken,
+    isLoading,
+    error,
     isLoggedIn,
-    login, register, logout, authHeaders,
+    login,
+    register,
+    logout,
+    authHeaders,
   }
 })

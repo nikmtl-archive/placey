@@ -6,9 +6,9 @@ import DateRangePicker from '@/components/DateRangePicker.vue'
 
 const props = defineProps<{
   initialLocation?: string
-  initialCheckIn?:  string
+  initialCheckIn?: string
   initialCheckOut?: string
-  initialGuests?:   number
+  initialGuests?: number
 }>()
 
 const emit = defineEmits<{ search: [query: Record<string, string>] }>()
@@ -19,10 +19,10 @@ const router = useRouter()
 const location = ref(props.initialLocation ?? '')
 
 // WHEN
-const checkIn      = ref(props.initialCheckIn  ?? '')
-const checkOut     = ref(props.initialCheckOut ?? '')
-const pickerRef    = ref<InstanceType<typeof DateRangePicker> | null>(null)
-const whenActive   = ref(false)
+const checkIn = ref(props.initialCheckIn ?? '')
+const checkOut = ref(props.initialCheckOut ?? '')
+const pickerRef = ref<InstanceType<typeof DateRangePicker> | null>(null)
+const whenActive = ref(false)
 
 function openWhen() {
   closeWho()
@@ -35,41 +35,43 @@ function openWhen() {
 // The picker already self-closes; we just need to sync the highlight.
 // Use a MutationObserver-free approach: listen to the same mousedown outside logic.
 
-// WHO 
-const guests    = ref(props.initialGuests ?? 2)
+// WHO
+const guests = ref(props.initialGuests ?? 2)
 const whoActive = ref(false)
 
 function openWho() {
   pickerRef.value?.closePicker()
   whenActive.value = false
-  whoActive.value  = true
+  whoActive.value = true
 }
-function closeWho() { whoActive.value = false }
+function closeWho() {
+  whoActive.value = false
+}
 
 // SEARCH
-const canSearch = computed(() =>
-  location.value.trim().length > 0 && !!checkIn.value && !!checkOut.value
+const canSearch = computed(
+  () => location.value.trim().length > 0 && !!checkIn.value && !!checkOut.value,
 )
 
 function handleSearch() {
   if (!canSearch.value) return
   const query: Record<string, string> = {
     location: location.value,
-    checkIn:  checkIn.value,
+    checkIn: checkIn.value,
     checkOut: checkOut.value,
   }
   if (guests.value > 1) query.guests = String(guests.value)
-  whoActive.value  = false
+  whoActive.value = false
   whenActive.value = false
   emit('search', query)
   router.push({ name: 'search', query })
 }
 
-// CLICK OUTSIDE 
+// CLICK OUTSIDE
 const barRef = ref<HTMLElement | null>(null)
 function onClickOutside(e: MouseEvent) {
   if (barRef.value && !barRef.value.contains(e.target as Node)) {
-    whoActive.value  = false
+    whoActive.value = false
     whenActive.value = false
   }
 }
@@ -79,11 +81,13 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside))
 // Date label for WHEN pill
 const whenLabel = computed(() => {
   if (checkIn.value && checkOut.value) {
-    const f = (s: string) => new Date(s + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const f = (s: string) =>
+      new Date(s + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     return `${f(checkIn.value)} – ${f(checkOut.value)}`
   }
   if (checkIn.value) {
-    const f = (s: string) => new Date(s + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const f = (s: string) =>
+      new Date(s + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     return `${f(checkIn.value)} – ?`
   }
   return null
@@ -94,14 +98,19 @@ const whenLabel = computed(() => {
   <div ref="barRef" class="relative">
     <form
       class="flex items-center bg-white rounded-full shadow-[0_2px_20px_rgba(0,0,0,0.10),0_0_0_1px_rgba(0,0,0,0.05)] transition-shadow pl-5 pr-2 py-2 sm:py-2.5 gap-1"
-      :class="{ 'shadow-[0_4px_28px_rgba(0,0,0,0.14),0_0_0_1px_rgba(0,0,0,0.06)]': whoActive || whenActive }"
+      :class="{
+        'shadow-[0_4px_28px_rgba(0,0,0,0.14),0_0_0_1px_rgba(0,0,0,0.06)]': whoActive || whenActive,
+      }"
       @submit.prevent="handleSearch"
     >
       <!-- WHERE — direct inline input -->
       <div class="flex-1 flex items-center gap-2 min-w-0">
         <MapPin class="w-4 h-4 text-muted shrink-0" :stroke-width="2" />
         <div class="flex flex-col min-w-0 flex-1 items-start">
-          <span class="hidden sm:block text-[10px] font-semibold tracking-widest text-ink uppercase leading-none mb-0.5">WHERE</span>
+          <span
+            class="hidden sm:block text-[10px] font-semibold tracking-widest text-ink uppercase leading-none mb-0.5"
+            >WHERE</span
+          >
           <input
             v-model="location"
             type="text"
@@ -122,8 +131,13 @@ const whenLabel = computed(() => {
       >
         <CalendarDays class="w-4 h-4 text-muted shrink-0" :stroke-width="2" />
         <div class="flex flex-col min-w-0 items-start">
-          <span class="hidden sm:block text-[10px] font-semibold tracking-widest text-ink uppercase leading-none mb-0.5">WHEN</span>
-          <span v-if="whenLabel" class="text-xs sm:text-sm text-ink font-medium truncate">{{ whenLabel }}</span>
+          <span
+            class="hidden sm:block text-[10px] font-semibold tracking-widest text-ink uppercase leading-none mb-0.5"
+            >WHEN</span
+          >
+          <span v-if="whenLabel" class="text-xs sm:text-sm text-ink font-medium truncate">{{
+            whenLabel
+          }}</span>
           <span v-else class="text-xs sm:text-sm text-dim">Add dates</span>
         </div>
       </button>
@@ -139,8 +153,13 @@ const whenLabel = computed(() => {
       >
         <Users class="w-4 h-4 text-muted shrink-0" :stroke-width="2" />
         <div class="flex flex-col min-w-0 items-start">
-          <span class="hidden sm:block text-[10px] font-semibold tracking-widest text-ink uppercase leading-none mb-0.5">WHO</span>
-          <span class="text-xs sm:text-sm text-ink font-medium whitespace-nowrap">{{ guests }} {{ guests === 1 ? 'guest' : 'guests' }}</span>
+          <span
+            class="hidden sm:block text-[10px] font-semibold tracking-widest text-ink uppercase leading-none mb-0.5"
+            >WHO</span
+          >
+          <span class="text-xs sm:text-sm text-ink font-medium whitespace-nowrap"
+            >{{ guests }} {{ guests === 1 ? 'guest' : 'guests' }}</span
+          >
         </div>
       </button>
 
@@ -148,9 +167,11 @@ const whenLabel = computed(() => {
       <button
         type="submit"
         class="w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shrink-0 ml-1 transition-all"
-        :class="canSearch
-          ? 'bg-dark text-white hover:bg-black hover:scale-105 active:scale-95 cursor-pointer'
-          : 'bg-gray-200 text-gray-400 cursor-not-allowed'"
+        :class="
+          canSearch
+            ? 'bg-dark text-white hover:bg-black hover:scale-105 active:scale-95 cursor-pointer'
+            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+        "
         aria-label="Search"
       >
         <Search class="w-4 h-4 sm:w-4.5 sm:h-4.5" :stroke-width="2.5" />
@@ -163,8 +184,14 @@ const whenLabel = computed(() => {
       no-trigger
       :check-in="checkIn"
       :check-out="checkOut"
-      @update:check-in="checkIn = $event; whenActive = true"
-      @update:check-out="checkOut = $event; whenActive = false"
+      @update:check-in="
+        checkIn = $event
+        whenActive = true
+      "
+      @update:check-out="
+        checkOut = $event
+        whenActive = false
+      "
     />
 
     <!-- WHO popup -->
@@ -184,14 +211,18 @@ const whenLabel = computed(() => {
               class="w-8 h-8 rounded-full border border-divider flex items-center justify-center text-ink hover:border-ink transition-colors text-lg leading-none disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
               :disabled="guests <= 1"
               @click="guests = Math.max(1, guests - 1)"
-            >−</button>
+            >
+              −
+            </button>
             <span class="text-sm font-semibold text-ink w-5 text-center">{{ guests }}</span>
             <button
               type="button"
               class="w-8 h-8 rounded-full border border-divider flex items-center justify-center text-ink hover:border-ink transition-colors text-lg leading-none disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
               :disabled="guests >= 20"
               @click="guests = Math.min(20, guests + 1)"
-            >+</button>
+            >
+              +
+            </button>
           </div>
         </div>
       </div>
@@ -200,6 +231,15 @@ const whenLabel = computed(() => {
 </template>
 
 <style scoped>
-.popup-enter-active, .popup-leave-active { transition: opacity 0.15s ease, transform 0.15s ease; }
-.popup-enter-from, .popup-leave-to { opacity: 0; transform: translateY(6px); }
+.popup-enter-active,
+.popup-leave-active {
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+.popup-enter-from,
+.popup-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
+}
 </style>

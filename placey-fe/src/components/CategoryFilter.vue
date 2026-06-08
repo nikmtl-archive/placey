@@ -22,9 +22,7 @@ function select(id: string) {
           :key="cat.id"
           class="relative flex flex-col items-center gap-1.5 px-5 py-2.5 rounded-xl transition-all duration-150 cursor-pointer"
           :class="
-            modelValue === cat.id
-              ? 'text-ink'
-              : 'text-ink/40 hover:text-ink/70 hover:bg-black/3'
+            modelValue === cat.id ? 'text-ink' : 'text-ink/40 hover:text-ink/70 hover:bg-black/3'
           "
           @click="select(cat.id)"
         >

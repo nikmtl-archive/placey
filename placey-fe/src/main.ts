@@ -7,13 +7,13 @@ import './assets/main.css'
 
 import { useAuthStore, useFavoritesStore } from '@/stores'
 
-const app   = createApp(App)
+const app = createApp(App)
 const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
 
-const authStore      = useAuthStore()
+const authStore = useAuthStore()
 const favoritesStore = useFavoritesStore()
 
 // Hydrate favorites when logged in (including restored sessions from localStorage)
@@ -21,7 +21,7 @@ watch(
   () => authStore.isLoggedIn,
   (loggedIn) => {
     if (loggedIn) favoritesStore.hydrate()
-    else          favoritesStore.reset()
+    else favoritesStore.reset()
   },
   { immediate: true },
 )
