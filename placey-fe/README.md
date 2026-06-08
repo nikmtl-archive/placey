@@ -25,6 +25,8 @@ See [Vite Configuration Reference](https://vite.dev/config/).
 
 ## Project Setup
 
+Enshure that the be and db are running before starting the frontend dev server, as the frontend needs to connect to the API and fetch data.
+
 ```sh
 pnpm install
 ```
