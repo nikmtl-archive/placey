@@ -15,4 +15,7 @@ public class User
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
     public ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+    public ICollection<Conversation> ConversationsAsUser1 { get; set; } = new List<Conversation>();
+    public ICollection<Conversation> ConversationsAsUser2 { get; set; } = new List<Conversation>();
+    public ICollection<Message> SentMessages { get; set; } = new List<Message>();
 }

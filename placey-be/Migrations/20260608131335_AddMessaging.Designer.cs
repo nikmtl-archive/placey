@@ -13,8 +13,8 @@ using placey_be.Data;
 namespace placey_be.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260604165507_AddListingDetails")]
-    partial class AddListingDetails
+    [Migration("20260608131335_AddMessaging")]
+    partial class AddMessaging
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -88,6 +88,31 @@ namespace placey_be.Migrations
                     b.HasIndex("ListingId");
 
                     b.ToTable("Bookings");
+                });
+
+            modelBuilder.Entity("placey_be.Models.Entities.Conversation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("User1Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("User2Id")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("User2Id");
+
+                    b.HasIndex("User1Id", "User2Id")
+                        .IsUnique();
+
+                    b.ToTable("Conversations");
                 });
 
             modelBuilder.Entity("placey_be.Models.Entities.Favorite", b =>
@@ -197,6 +222,38 @@ namespace placey_be.Migrations
                     b.HasIndex("ListingId");
 
                     b.ToTable("ListingPhotos");
+                });
+
+            modelBuilder.Entity("placey_be.Models.Entities.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConversationId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("placey_be.Models.Entities.RefreshToken", b =>
@@ -327,6 +384,25 @@ namespace placey_be.Migrations
                     b.Navigation("Listing");
                 });
 
+            modelBuilder.Entity("placey_be.Models.Entities.Conversation", b =>
+                {
+                    b.HasOne("placey_be.Models.Entities.User", "User1")
+                        .WithMany("ConversationsAsUser1")
+                        .HasForeignKey("User1Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("placey_be.Models.Entities.User", "User2")
+                        .WithMany("ConversationsAsUser2")
+                        .HasForeignKey("User2Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User1");
+
+                    b.Navigation("User2");
+                });
+
             modelBuilder.Entity("placey_be.Models.Entities.Favorite", b =>
                 {
                     b.HasOne("placey_be.Models.Entities.Listing", "Listing")
@@ -368,6 +444,25 @@ namespace placey_be.Migrations
                     b.Navigation("Listing");
                 });
 
+            modelBuilder.Entity("placey_be.Models.Entities.Message", b =>
+                {
+                    b.HasOne("placey_be.Models.Entities.Conversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("placey_be.Models.Entities.User", "Sender")
+                        .WithMany("SentMessages")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("placey_be.Models.Entities.RefreshToken", b =>
                 {
                     b.HasOne("placey_be.Models.Entities.User", "User")
@@ -406,6 +501,11 @@ namespace placey_be.Migrations
                     b.Navigation("Listing");
                 });
 
+            modelBuilder.Entity("placey_be.Models.Entities.Conversation", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
             modelBuilder.Entity("placey_be.Models.Entities.Listing", b =>
                 {
                     b.Navigation("Availabilities");
@@ -423,6 +523,10 @@ namespace placey_be.Migrations
                 {
                     b.Navigation("Bookings");
 
+                    b.Navigation("ConversationsAsUser1");
+
+                    b.Navigation("ConversationsAsUser2");
+
                     b.Navigation("Favorites");
 
                     b.Navigation("Listings");
@@ -430,6 +534,8 @@ namespace placey_be.Migrations
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("Reviews");
+
+                    b.Navigation("SentMessages");
                 });
 #pragma warning restore 612, 618
         }
