@@ -33,6 +33,56 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isLoggedIn = computed(() => !!accessToken.value)
 
+  // Serialises concurrent refresh attempts so only one request goes out
+  let _refreshPromise: Promise<boolean> | null = null
+
+  async function refreshSession(): Promise<boolean> {
+    if (_refreshPromise) return _refreshPromise
+    _refreshPromise = (async () => {
+      if (!refreshToken.value) return false
+      try {
+        const res = await fetch('/api/auth/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken: refreshToken.value }),
+        })
+        if (!res.ok) return false
+        setSession(await res.json())
+        return true
+      } catch {
+        return false
+      } finally {
+        _refreshPromise = null
+      }
+    })()
+    return _refreshPromise
+  }
+
+  // Drop-in fetch wrapper: retries once after a transparent token refresh on 401
+  async function apiFetch(input: RequestInfo, init: RequestInit = {}): Promise<Response> {
+    const makeHeaders = () => ({
+      ...(init.headers as Record<string, string> | undefined),
+      ...authHeaders(),
+    })
+
+    let res = await fetch(input, { ...init, headers: makeHeaders() })
+
+    if (res.status === 401 && refreshToken.value) {
+      const refreshed = await refreshSession()
+      if (refreshed) {
+        res = await fetch(input, { ...init, headers: makeHeaders() })
+      } else {
+        // Refresh failed — clear stale session so UI reflects logged-out state
+        user.value = null
+        accessToken.value = null
+        refreshToken.value = null
+        localStorage.removeItem(LS_KEY)
+      }
+    }
+
+    return res
+  }
+
   function setSession(data: { user: AuthUser; accessToken: string; refreshToken: string }) {
     user.value = data.user
     accessToken.value = data.accessToken
@@ -119,5 +169,7 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     authHeaders,
+    refreshSession,
+    apiFetch,
   }
 })

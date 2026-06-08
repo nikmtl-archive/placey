@@ -16,9 +16,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
     isLoading.value = true
     error.value = null
     try {
-      const res = await fetch('/api/favorites', {
-        headers: authStore.authHeaders(),
-      })
+      const res = await authStore.apiFetch('/api/favorites')
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
       favoriteIds.value = data.map((l: { id: string }) => l.id)
@@ -41,9 +39,8 @@ export const useFavoritesStore = defineStore('favorites', () => {
     }
 
     try {
-      const res = await fetch(`/api/favorites/${listingId}`, {
+      const res = await authStore.apiFetch(`/api/favorites/${listingId}`, {
         method: wasFavorited ? 'DELETE' : 'POST',
-        headers: authStore.authHeaders(),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
     } catch (e: unknown) {
