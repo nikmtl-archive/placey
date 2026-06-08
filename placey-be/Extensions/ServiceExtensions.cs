@@ -39,6 +39,19 @@ public static class ServiceExtensions
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(config["Jwt:Secret"]!))
                 };
+                options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+                {
+                    OnMessageReceived = ctx =>
+                    {
+                        var token = ctx.Request.Query["access_token"];
+                        if (!string.IsNullOrEmpty(token) &&
+                            ctx.Request.Path.StartsWithSegments("/messages/stream"))
+                        {
+                            ctx.Token = token;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
         services.AddAuthorization();
@@ -53,6 +66,8 @@ public static class ServiceExtensions
         services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IFavoriteService, FavoriteService>();
+        services.AddScoped<IMessageService, MessageService>();
+        services.AddSingleton<SseHub>();
         return services;
     }
 
