@@ -184,14 +184,8 @@ const whenLabel = computed(() => {
       no-trigger
       :check-in="checkIn"
       :check-out="checkOut"
-      @update:check-in="
-        checkIn = $event
-        whenActive = true
-      "
-      @update:check-out="
-        checkOut = $event
-        whenActive = false
-      "
+      @update:check-in="checkIn = $event; whenActive = true"
+      @update:check-out="checkOut = $event; whenActive = false"
     />
 
     <!-- WHO popup -->
