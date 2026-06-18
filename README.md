@@ -70,7 +70,7 @@ placey/
 ### Quick start with Docker Compose
 
 ```bash
-# 1. Copy the env template and fill in your values
+# 1. Copy the env template and fill in your values (if security is not a concern, you can use the same values as in .env.example)
 cp .env.example .env
 
 # 2. Build and start all services
@@ -85,7 +85,7 @@ docker compose up --build
 
 ### Local backend development
 
-JWT config and the dev database connection string are already set in `placey-be/appsettings.Development.json` — no extra environment setup needed.
+JWT config and the dev database connection string are set in `placey-be/appsettings.Development.json` — no extra environment setup needed.
 
 ```bash
 # Start only the database
@@ -103,16 +103,25 @@ dotnet run
 
 ### Local frontend development
 
-
 ```bash
-# Start the backend and database
-docker compose up postgres -d
+# Start the backend
 docker compose up backend -d
 
 cd placey-fe
 pnpm install
 pnpm dev
 ```
+
+if you get an error like this:
+
+```
+7:37:24 PM [vite] http proxy error: <an api request URL>
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+```
+
+Make sure the backend is running and the proxy target in `vite.config.ts` matches the backend Port (default: `http://localhost:5001`).
 
 ### Environment variables
 

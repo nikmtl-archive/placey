@@ -454,7 +454,11 @@ function reviewDate(iso: string) {
             >
               <div>
                 <h2 class="text-xl font-semibold text-ink mb-1">
-                  {{ listing.propertyType }} hosted by {{ listing.hostName }}
+                  {{ listing.propertyType }} hosted by
+                  <RouterLink
+                    :to="`/host/${listing.hostId}`"
+                    class="hover:underline underline-offset-2 transition-colors"
+                  >{{ listing.hostName }}</RouterLink>
                 </h2>
                 <div class="flex items-center flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted">
                   <span class="flex items-center gap-1.5"
@@ -481,12 +485,20 @@ function reviewDate(iso: string) {
                 >
                   {{ isStartingConversation ? 'Opening…' : 'Message Host' }}
                 </button>
-                <div
-                  class="w-14 h-14 rounded-full bg-cream border-2 border-divider-light flex items-center justify-center text-xl font-serif font-semibold text-ink/50 select-none"
-                >
-                  {{ listing.hostName.charAt(0).toUpperCase() }}
-                </div>
-                
+                <RouterLink :to="`/host/${listing.hostId}`" class="shrink-0">
+                  <img
+                    v-if="listing.hostAvatarUrl"
+                    :src="listing.hostAvatarUrl"
+                    :alt="listing.hostName"
+                    class="w-14 h-14 rounded-full object-cover border-2 border-divider-light hover:opacity-80 transition-opacity"
+                  />
+                  <div
+                    v-else
+                    class="w-14 h-14 rounded-full bg-cream border-2 border-divider-light flex items-center justify-center text-xl font-serif font-semibold text-ink/50 select-none hover:opacity-80 transition-opacity"
+                  >
+                    {{ listing.hostName.charAt(0).toUpperCase() }}
+                  </div>
+                </RouterLink>
               </div>
             </div>
 

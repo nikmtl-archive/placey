@@ -53,21 +53,6 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
                 b.CheckOut > checkIn));
         }
 
-        if (p.Category.HasValue)
-            query = query.Where(l => l.Category == p.Category.Value);
-
-        if (p.PropertyType.HasValue)
-            query = query.Where(l => l.PropertyType == p.PropertyType.Value);
-
-        if (p.MinBedrooms.HasValue)
-            query = query.Where(l => l.Bedrooms >= p.MinBedrooms.Value);
-
-        if (p.MinPrice.HasValue)
-            query = query.Where(l => l.PricePerNight >= p.MinPrice.Value);
-
-        if (p.MaxPrice.HasValue)
-            query = query.Where(l => l.PricePerNight <= p.MaxPrice.Value);
-
         var total = await query.CountAsync();
         var items = await query
             .OrderByDescending(l => l.CreatedAt)

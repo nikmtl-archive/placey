@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using placey_be.Data;
 using placey_be.Extensions;
 using placey_be.Models.DTOs.Bookings;
+using placey_be.Models.DTOs.Listings;
 using placey_be.Models.DTOs.Users;
-using placey_be.Models.Entities;
 using placey_be.Services.Interfaces;
 
 namespace placey_be.Controllers;
@@ -109,6 +109,45 @@ public class UsersController(
     {
         var result = await userService.GetPublicAsync(id);
         return Ok(result);
+    }
+
+    [HttpGet("{id:guid}/listings")]
+    public async Task<IActionResult> GetHostListings(Guid id)
+    {
+        var listings = await db.Listings
+            .Include(l => l.Host)
+            .Include(l => l.Photos)
+            .Include(l => l.Reviews)
+            .Where(l => l.HostId == id)
+            .OrderByDescending(l => l.CreatedAt)
+            .ToListAsync();
+
+        var response = listings.Select(l => new ListingResponse(
+            l.Id,
+            l.HostId,
+            l.Host.Name,
+            l.Host.AvatarUrl,
+            l.Title,
+            l.Description,
+            l.City,
+            l.Country,
+            string.IsNullOrEmpty(l.Street) ? null : l.Street,
+            $"{l.City}, {l.Country}",
+            l.PricePerNight,
+            l.Bedrooms,
+            l.Bathrooms,
+            l.MaxGuests,
+            l.IsInstantBook,
+            l.Amenities,
+            l.Category,
+            l.PropertyType,
+            l.Photos.OrderBy(p => p.Order).Select(p => p.Url).ToList(),
+            l.Reviews.Count > 0 ? l.Reviews.Average(r => r.Rating) : null,
+            l.Reviews.Count,
+            l.CreatedAt
+        ));
+
+        return Ok(response);
     }
 
     [HttpGet("{id:guid}/reviews")]

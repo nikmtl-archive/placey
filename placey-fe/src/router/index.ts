@@ -41,6 +41,14 @@ const router = createRouter({
       meta: { title: 'Placey – Favorites', requiresAuth: true },
     },
 
+    // Host profile
+    {
+      path: '/host/:id',
+      name: 'host-profile',
+      component: () => import('@/views/HostProfileView.vue'),
+      meta: { title: 'Placey – Host Profile' },
+    },
+
     // Hosting
     {
       path: '/become-a-host',

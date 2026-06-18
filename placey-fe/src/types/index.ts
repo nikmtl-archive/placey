@@ -28,6 +28,7 @@ export interface Listing {
   reviewCount: number
   hostId: string
   hostName: string
+  hostAvatarUrl: string | null
   createdAt: string
 }
 
@@ -102,4 +103,12 @@ export interface ConversationDetail {
   otherUserName: string
   otherUserAvatarUrl: string | null
   messages: ChatMessage[]
+}
+
+export interface HostProfile {
+  id: string
+  name: string
+  bio: string | null
+  avatarUrl: string | null
+  createdAt: string
 }
