@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores'
+import { useAuthStore, useMessagingStore } from '@/stores'
 import type { HostProfile, Listing, Review } from '@/types'
 import { ChevronLeft, Star, MapPin, MessageCircle, CalendarDays } from '@lucide/vue'
 import ListingCard from '@/components/ListingCard.vue'
@@ -9,6 +9,9 @@ import ListingCard from '@/components/ListingCard.vue'
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const messagingStore = useMessagingStore()
+
+const isStartingConversation = ref(false)
 
 const host = ref<HostProfile | null>(null)
 const listings = ref<Listing[]>([])
@@ -61,12 +64,18 @@ function reviewDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 }
 
-function goToMessages() {
+async function goToMessages() {
   if (!authStore.isLoggedIn) {
     router.push({ path: '/login', query: { redirect: route.fullPath } })
     return
   }
-  router.push(`/messages/${route.params.id}`)
+  isStartingConversation.value = true
+  try {
+    const convId = await messagingStore.getOrCreateConversation(String(route.params.id))
+    router.push({ name: 'messages', params: { id: convId } })
+  } finally {
+    isStartingConversation.value = false
+  }
 }
 </script>
 
@@ -155,11 +164,12 @@ function goToMessages() {
 
           <!-- Message button -->
           <button
-            class="inline-flex items-center gap-2 bg-ink text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-black transition-colors cursor-pointer shrink-0"
+            class="inline-flex items-center gap-2 bg-ink text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-black transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            :disabled="isStartingConversation"
             @click="goToMessages"
           >
             <MessageCircle :size="16" />
-            Message host
+            {{ isStartingConversation ? 'Opening…' : 'Message host' }}
           </button>
         </div>
       </div>

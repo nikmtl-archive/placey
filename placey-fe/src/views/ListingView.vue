@@ -14,7 +14,7 @@ import {
   BedDouble,
   Bath,
   Zap,
-  Share2,
+  Share,
   Heart,
   Wifi,
   Car,
@@ -299,7 +299,7 @@ function reviewDate(iso: string) {
             class="relative flex items-center gap-1.5 text-sm font-medium text-ink/70 hover:text-ink px-3 py-2 rounded-lg hover:bg-black/5 transition-colors cursor-pointer"
             @click="share"
           >
-            <Share2 :size="15" />
+            <Share :size="15" />
             {{ shareCopied ? 'Copied!' : 'Share' }}
           </button>
           <!-- Save -->
