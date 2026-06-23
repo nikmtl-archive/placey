@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore, useMessagingStore } from '@/stores'
 import { useClickOutside } from '@/composables/useClickOutside'
 
+const router = useRouter()
 const authStore = useAuthStore()
 const messagingStore = useMessagingStore()
 const scrolled = ref(false)
@@ -37,6 +39,7 @@ const initials = computed(() => {
 async function handleLogout() {
   dropdownOpen.value = false
   await authStore.logout()
+  router.push({ name: 'home' })
 }
 </script>
 
