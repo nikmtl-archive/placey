@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores'
+import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
+const router = useRouter()
 
 const name = ref('')
 const bio = ref('')
@@ -79,6 +81,27 @@ const initials = () => {
   const n = authStore.user?.name
   if (!n) return '?'
   return n.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
+}
+
+const showDeleteConfirm = ref(false)
+const isDeleting = ref(false)
+const deleteError = ref<string | null>(null)
+
+async function deleteAccount() {
+  isDeleting.value = true
+  deleteError.value = null
+  try {
+    const res = await authStore.apiFetch('/api/users/me', { method: 'DELETE' })
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
+    }
+    await authStore.logout()
+    router.push('/')
+  } catch (e: unknown) {
+    deleteError.value = e instanceof Error ? e.message : 'Failed to delete account'
+    isDeleting.value = false
+  }
 }
 </script>
 
@@ -176,7 +199,44 @@ const initials = () => {
         </div>
       </form>
     </section>
-  </div>
+
+
+    <!-- Danger zone -->
+    <section class="mb-10 border border-rose-200 rounded-2xl p-6">
+      <h2 class="text-sm font-semibold text-rose-600 mb-1">Danger zone</h2>
+      <p class="text-sm text-muted mb-4">Permanently delete your account and all associated data. This cannot be undone.</p>
+
+      <div v-if="!showDeleteConfirm">
+        <button
+          class="text-sm font-medium text-rose-600 border border-rose-200 rounded-full px-4 py-2 hover:bg-rose-50 transition-colors cursor-pointer"
+          @click="showDeleteConfirm = true"
+        >
+          Delete account
+        </button>
+      </div>
+
+      <div v-else class="space-y-3">
+        <p class="text-sm font-medium text-ink">Are you sure? This will delete all your data including bookings, messages, and listings.</p>
+        <div class="flex items-center gap-3">
+          <button
+            class="text-sm font-medium text-white bg-rose-600 px-5 py-2 rounded-full hover:bg-rose-700 transition-colors disabled:opacity-50 cursor-pointer"
+            :disabled="isDeleting"
+            @click="deleteAccount"
+          >
+            {{ isDeleting ? 'Deleting…' : 'Yes, delete my account' }}
+          </button>
+          <button
+            class="text-sm text-muted hover:text-ink transition-colors cursor-pointer"
+            :disabled="isDeleting"
+            @click="showDeleteConfirm = false"
+          >
+            Cancel
+          </button>
+        </div>
+        <p v-if="deleteError" class="text-xs text-rose-600">{{ deleteError }}</p>
+      </div>
+    </section>
+  </div>  
 </template>
 
 <style scoped>
