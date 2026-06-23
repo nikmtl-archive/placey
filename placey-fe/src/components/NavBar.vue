@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore, useMessagingStore } from '@/stores'
 import { useClickOutside } from '@/composables/useClickOutside'
+import { MessageCircle, CalendarDays, House, Heart, Plus, LogOut, AlignJustify } from '@lucide/vue'
 
 const authStore = useAuthStore()
 const messagingStore = useMessagingStore()
@@ -19,7 +20,10 @@ function onScroll() {
 
 onMounted(() => {
   window.addEventListener('scroll', onScroll, { passive: true })
-  if (authStore.isLoggedIn) messagingStore.fetchUnreadCount()
+  if (authStore.isLoggedIn) {
+    messagingStore.fetchUnreadCount()
+    authStore.checkIsHost()
+  }
 })
 onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
@@ -53,11 +57,47 @@ async function handleLogout() {
         placey
       </RouterLink>
 
-      <nav class="flex items-center gap-2 shrink-0">
+      <nav class="flex items-center gap-1 shrink-0">
+        <!-- Desktop shortcuts — only when logged in -->
+        <template v-if="authStore.isLoggedIn">
+          <!-- Messages -->
+          <RouterLink
+            to="/messages"
+            class="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors text-ink/60 hover:text-ink"
+            title="Messages"
+          >
+            <MessageCircle :size="20" :stroke-width="1.75" />
+            <span
+              v-if="messagingStore.unreadCount > 0"
+              class="absolute top-1 right-1 min-w-4 h-4 bg-ink text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 leading-none"
+            >
+              {{ messagingStore.unreadCount }}
+            </span>
+          </RouterLink>
+
+          <!-- My Bookings (guests only) -->
+          <RouterLink
+            v-if="!authStore.isHost"
+            to="/bookings"
+            class="text-sm font-medium text-ink/70 hover:text-ink transition-colors px-1"
+          >
+            My Bookings
+          </RouterLink>
+
+          <!-- Host Dashboard (hosts only) -->
+          <RouterLink
+            v-if="authStore.isHost"
+            to="/host-dashboard"
+            class="text-sm font-medium text-ink/70 hover:text-ink transition-colors px-1"
+          >
+            Host Dashboard
+          </RouterLink>
+        </template>
+
         <RouterLink
           v-if="!authStore.isLoggedIn"
           to="/become-a-host"
-          class="text-sm font-medium text-ink px-3.5 py-2 rounded-lg hover:bg-black/5 transition-colors"
+          class="text-sm font-medium text-ink px-3.5 py-2 rounded-full transition-colors"
         >
           Become a Host
         </RouterLink>
@@ -72,28 +112,14 @@ async function handleLogout() {
         </RouterLink>
 
         <!-- Logged in -->
-        <div v-else ref="dropdownRef" class="relative">
+        <div v-else ref="dropdownRef" class="relative ml-1">
           <button
-            class="flex items-center gap-2.5 border border-divider rounded-full pl-3 pr-1 py-1 hover:shadow-md transition-shadow cursor-pointer"
+            class="flex items-center gap-2.5 border border-divider rounded-full pl-3 pr-1 py-1 cursor-pointer hover:border-ink/30 hover:shadow-sm transition-all"
             @click="dropdownOpen = !dropdownOpen"
             aria-haspopup="true"
             :aria-expanded="dropdownOpen"
           >
-            <!-- Hamburger lines -->
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              class="text-ink/60"
-            >
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
+            <AlignJustify :size="16" :stroke-width="2" class="text-ink/60" />
 
             <!-- Avatar or initials -->
             <div
@@ -127,11 +153,14 @@ async function handleLogout() {
               <!-- Menu items -->
               <RouterLink
                 to="/messages"
-                class="flex items-center justify-between px-4 py-2.5 text-sm text-ink hover:bg-black/5 transition-colors cursor-pointer"
+                class="flex items-center gap-3 justify-between px-4 py-2.5 text-sm text-ink hover:bg-black/5 transition-colors cursor-pointer"
                 role="menuitem"
                 @click="dropdownOpen = false"
               >
-                Messages
+                <span class="flex items-center gap-3">
+                  <MessageCircle :size="15" :stroke-width="1.75" class="text-ink/50 shrink-0" />
+                  Messages
+                </span>
                 <span
                   v-if="messagingStore.unreadCount > 0"
                   class="bg-ink text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5 leading-none"
@@ -139,29 +168,60 @@ async function handleLogout() {
                   {{ messagingStore.unreadCount }}
                 </span>
               </RouterLink>
+
+              <RouterLink
+                to="/bookings"
+                class="flex items-center gap-3 px-4 py-2.5 text-sm text-ink hover:bg-black/5 transition-colors cursor-pointer"
+                role="menuitem"
+                @click="dropdownOpen = false"
+              >
+                <CalendarDays :size="15" :stroke-width="1.75" class="text-ink/50 shrink-0" />
+                My Bookings
+              </RouterLink>
+
               <RouterLink
                 to="/favorites"
-                class="flex items-center px-4 py-2.5 text-sm text-ink hover:bg-black/5 transition-colors cursor-pointer"
+                class="flex items-center gap-3 px-4 py-2.5 text-sm text-ink hover:bg-black/5 transition-colors cursor-pointer"
                 role="menuitem"
                 @click="dropdownOpen = false"
               >
+                <Heart :size="15" :stroke-width="1.75" class="text-ink/50 shrink-0" />
                 Favorites
               </RouterLink>
-              <RouterLink
-                to="/become-a-host"
-                class="flex items-center px-4 py-2.5 text-sm text-ink hover:bg-black/5 transition-colors cursor-pointer"
-                role="menuitem"
-                @click="dropdownOpen = false"
-              >
-                Become a Host
-              </RouterLink>
+
+              <!-- Host section -->
+              <div v-if="authStore.isHost" class="border-t border-divider-light mt-1 pt-1">
+                <RouterLink
+                  to="/host-dashboard"
+                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-ink hover:bg-black/5 transition-colors cursor-pointer"
+                  role="menuitem"
+                  @click="dropdownOpen = false"
+                >
+                  <House :size="15" :stroke-width="1.75" class="text-ink/50 shrink-0" />
+                  Host Dashboard
+                </RouterLink>
+              </div>
+
+              <!-- Become a host (non-hosts) -->
+              <div v-else class="border-t border-divider-light mt-1 pt-1">
+                <RouterLink
+                  to="/become-a-host"
+                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-ink hover:bg-black/5 transition-colors cursor-pointer"
+                  role="menuitem"
+                  @click="dropdownOpen = false"
+                >
+                  <Plus :size="15" :stroke-width="1.75" class="text-ink/50 shrink-0" />
+                  Become a Host
+                </RouterLink>
+              </div>
 
               <div class="border-t border-divider-light mt-1 pt-1">
                 <button
-                  class="flex items-center w-full px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                  class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                   role="menuitem"
                   @click="handleLogout"
                 >
+                  <LogOut :size="15" :stroke-width="1.75" class="shrink-0" />
                   Log out
                 </button>
               </div>

@@ -57,6 +57,20 @@ const router = createRouter({
       meta: { title: 'Placey – Become a Host' },
     },
 
+    // Bookings & hosting dashboard
+    {
+      path: '/bookings',
+      name: 'bookings',
+      component: () => import('@/views/PlaceholderView.vue'),
+      meta: { title: 'Placey – My Bookings', requiresAuth: true },
+    },
+    {
+      path: '/host-dashboard',
+      name: 'host-dashboard',
+      component: () => import('@/views/PlaceholderView.vue'),
+      meta: { title: 'Placey – Host Dashboard', requiresAuth: true },
+    },
+
     // Auth
     {
       path: '/login',

@@ -7,6 +7,7 @@ export interface AuthUser {
   name: string
   bio: string | null
   avatarUrl: string | null
+  isHost?: boolean
 }
 
 const LS_KEY = 'placey_session'
@@ -32,6 +33,19 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const isLoggedIn = computed(() => !!accessToken.value)
+  const isHost = ref(false)
+
+  async function checkIsHost() {
+    if (!accessToken.value) { isHost.value = false; return }
+    try {
+      const res = await apiFetch('/api/users/me/listings')
+      if (!res.ok) { isHost.value = false; return }
+      const data = await res.json()
+      isHost.value = Array.isArray(data) ? data.length > 0 : (data.total ?? 0) > 0
+    } catch {
+      isHost.value = false
+    }
+  }
 
   // Serialises concurrent refresh attempts so only one request goes out
   let _refreshPromise: Promise<boolean> | null = null
@@ -105,6 +119,7 @@ export const useAuthStore = defineStore('auth', () => {
         throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
       }
       setSession(await res.json())
+      checkIsHost()
     } catch (e: unknown) {
       error.value = e instanceof Error ? e.message : 'Login failed'
     } finally {
@@ -126,6 +141,7 @@ export const useAuthStore = defineStore('auth', () => {
         throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
       }
       setSession(await res.json())
+      checkIsHost()
     } catch (e: unknown) {
       error.value = e instanceof Error ? e.message : 'Registration failed'
     } finally {
@@ -165,6 +181,8 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading,
     error,
     isLoggedIn,
+    isHost,
+    checkIsHost,
     login,
     register,
     logout,

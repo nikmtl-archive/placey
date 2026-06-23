@@ -296,7 +296,7 @@ function reviewDate(iso: string) {
         <div class="flex items-center gap-3 shrink-0">
           <!-- Share -->
           <button
-            class="relative flex items-center gap-1.5 text-sm font-medium text-ink/70 hover:text-ink px-3 py-2 rounded-lg hover:bg-black/5 transition-colors cursor-pointer"
+            class="relative flex items-center gap-1.5 text-sm font-medium text-ink/70 hover:text-ink px-3 py-2 rounded-full hover:bg-black/5 transition-colors cursor-pointer"
             @click="share"
           >
             <Share :size="15" />
@@ -305,7 +305,7 @@ function reviewDate(iso: string) {
           <!-- Save -->
           <div class="relative">
             <button
-              class="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg hover:bg-black/5 transition-colors cursor-pointer"
+              class="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-full hover:bg-black/5 transition-colors cursor-pointer"
               :class="
                 authStore.isLoggedIn && listing && favoritesStore.isFavorited(listing.id)
                   ? 'text-rose-500'

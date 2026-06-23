@@ -73,7 +73,7 @@ function initials(name: string): string {
       v-for="conv in conversations"
       :key="conv.id"
       class="w-full flex items-center gap-4 px-5 py-4 transition-colors text-left cursor-pointer"
-      :class="conv.id === activeId ? 'bg-cream' : 'hover:bg-black/[0.025]'"
+      :class="conv.id === activeId ? 'bg-black/3' : 'hover:bg-black/2'"
       @click="emit('select', conv.id)"
     >
       <!-- Avatar -->

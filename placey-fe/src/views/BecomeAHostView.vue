@@ -36,7 +36,7 @@ import { DollarSign, Star, ChevronRight, Clock } from '@lucide/vue'
 
         <!-- Mock earnings card -->
         <div class="flex justify-center md:justify-end">
-          <div class="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl p-8 w-72">
+          <div class="bg-white/10 backdrop-blur-sm border border-white/10 rounded-3xl p-8 w-72">
             <p class="text-white/50 text-xs font-semibold tracking-widest uppercase mb-1">
               Estimated monthly
             </p>
@@ -68,7 +68,7 @@ import { DollarSign, Star, ChevronRight, Clock } from '@lucide/vue'
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
         <div
-          class="group p-6 sm:p-8 rounded-2xl border border-divider-light hover:border-divider hover:shadow-sm transition-all"
+          class="group p-6 rounded-3xl border border-divider-light hover:border-divider hover:shadow-sm transition-all"
         >
           <div class="w-11 h-11 rounded-xl bg-cream flex items-center justify-center mb-5">
             <DollarSign class="w-5 h-5 text-ink" :stroke-width="2" />
@@ -80,7 +80,7 @@ import { DollarSign, Star, ChevronRight, Clock } from '@lucide/vue'
         </div>
 
         <div
-          class="group p-6 sm:p-8 rounded-2xl border border-divider-light hover:border-divider hover:shadow-sm transition-all"
+          class="group p-6 rounded-3xl border border-divider-light hover:border-divider hover:shadow-sm transition-all"
         >
           <div class="w-11 h-11 rounded-xl bg-cream flex items-center justify-center mb-5">
             <Clock class="w-5 h-5 text-ink" :stroke-width="2" />
@@ -92,7 +92,7 @@ import { DollarSign, Star, ChevronRight, Clock } from '@lucide/vue'
         </div>
 
         <div
-          class="group p-6 sm:p-8 rounded-2xl border border-divider-light hover:border-divider hover:shadow-sm transition-all sm:col-span-2 lg:col-span-1"
+          class="group p-6 rounded-3xl border border-divider-light hover:border-divider hover:shadow-sm transition-all sm:col-span-2 lg:col-span-1"
         >
           <div class="w-11 h-11 rounded-xl bg-cream flex items-center justify-center mb-5">
             <Star class="w-5 h-5 text-ink" :stroke-width="2" />

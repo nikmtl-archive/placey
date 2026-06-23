@@ -97,14 +97,15 @@ const whenLabel = computed(() => {
 <template>
   <div ref="barRef" class="relative">
     <form
-      class="flex items-center bg-white rounded-full shadow-[0_2px_20px_rgba(0,0,0,0.10),0_0_0_1px_rgba(0,0,0,0.05)] transition-shadow pl-5 pr-2 py-2 sm:py-2.5 gap-1"
+      class="flex items-center bg-white rounded-full shadow-[0_2px_20px_rgba(0,0,0,0.10),0_0_0_1px_rgba(0,0,0,0.05)] transition-shadow pl-3 pr-2 py-2 sm:py-2.5 gap-1"
       :class="{
         'shadow-[0_4px_28px_rgba(0,0,0,0.14),0_0_0_1px_rgba(0,0,0,0.06)]': whoActive || whenActive,
       }"
       @submit.prevent="handleSearch"
     >
       <!-- WHERE — direct inline input -->
-      <div class="flex-1 flex items-center gap-2 min-w-0">
+      <div class="flex-1 flex items-center gap-2 px-2 sm:px-3 py-1 rounded-full transition-colors min-w-0 cursor-pointer"
+        :class="whenActive ? 'bg-gray-50' : 'hover:bg-gray-50'">
         <MapPin class="w-4 h-4 text-muted shrink-0" :stroke-width="2" />
         <div class="flex flex-col min-w-0 flex-1 items-start">
           <span
