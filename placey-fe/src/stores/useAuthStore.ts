@@ -174,6 +174,16 @@ export const useAuthStore = defineStore('auth', () => {
     return { Authorization: `Bearer ${accessToken.value}` }
   }
 
+  function patchUser(partial: Partial<AuthUser>) {
+    if (!user.value) return
+    user.value = { ...user.value, ...partial }
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      user: user.value,
+      accessToken: accessToken.value,
+      refreshToken: refreshToken.value,
+    }))
+  }
+
   return {
     user,
     accessToken,
@@ -189,5 +199,6 @@ export const useAuthStore = defineStore('auth', () => {
     authHeaders,
     refreshSession,
     apiFetch,
+    patchUser,
   }
 })

@@ -27,7 +27,7 @@ public class UsersController(
 
     [Authorize]
     [HttpPatch("me")]
-    public async Task<IActionResult> UpdateMe(UpdateProfileRequest request)
+    public async Task<IActionResult> UpdateMe([FromBody] UpdateProfileRequest request)
     {
         var result = await userService.UpdateMeAsync(User.GetUserId(), request);
         return Ok(result);
