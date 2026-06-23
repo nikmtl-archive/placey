@@ -162,8 +162,9 @@ async function goToMessages() {
             <p v-else class="text-sm text-muted italic">No bio provided.</p>
           </div>
 
-          <!-- Message button -->
+          <!-- Message button (hidden when viewing own profile) -->
           <button
+            v-if="authStore.user?.id !== host.id"
             class="inline-flex items-center gap-2 bg-ink text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-black transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             :disabled="isStartingConversation"
             @click="goToMessages"
