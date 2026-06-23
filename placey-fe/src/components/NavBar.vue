@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore, useMessagingStore } from '@/stores'
 import { useClickOutside } from '@/composables/useClickOutside'
-import { MessageCircle, CalendarDays, House, Heart, Plus, LogOut, AlignJustify } from '@lucide/vue'
+import { MessageCircle, CalendarDays, House, Heart, Plus, LogOut, AlignJustify, Settings } from '@lucide/vue'
 
 const authStore = useAuthStore()
 const messagingStore = useMessagingStore()
@@ -216,6 +216,15 @@ async function handleLogout() {
               </div>
 
               <div class="border-t border-divider-light mt-1 pt-1">
+                <RouterLink
+                  to="/settings"
+                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-ink hover:bg-black/5 transition-colors cursor-pointer"
+                  role="menuitem"
+                  @click="dropdownOpen = false"
+                >
+                  <Settings :size="15" :stroke-width="1.75" class="text-ink/50 shrink-0" />
+                  Account settings
+                </RouterLink>
                 <button
                   class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                   role="menuitem"

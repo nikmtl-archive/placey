@@ -105,6 +105,14 @@ const router = createRouter({
       meta: { title: 'Placey – Terms' },
     },
 
+    // Settings
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('@/views/SettingsView.vue'),
+      meta: { title: 'Placey – Account Settings', requiresAuth: true },
+    },
+
     // Messaging
     {
       path: '/messages/:id?',
