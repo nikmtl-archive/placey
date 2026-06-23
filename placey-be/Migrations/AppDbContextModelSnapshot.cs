@@ -142,7 +142,7 @@ namespace placey_be.Migrations
 
                     b.Property<List<string>>("Amenities")
                         .IsRequired()
-                        .HasColumnType("text[]");
+                        .HasColumnType("jsonb");
 
                     b.Property<int>("Bathrooms")
                         .HasColumnType("integer");
@@ -151,7 +151,8 @@ namespace placey_be.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("Category")
-                        .HasColumnType("integer");
+                        .HasConversion<string>()
+                        .HasColumnType("text");
 
                     b.Property<string>("City")
                         .IsRequired()
@@ -181,7 +182,8 @@ namespace placey_be.Migrations
                         .HasColumnType("numeric(10,2)");
 
                     b.Property<int>("PropertyType")
-                        .HasColumnType("integer");
+                        .HasConversion<string>()
+                        .HasColumnType("text");
 
                     b.Property<string>("Street")
                         .IsRequired()

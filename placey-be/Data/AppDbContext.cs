@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using placey_be.Models.Entities;
 
 namespace placey_be.Data;
@@ -26,7 +28,17 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         model.Entity<Listing>(e =>
         {
             e.Property(l => l.PricePerNight).HasColumnType("numeric(10,2)");
-            e.Property(l => l.Amenities).HasColumnType("text[]");
+            e.Property(l => l.Amenities)
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null)!,
+                    new ValueComparer<List<string>>(
+                        (a, b) => a != null && b != null && a.SequenceEqual(b),
+                        v => v.Aggregate(0, (h, s) => HashCode.Combine(h, s.GetHashCode())),
+                        v => v.ToList()));
+            e.Property(l => l.Category).HasConversion<string>();
+            e.Property(l => l.PropertyType).HasConversion<string>();
             e.HasOne(l => l.Host)
                 .WithMany(u => u.Listings)
                 .HasForeignKey(l => l.HostId)

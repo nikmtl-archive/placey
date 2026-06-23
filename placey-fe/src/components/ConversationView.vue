@@ -146,7 +146,7 @@ function initials(name: string): string {
           >
             <!-- Date separator -->
             <div
-              v-if="i === 0 || new Date(msg.createdAt).toDateString() !== new Date(activeConversation.messages[i - 1].createdAt).toDateString()"
+              v-if="i === 0 || new Date(msg.createdAt).toDateString() !== new Date(activeConversation.messages[i - 1]!.createdAt).toDateString()"
               class="self-center text-[10px] text-muted bg-white border border-divider px-3 py-0.5 rounded-full my-4"
             >
               {{ new Date(msg.createdAt).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) }}
