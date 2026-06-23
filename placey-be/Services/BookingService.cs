@@ -49,7 +49,7 @@ public class BookingService(AppDbContext db) : IBookingService
     public async Task<BookingResponse> GetByIdAsync(Guid bookingId, Guid requesterId)
     {
         var booking = await db.Bookings
-            .Include(b => b.Listing)
+            .Include(b => b.Listing).ThenInclude(l => l.Photos)
             .Include(b => b.Guest)
             .FirstOrDefaultAsync(b => b.Id == bookingId)
             ?? throw new KeyNotFoundException("Booking not found.");
@@ -80,7 +80,7 @@ public class BookingService(AppDbContext db) : IBookingService
     public async Task<BookingResponse> UpdateStatusAsync(Guid bookingId, Guid requesterId, BookingStatus status)
     {
         var booking = await db.Bookings
-            .Include(b => b.Listing)
+            .Include(b => b.Listing).ThenInclude(l => l.Photos)
             .Include(b => b.Guest)
             .FirstOrDefaultAsync(b => b.Id == bookingId)
             ?? throw new KeyNotFoundException("Booking not found.");
@@ -97,7 +97,7 @@ public class BookingService(AppDbContext db) : IBookingService
     private async Task<BookingResponse> LoadResponseAsync(Guid bookingId)
     {
         var booking = await db.Bookings
-            .Include(b => b.Listing)
+            .Include(b => b.Listing).ThenInclude(l => l.Photos)
             .Include(b => b.Guest)
             .FirstAsync(b => b.Id == bookingId);
         return ToResponse(booking);
@@ -107,8 +107,10 @@ public class BookingService(AppDbContext db) : IBookingService
         b.Id,
         b.ListingId,
         b.Listing.Title,
+        b.Listing.Photos.OrderBy(p => p.Order).Select(p => p.Url).FirstOrDefault(),
         b.GuestId,
         b.Guest.Name,
+        b.Guest.AvatarUrl,
         b.CheckIn,
         b.CheckOut,
         b.Guests,

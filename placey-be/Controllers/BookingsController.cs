@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using placey_be.Data;
 using placey_be.Extensions;
 using placey_be.Models.DTOs.Bookings;
 using placey_be.Services.Interfaces;
@@ -9,7 +11,7 @@ namespace placey_be.Controllers;
 [ApiController]
 [Route("bookings")]
 [Authorize]
-public class BookingsController(IBookingService bookingService) : ControllerBase
+public class BookingsController(IBookingService bookingService, AppDbContext db) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> Create(CreateBookingRequest request)
@@ -37,5 +39,16 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     {
         var result = await bookingService.UpdateStatusAsync(id, User.GetUserId(), request.Status);
         return Ok(result);
+    }
+
+    [HttpGet("{id:guid}/review")]
+    public async Task<IActionResult> GetReview(Guid id)
+    {
+        var review = await db.Reviews
+            .Include(r => r.Author)
+            .FirstOrDefaultAsync(r => r.BookingId == id);
+
+        if (review == null) return NotFound();
+        return Ok(new { review.Id, review.Rating, review.Comment, review.CreatedAt });
     }
 }

@@ -59,11 +59,33 @@ public class UsersController(
             .Include(l => l.Photos)
             .Include(l => l.Reviews)
             .Where(l => l.HostId == userId)
+            .OrderByDescending(l => l.CreatedAt)
             .ToListAsync();
 
-        return Ok(listings.Select(l => new {
-            l.Id, l.Title, Location = $"{l.City}, {l.Country}", l.City, l.Country, l.PricePerNight, l.Bedrooms, l.MaxGuests, l.Category, l.PropertyType, l.CreatedAt
-        }));
+        return Ok(listings.Select(l => new ListingResponse(
+            l.Id,
+            l.HostId,
+            l.Host.Name,
+            l.Host.AvatarUrl,
+            l.Title,
+            l.Description,
+            l.City,
+            l.Country,
+            string.IsNullOrEmpty(l.Street) ? null : l.Street,
+            $"{l.City}, {l.Country}",
+            l.PricePerNight,
+            l.Bedrooms,
+            l.Bathrooms,
+            l.MaxGuests,
+            l.IsInstantBook,
+            l.Amenities,
+            l.Category,
+            l.PropertyType,
+            l.Photos.OrderBy(p => p.Order).Select(p => p.Url).ToList(),
+            l.Reviews.Count > 0 ? l.Reviews.Average(r => r.Rating) : null,
+            l.Reviews.Count,
+            l.CreatedAt
+        )));
     }
 
     [Authorize]
@@ -72,17 +94,17 @@ public class UsersController(
     {
         var userId = User.GetUserId();
         var bookings = await db.Bookings
-            .Include(b => b.Listing)
+            .Include(b => b.Listing).ThenInclude(l => l.Photos)
             .Include(b => b.Guest)
             .Where(b => b.GuestId == userId)
             .OrderByDescending(b => b.CreatedAt)
-            .Select(b => new BookingResponse(
-                b.Id, b.ListingId, b.Listing.Title,
-                b.GuestId, b.Guest.Name,
-                b.CheckIn, b.CheckOut, b.Guests, b.TotalPrice, b.Status, b.CreatedAt))
             .ToListAsync();
 
-        return Ok(bookings);
+        return Ok(bookings.Select(b => new BookingResponse(
+            b.Id, b.ListingId, b.Listing.Title,
+            b.Listing.Photos.OrderBy(p => p.Order).Select(p => p.Url).FirstOrDefault(),
+            b.GuestId, b.Guest.Name, b.Guest.AvatarUrl,
+            b.CheckIn, b.CheckOut, b.Guests, b.TotalPrice, b.Status, b.CreatedAt)));
     }
 
     [Authorize]
@@ -91,17 +113,17 @@ public class UsersController(
     {
         var userId = User.GetUserId();
         var reservations = await db.Bookings
-            .Include(b => b.Listing)
+            .Include(b => b.Listing).ThenInclude(l => l.Photos)
             .Include(b => b.Guest)
             .Where(b => b.Listing.HostId == userId)
             .OrderByDescending(b => b.CreatedAt)
-            .Select(b => new BookingResponse(
-                b.Id, b.ListingId, b.Listing.Title,
-                b.GuestId, b.Guest.Name,
-                b.CheckIn, b.CheckOut, b.Guests, b.TotalPrice, b.Status, b.CreatedAt))
             .ToListAsync();
 
-        return Ok(reservations);
+        return Ok(reservations.Select(b => new BookingResponse(
+            b.Id, b.ListingId, b.Listing.Title,
+            b.Listing.Photos.OrderBy(p => p.Order).Select(p => p.Url).FirstOrDefault(),
+            b.GuestId, b.Guest.Name, b.Guest.AvatarUrl,
+            b.CheckIn, b.CheckOut, b.Guests, b.TotalPrice, b.Status, b.CreatedAt)));
     }
 
     [HttpGet("{id:guid}")]

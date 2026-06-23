@@ -67,6 +67,14 @@ public class ListingsController(
     }
 
     [Authorize]
+    [HttpGet("{id:guid}/photos")]
+    public async Task<IActionResult> GetPhotos(Guid id)
+    {
+        var result = await listingService.GetPhotosAsync(id, User.GetUserId());
+        return Ok(result);
+    }
+
+    [Authorize]
     [HttpPost("{id:guid}/photos")]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> UploadPhoto(Guid id, IFormFile file)

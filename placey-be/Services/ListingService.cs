@@ -170,6 +170,21 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
         return new AvailabilityResponse(entry.Id, entry.StartDate, entry.EndDate, entry.IsBlocked);
     }
 
+    public async Task<List<ListingPhotoResponse>> GetPhotosAsync(Guid listingId, Guid requesterId)
+    {
+        var listing = await db.Listings.FindAsync(listingId)
+            ?? throw new KeyNotFoundException("Listing not found.");
+
+        if (listing.HostId != requesterId)
+            throw new UnauthorizedAccessException("Only the host can view photo details.");
+
+        return await db.ListingPhotos
+            .Where(p => p.ListingId == listingId)
+            .OrderBy(p => p.Order)
+            .Select(p => new ListingPhotoResponse(p.Id, p.Url, p.Order))
+            .ToListAsync();
+    }
+
     public async Task<ListingPhotoResponse> UploadPhotoAsync(Guid listingId, Guid requesterId, IFormFile file)
     {
         var listing = await db.Listings.Include(l => l.Photos).FirstOrDefaultAsync(l => l.Id == listingId)
