@@ -21,7 +21,7 @@ public class UserService(AppDbContext db, IWebHostEnvironment env) : IUserServic
             ?? throw new KeyNotFoundException("User not found.");
 
         if (request.Name is not null) user.Name = request.Name;
-        if (request.Bio is not null) user.Bio = request.Bio;
+        user.Bio = request.Bio;
 
         await db.SaveChangesAsync();
         return new PrivateUserResponse(user.Id, user.Email, user.Name, user.Bio, user.AvatarUrl, user.CreatedAt);
