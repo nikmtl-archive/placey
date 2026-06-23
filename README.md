@@ -10,8 +10,8 @@ Placey is a short-term property rental platform inspired by Airbnb. Hosts publis
 - [x] Property listings with photos and availability
 - [x] Search and filter by location, dates, and guest count
 - [x] Availability checks during the booking flow
-- [ ] Host dashboard — manage listings and view incoming reservations
-- [ ] Guest dashboard — view and manage own bookings
+- [ ] Host dashboard: manage listings and view incoming reservations
+- [ ] Guest dashboard: view and manage own bookings
 
 ### Optional Scope
 - [x] Reviews and ratings for listings
@@ -41,7 +41,8 @@ Placey is a short-term property rental platform inspired by Airbnb. Hosts publis
 ## Project structure
 
 > [!NOTE]
-> For detailed technical documentation, see the documentation section below.
+> For detailed technical documentation, see the `docs/` folder.
+> For an overview of the avalable documentation, see the the documentation section below.
 
 ```
 placey/
@@ -49,10 +50,6 @@ placey/
 ├── placey-be.Tests/    xUnit unit tests for the backend services
 ├── placey-fe/          Vue 3 frontend
 ├── docs/               Architecture and API documentation
-│   ├── backend.md          Backend architecture & developer guide
-│   ├── frontend.md         Frontend architecture & developer guide
-│   ├── messaging.md        Messaging feature design (SSE, stores, components)
-│   └── api-endpoints.md    Full REST API reference
 ├── .env.example        Environment variable template
 └── docker-compose.yml
 ```
@@ -64,10 +61,10 @@ placey/
 ### Requirements
 
 - [Docker](https://www.docker.com/) and Docker Compose
-- .NET 8 SDK (for local backend development)
-- Node.js 20 + pnpm (for local frontend development)
+- .NET 8 SDK (for local backend development only)
+- Node.js 20 + pnpm (for local frontend development only)
 
-### Quick start with Docker Compose
+### Quick start with Docker Compose (Start everything)
 
 ```bash
 # 1. Copy the env template and fill in your values (if security is not a concern, you can use the same values as in .env.example)
