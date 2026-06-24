@@ -61,7 +61,7 @@ const router = createRouter({
     {
       path: '/bookings',
       name: 'bookings',
-      component: () => import('@/views/PlaceholderView.vue'),
+      component: () => import('@/views/BookingsView.vue'),
       meta: { title: 'Placey – My Bookings', requiresAuth: true },
     },
     {
