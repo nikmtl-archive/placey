@@ -196,6 +196,8 @@ const total = computed(() => (listing.value ? listing.value.pricePerNight * nigh
 
 // Booking
 const bookingConfirmed = ref(false)
+const bookingModalOpen = ref(false)
+const bookingStatus = ref<string | null>(null)
 const bookingError = ref<string | null>(null)
 
 async function reserve() {
@@ -206,11 +208,22 @@ async function reserve() {
   if (!listing.value || !checkIn.value || !checkOut.value || nights.value <= 0) return
   bookingError.value = null
   try {
-    await bookingStore.createBooking(listing.value.id, checkIn.value, checkOut.value, guests.value)
+    const booking = await bookingStore.createBooking(listing.value.id, checkIn.value, checkOut.value, guests.value)
     bookingConfirmed.value = true
+    bookingStatus.value = booking.status
+    bookingModalOpen.value = true
   } catch (e: unknown) {
     bookingError.value = e instanceof Error ? e.message : 'Something went wrong'
   }
+}
+
+function closeModal() {
+  bookingModalOpen.value = false
+}
+
+function goToBookings() {
+  bookingModalOpen.value = false
+  router.push({ name: 'bookings' })
 }
 
 // Review helpers
@@ -614,12 +627,6 @@ function reviewDate(iso: string) {
                   These dates are not available. Please choose different dates.
                 </div>
                 <div
-                  v-if="bookingConfirmed"
-                  class="mb-3 px-3 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium"
-                >
-                  Reservation confirmed! Check your bookings for details.
-                </div>
-                <div
                   v-if="bookingError"
                   class="mb-3 px-3 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"
                 >
@@ -638,17 +645,15 @@ function reviewDate(iso: string) {
                   {{
                     bookingStore.isSubmitting
                       ? 'Reserving…'
-                      : bookingConfirmed
-                        ? 'Reserved!'
-                        : !datesReady
-                          ? 'Add dates to check availability'
-                          : authStore.isLoggedIn
-                            ? 'Reserve'
-                            : 'Log in to reserve'
+                      : !datesReady
+                        ? 'Add dates to check availability'
+                        : authStore.isLoggedIn
+                          ? 'Reserve'
+                          : 'Log in to reserve'
                   }}
                 </button>
                 <div
-                  v-if="datesReady && !isRangeBlocked && !bookingConfirmed"
+                  v-if="datesReady && !isRangeBlocked"
                   class="mt-5 pt-5 border-t border-divider-light text-sm"
                 >
                   <div class="flex justify-between font-semibold text-ink">
@@ -658,9 +663,7 @@ function reviewDate(iso: string) {
                     ><span>${{ total }}</span>
                   </div>
                 </div>
-                <p v-if="!bookingConfirmed" class="text-xs text-muted text-center mt-3">
-                  You won't be charged yet
-                </p>
+                <p class="text-xs text-muted text-center mt-3">You won't be charged yet</p>
               </div>
             </div>
 
@@ -780,12 +783,6 @@ function reviewDate(iso: string) {
                 These dates are not available. Please choose different dates.
               </div>
               <div
-                v-if="bookingConfirmed"
-                class="mb-3 px-3 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium"
-              >
-                Reservation confirmed! Check your bookings for details.
-              </div>
-              <div
                 v-if="bookingError"
                 class="mb-3 px-3 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"
               >
@@ -804,17 +801,15 @@ function reviewDate(iso: string) {
                 {{
                   bookingStore.isSubmitting
                     ? 'Reserving…'
-                    : bookingConfirmed
-                      ? 'Reserved!'
-                      : !datesReady
-                        ? 'Add dates to check availability'
-                        : authStore.isLoggedIn
-                          ? 'Reserve'
-                          : 'Log in to reserve'
+                    : !datesReady
+                      ? 'Add dates to check availability'
+                      : authStore.isLoggedIn
+                        ? 'Reserve'
+                        : 'Log in to reserve'
                 }}
               </button>
               <div
-                v-if="datesReady && !isRangeBlocked && !bookingConfirmed"
+                v-if="datesReady && !isRangeBlocked"
                 class="mt-5 pt-5 border-t border-divider-light text-sm"
               >
                 <div class="flex justify-between font-semibold text-ink">
@@ -824,14 +819,68 @@ function reviewDate(iso: string) {
                   ><span>${{ total }}</span>
                 </div>
               </div>
-              <p v-if="!bookingConfirmed" class="text-xs text-muted text-center mt-3">
-                You won't be charged yet
-              </p>
+              <p class="text-xs text-muted text-center mt-3">You won't be charged yet</p>
             </div>
           </div>
         </div>
       </div>
     </template>
+
+    <!-- Booking Confirmation Modal -->
+    <Teleport to="body">
+      <Transition name="modal">
+        <div
+          v-if="bookingModalOpen"
+          class="fixed inset-0 z-300 flex items-center justify-center px-4"
+          @click.self="closeModal"
+        >
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closeModal" />
+          <div class="relative bg-white rounded-4xl shadow-2xl w-full max-w-sm p-8 text-center">
+            <button
+              class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+              @click="closeModal"
+            >
+              <X :size="16" />
+            </button>
+            <div
+              class="mx-auto mb-5 w-16 h-16 rounded-full flex items-center justify-center"
+              :class="bookingStatus === 'Confirmed' ? 'bg-emerald-50' : 'bg-amber-50'"
+            >
+              <svg
+                v-if="bookingStatus === 'Confirmed'"
+                class="w-8 h-8 text-emerald-500"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              <svg
+                v-else
+                class="w-8 h-8 text-amber-500"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 class="text-xl font-bold text-ink mb-2">
+              {{ bookingStatus === 'Confirmed' ? "You're booked!" : 'Request sent!' }}
+            </h2>
+            <p class="text-sm text-muted mb-6">
+              {{
+                bookingStatus === 'Confirmed'
+                  ? 'Your reservation is confirmed. You can manage it from your bookings page.'
+                  : "Your request is awaiting host approval. You'll be notified once it's confirmed."
+              }}
+            </p>
+            <button
+              class="w-full bg-ink text-white text-sm font-semibold py-3 rounded-xl hover:bg-black transition-colors cursor-pointer"
+              @click="goToBookings"
+            >
+              View My Bookings
+            </button>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
 
     <!-- Lightbox -->
     <Teleport to="body">
@@ -904,6 +953,15 @@ function reviewDate(iso: string) {
 }
 .fade-enter-from,
 .fade-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 200ms ease;
+}
+.modal-enter-from,
+.modal-leave-to {
   opacity: 0;
 }
 </style>
