@@ -5,6 +5,7 @@ using placey_be.Data;
 using placey_be.Extensions;
 using placey_be.Models.DTOs.Bookings;
 using placey_be.Models.DTOs.Listings;
+using placey_be.Models.DTOs.Reviews;
 using placey_be.Models.DTOs.Users;
 using placey_be.Services.Interfaces;
 
@@ -100,11 +101,14 @@ public class UsersController(
             .OrderByDescending(b => b.CreatedAt)
             .ToListAsync();
 
+        var reviewsByBookingId = await LoadReviewsByBookingIdAsync(bookings.Select(b => b.Id));
+
         return Ok(bookings.Select(b => new BookingResponse(
             b.Id, b.ListingId, b.Listing.Title,
             b.Listing.Photos.OrderBy(p => p.Order).Select(p => p.Url).FirstOrDefault(),
             b.GuestId, b.Guest.Name, b.Guest.AvatarUrl,
-            b.CheckIn, b.CheckOut, b.Guests, b.TotalPrice, b.Status, b.CreatedAt)));
+            b.CheckIn, b.CheckOut, b.Guests, b.TotalPrice, b.Status, b.CreatedAt,
+            reviewsByBookingId.GetValueOrDefault(b.Id))));
     }
 
     [Authorize]
@@ -119,11 +123,33 @@ public class UsersController(
             .OrderByDescending(b => b.CreatedAt)
             .ToListAsync();
 
+        var reviewsByBookingId = await LoadReviewsByBookingIdAsync(reservations.Select(b => b.Id));
+
         return Ok(reservations.Select(b => new BookingResponse(
             b.Id, b.ListingId, b.Listing.Title,
             b.Listing.Photos.OrderBy(p => p.Order).Select(p => p.Url).FirstOrDefault(),
             b.GuestId, b.Guest.Name, b.Guest.AvatarUrl,
-            b.CheckIn, b.CheckOut, b.Guests, b.TotalPrice, b.Status, b.CreatedAt)));
+            b.CheckIn, b.CheckOut, b.Guests, b.TotalPrice, b.Status, b.CreatedAt,
+            reviewsByBookingId.GetValueOrDefault(b.Id))));
+    }
+
+    private async Task<Dictionary<Guid, ReviewResponse>> LoadReviewsByBookingIdAsync(IEnumerable<Guid> bookingIds)
+    {
+        return await db.Reviews
+            .Include(r => r.Author)
+            .Where(r => bookingIds.Contains(r.BookingId))
+            .ToDictionaryAsync(
+                r => r.BookingId,
+                r => new ReviewResponse(
+                    r.Id,
+                    r.ListingId,
+                    r.AuthorId,
+                    r.Author.Name,
+                    r.Author.AvatarUrl,
+                    r.Rating,
+                    r.Comment,
+                    r.CreatedAt
+                ));
     }
 
     [HttpGet("{id:guid}")]

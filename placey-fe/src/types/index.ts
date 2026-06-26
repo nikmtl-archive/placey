@@ -112,3 +112,20 @@ export interface HostProfile {
   avatarUrl: string | null
   createdAt: string
 }
+
+export interface Booking {
+  id: string
+  listingId: string
+  listingTitle: string
+  listingPhotoUrl: string | null
+  guestId: string
+  guestName: string
+  guestAvatarUrl: string | null
+  checkIn: string
+  checkOut: string
+  guests: number
+  totalPrice: number
+  status: string
+  createdAt: string
+  review: Review | null
+}

@@ -1,10 +1,36 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import UpcomingView from '@/components/Upcoming.vue'
-import PastView from '@/components/Past.vue'
+import { computed, onMounted, ref } from 'vue'
+import type { Booking } from '@/types'
+import { useBookingStore } from '@/stores/useBookingStore'
+import Bookings from '@/components/Bookings.vue'
 
+const bookingStore = useBookingStore()
 const isLoading = ref(false)
-const activeTab = ref('upcoming')
+const activeTab = ref<'upcoming' | 'past'>('upcoming')
+
+const bookings = computed<Booking[]>(() => bookingStore.bookings)
+
+function isUpcoming(booking: Booking) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const checkout = new Date(booking.checkOut)
+  return checkout >= today && booking.status.toLowerCase() !== 'cancelled'
+}
+
+const upcomingBookings = computed(() => bookings.value.filter((booking) => isUpcoming(booking)))
+const pastBookings = computed(() =>
+  bookings.value.filter((booking) => booking.status.toLowerCase() === 'completed'),
+)
+const errorMessage = computed(() => bookingStore.error)
+
+onMounted(async () => {
+  isLoading.value = true
+  try {
+    await bookingStore.fetchMyBookings()
+  } finally {
+    isLoading.value = false
+  }
+})
 </script>
 
 <template>
@@ -12,6 +38,10 @@ const activeTab = ref('upcoming')
     <div class="mb-8">
       <h1 class="font-serif text-3xl font-semibold text-ink mb-1">My bookings</h1>
       <p class="text-sm text-muted">Manage your trips and write reviews</p>
+    </div>
+
+    <div v-if="errorMessage" class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 mb-4">
+      {{ errorMessage }}
     </div>
 
     <!-- Skeleton -->
@@ -40,7 +70,7 @@ const activeTab = ref('upcoming')
         class="flex h-5 w-5 items-center justify-center rounded-full  text-xs" 
         :class="activeTab === 'upcoming' ? 'bg-gray-900! text-gray-200!' : 'text-gray-500! bg-gray-200!'"
       >
-        2
+        {{ upcomingBookings.length }}
       </span>
 
       <div
@@ -60,7 +90,7 @@ const activeTab = ref('upcoming')
         class="flex h-5 w-5 items-center justify-center rounded-full text-xs"
         :class="activeTab === 'past' ? 'bg-gray-900! text-gray-200!' : 'text-gray-500! bg-gray-200!'"
       >
-        0
+        {{ pastBookings.length }}
       </span>
 
       <div
@@ -70,8 +100,14 @@ const activeTab = ref('upcoming')
     </button>
   </div>
 
-  <component
-    :is="activeTab === 'upcoming' ? UpcomingView : PastView"
+  <Bookings
+    v-if="activeTab === 'upcoming'"
+    :bookings="upcomingBookings"
+  />
+
+  <Bookings
+    v-else
+    :bookings="pastBookings"
   />
 </div>
 </div>

@@ -1,18 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import type { Booking } from '@/types'
 import { useAuthStore } from './useAuthStore'
 
-export interface BookingResponse {
+type BookingReviewFallback = {
   id: string
-  listingId: string
-  listingTitle: string
-  guestId: string
-  guestName: string
-  checkIn: string
-  checkOut: string
-  guests: number
-  totalPrice: number
-  status: string
+  rating: number
+  comment: string
   createdAt: string
 }
 
@@ -20,15 +14,64 @@ export const useBookingStore = defineStore('booking', () => {
   const authStore = useAuthStore()
 
   const isSubmitting = ref(false)
+  const isCancelling = ref(false)
+  const isRating = ref(false)
   const error = ref<string | null>(null)
-  const lastBooking = ref<BookingResponse | null>(null)
+  const bookings = ref<Booking[]>([])
+  const lastBooking = ref<Booking | null>(null)
+
+  async function fetchMyBookings(): Promise<Booking[]> {
+    error.value = null
+    try {
+      const res = await authStore.apiFetch('/api/users/me/bookings')
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
+      }
+
+      const data = await res.json()
+      bookings.value = Array.isArray(data) ? data : []
+
+      // Fallback hydration for environments where the embedded review is missing.
+      const completedWithoutReview = bookings.value.filter(
+        (booking) => booking.status === 'Completed' && !booking.review,
+      )
+
+      await Promise.all(
+        completedWithoutReview.map(async (booking) => {
+          const reviewRes = await authStore
+            .apiFetch(`/api/bookings/${booking.id}/review`)
+            .catch(() => null)
+
+          if (!reviewRes || !reviewRes.ok) return
+
+          const review = (await reviewRes.json()) as BookingReviewFallback
+          booking.review = {
+            id: review.id,
+            listingId: booking.listingId,
+            authorId: booking.guestId,
+            authorName: booking.guestName,
+            authorAvatarUrl: booking.guestAvatarUrl,
+            rating: review.rating,
+            comment: review.comment,
+            createdAt: review.createdAt,
+          }
+        }),
+      )
+
+      return bookings.value
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : 'Failed to load bookings'
+      throw e
+    }
+  }
 
   async function createBooking(
     listingId: string,
     checkIn: string,
     checkOut: string,
     guests: number,
-  ): Promise<BookingResponse> {
+  ): Promise<Booking> {
     isSubmitting.value = true
     error.value = null
     try {
@@ -51,5 +94,63 @@ export const useBookingStore = defineStore('booking', () => {
     }
   }
 
-  return { isSubmitting, error, lastBooking, createBooking }
+  async function cancelBooking(bookingId: string) {
+    isCancelling.value = true
+    error.value = null
+    try {
+      const res = await authStore.apiFetch(`/api/bookings/${bookingId}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
+      }
+
+      bookings.value = bookings.value.filter((booking) => booking.id !== bookingId)
+      if (lastBooking.value?.id === bookingId) lastBooking.value = null
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : 'Failed to cancel booking'
+      throw e
+    } finally {
+      isCancelling.value = false
+    }
+  }
+
+  async function rateBooking(bookingId: string, rating: number, comment: string) {
+    isRating.value = true
+    error.value = null
+    try {
+      const res = await authStore.apiFetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId, rating, comment }),
+      })
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
+      }
+
+      // Keep booking cards in sync so the new review appears on the right booking.
+      await fetchMyBookings()
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : 'Failed to submit review'
+      throw e
+    } finally {
+      isRating.value = false
+    }
+  }
+
+  return {
+    isSubmitting,
+    isCancelling,
+    isRating,
+    error,
+    bookings,
+    lastBooking,
+    fetchMyBookings,
+    createBooking,
+    cancelBooking,
+    rateBooking,
+  }
 })
