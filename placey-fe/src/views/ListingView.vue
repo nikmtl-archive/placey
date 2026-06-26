@@ -41,7 +41,7 @@ const favoritesStore = useFavoritesStore()
 const listingStore = useListingStore()
 const bookingStore = useBookingStore()
 const messagingStore = useMessagingStore()
-const { listing, isLoading, error, reviews, reviewsLoading, availability } =
+const { listing, isLoading, error, reviews, reviewsLoading, blockings } =
   storeToRefs(listingStore)
 
 const isStartingConversation = ref(false)
@@ -65,10 +65,7 @@ const isRangeBlocked = computed(() => {
   if (!checkIn.value || !checkOut.value || nights.value <= 0) return false
   const start = new Date(checkIn.value)
   const end = new Date(checkOut.value)
-  return availability.value.some((r) => {
-    if (!r.isBlocked) return false
-    return start <= new Date(r.endDate) && end >= new Date(r.startDate)
-  })
+  return blockings.value.some((b) => start <= new Date(b.endDate) && end >= new Date(b.startDate))
 })
 
 onMounted(async () => {
@@ -76,7 +73,7 @@ onMounted(async () => {
   listingStore.reset()
   await listingStore.fetchListing(id)
   listingStore.fetchReviews(id)
-  listingStore.fetchAvailability(id)
+  listingStore.fetchBlockings(id)
 })
 
 function scrollToReviews() {

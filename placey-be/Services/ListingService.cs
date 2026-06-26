@@ -139,35 +139,49 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
         await db.SaveChangesAsync();
     }
 
-    public async Task<List<AvailabilityResponse>> GetAvailabilityAsync(Guid listingId)
+    public async Task<List<BlockingResponse>> GetBlockingsAsync(Guid listingId)
     {
-        return await db.Availabilities
-            .Where(a => a.ListingId == listingId)
-            .OrderBy(a => a.StartDate)
-            .Select(a => new AvailabilityResponse(a.Id, a.StartDate, a.EndDate, a.IsBlocked))
+        return await db.ListingBlocks
+            .Where(b => b.ListingId == listingId)
+            .OrderBy(b => b.StartDate)
+            .Select(b => new BlockingResponse(b.Id, b.StartDate, b.EndDate))
             .ToListAsync();
     }
 
-    public async Task<AvailabilityResponse> SetAvailabilityAsync(Guid listingId, Guid requesterId, SetAvailabilityRequest request)
+    public async Task<BlockingResponse> AddBlockingAsync(Guid listingId, Guid requesterId, AddBlockingRequest request)
     {
         var listing = await db.Listings.FindAsync(listingId)
             ?? throw new KeyNotFoundException("Listing not found.");
 
         if (listing.HostId != requesterId)
-            throw new UnauthorizedAccessException("Only the host can set availability.");
+            throw new UnauthorizedAccessException("Only the host can block dates.");
 
-        var entry = new Availability
+        var block = new ListingBlock
         {
             ListingId = listingId,
             StartDate = request.StartDate,
             EndDate = request.EndDate,
-            IsBlocked = request.IsBlocked
         };
 
-        db.Availabilities.Add(entry);
+        db.ListingBlocks.Add(block);
         await db.SaveChangesAsync();
 
-        return new AvailabilityResponse(entry.Id, entry.StartDate, entry.EndDate, entry.IsBlocked);
+        return new BlockingResponse(block.Id, block.StartDate, block.EndDate);
+    }
+
+    public async Task DeleteBlockingAsync(Guid listingId, Guid blockingId, Guid requesterId)
+    {
+        var listing = await db.Listings.FindAsync(listingId)
+            ?? throw new KeyNotFoundException("Listing not found.");
+
+        if (listing.HostId != requesterId)
+            throw new UnauthorizedAccessException("Only the host can remove blockings.");
+
+        var block = await db.ListingBlocks.FirstOrDefaultAsync(b => b.Id == blockingId && b.ListingId == listingId)
+            ?? throw new KeyNotFoundException("Blocking not found.");
+
+        db.ListingBlocks.Remove(block);
+        await db.SaveChangesAsync();
     }
 
     public async Task<List<ListingPhotoResponse>> GetPhotosAsync(Guid listingId, Guid requesterId)

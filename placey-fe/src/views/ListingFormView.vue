@@ -173,63 +173,73 @@ onUnmounted(() => {
   for (const p of stagedPhotos.value) URL.revokeObjectURL(p.previewUrl)
 })
 
-// ── Availability (edit mode) ─────────────────────────────────────────────────
+// ── Blockings (edit mode) ────────────────────────────────────────────────────
 
-interface AvailabilityBlock { id: string; startDate: string; endDate: string; isBlocked: boolean }
-const availability = ref<AvailabilityBlock[]>([])
-const availLoading = ref(false)
-const availError = ref<string | null>(null)
-const availForm = ref({ startDate: '', endDate: '', isBlocked: true })
-const isSavingAvail = ref(false)
-const availSaved = ref(false)
-const availFormError = ref<string | null>(null)
+interface BlockingItem { id: string; startDate: string; endDate: string }
+const blockings = ref<BlockingItem[]>([])
+const blockingsLoading = ref(false)
+const blockingsError = ref<string | null>(null)
+const blockingForm = ref({ startDate: '', endDate: '' })
+const isSavingBlocking = ref(false)
+const blockingSaved = ref(false)
+const blockingFormError = ref<string | null>(null)
 
-async function fetchAvailability() {
-  availLoading.value = true
-  availError.value = null
+async function fetchBlockings() {
+  blockingsLoading.value = true
+  blockingsError.value = null
   try {
-    const res = await authStore.apiFetch(`/api/listings/${listingId}/availability`)
+    const res = await authStore.apiFetch(`/api/listings/${listingId}/blockings`)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    availability.value = await res.json()
+    blockings.value = await res.json()
   } catch (e: unknown) {
-    availError.value = e instanceof Error ? e.message : 'Failed to load availability'
+    blockingsError.value = e instanceof Error ? e.message : 'Failed to load blockings'
   } finally {
-    availLoading.value = false
+    blockingsLoading.value = false
   }
 }
 
-async function saveAvailability() {
-  if (!availForm.value.startDate || !availForm.value.endDate) {
-    availFormError.value = 'Please select start and end dates'
+async function addBlocking() {
+  if (!blockingForm.value.startDate || !blockingForm.value.endDate) {
+    blockingFormError.value = 'Please select start and end dates'
     return
   }
-  if (availForm.value.startDate > availForm.value.endDate) {
-    availFormError.value = 'Start date must be before end date'
+  if (blockingForm.value.startDate > blockingForm.value.endDate) {
+    blockingFormError.value = 'Start date must be before end date'
     return
   }
-  isSavingAvail.value = true
-  availSaved.value = false
-  availFormError.value = null
+  isSavingBlocking.value = true
+  blockingSaved.value = false
+  blockingFormError.value = null
   try {
-    const res = await authStore.apiFetch(`/api/listings/${listingId}/availability`, {
-      method: 'PATCH',
+    const res = await authStore.apiFetch(`/api/listings/${listingId}/blockings`, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(availForm.value),
+      body: JSON.stringify(blockingForm.value),
     })
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))
       throw new Error(err.detail ?? err.message ?? `HTTP ${res.status}`)
     }
-    const block: AvailabilityBlock = await res.json()
-    const existing = availability.value.findIndex(a => a.id === block.id)
-    if (existing !== -1) availability.value[existing] = block
-    else availability.value.push(block)
-    availSaved.value = true
-    availForm.value = { startDate: '', endDate: '', isBlocked: true }
+    const block: BlockingItem = await res.json()
+    blockings.value.push(block)
+    blockingSaved.value = true
+    blockingForm.value = { startDate: '', endDate: '' }
   } catch (e: unknown) {
-    availFormError.value = e instanceof Error ? e.message : 'Failed to save'
+    blockingFormError.value = e instanceof Error ? e.message : 'Failed to save'
   } finally {
-    isSavingAvail.value = false
+    isSavingBlocking.value = false
+  }
+}
+
+async function removeBlocking(blockingId: string) {
+  try {
+    const res = await authStore.apiFetch(`/api/listings/${listingId}/blockings/${blockingId}`, {
+      method: 'DELETE',
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    blockings.value = blockings.value.filter(b => b.id !== blockingId)
+  } catch {
+    // ignore
   }
 }
 
@@ -363,7 +373,7 @@ function formatDate(d: string) {
 onMounted(async () => {
   if (isEdit) {
     await fetchListing()
-    await Promise.all([fetchPhotos(), fetchAvailability()])
+    await Promise.all([fetchPhotos(), fetchBlockings()])
   }
 })
 </script>
@@ -707,67 +717,50 @@ onMounted(async () => {
         </div>
       </section>
 
-      <!-- Availability (edit mode only) -->
+      <!-- Blockings (edit mode only) -->
       <template v-if="isEdit">
         <div class="border-t border-divider-light" />
 
         <section>
-          <h2 class="text-xs font-semibold text-muted uppercase tracking-widest mb-4">Availability</h2>
+          <h2 class="text-xs font-semibold text-muted uppercase tracking-widest mb-4">Blocked dates</h2>
 
           <div class="bg-cream rounded-2xl p-5 mb-5">
-            <div class="grid grid-cols-2 gap-3 mb-3">
+            <div class="grid grid-cols-2 gap-3 mb-4">
               <div>
                 <label class="block text-xs text-muted mb-1">Start date</label>
-                <input v-model="availForm.startDate" type="date" class="w-full border border-divider bg-white rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-ink/40 transition-colors" />
+                <input v-model="blockingForm.startDate" type="date" class="w-full border border-divider bg-white rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-ink/40 transition-colors" />
               </div>
               <div>
                 <label class="block text-xs text-muted mb-1">End date</label>
-                <input v-model="availForm.endDate" type="date" class="w-full border border-divider bg-white rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-ink/40 transition-colors" />
+                <input v-model="blockingForm.endDate" type="date" class="w-full border border-divider bg-white rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-ink/40 transition-colors" />
               </div>
             </div>
 
-            <div class="flex items-center gap-4 mb-4">
-              <label
-                v-for="opt in [{ label: 'Blocked', value: true }, { label: 'Available', value: false }]"
-                :key="String(opt.value)"
-                class="flex items-center gap-2 cursor-pointer"
-              >
-                <div
-                  class="w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors"
-                  :class="availForm.isBlocked === opt.value ? 'border-ink' : 'border-divider'"
-                  @click="availForm.isBlocked = opt.value"
-                >
-                  <div v-if="availForm.isBlocked === opt.value" class="w-2 h-2 rounded-full bg-ink" />
-                </div>
-                <span class="text-sm" :class="availForm.isBlocked === opt.value ? 'text-ink' : 'text-muted'">{{ opt.label }}</span>
-              </label>
-            </div>
-
-            <p v-if="availFormError" class="text-xs text-rose-600 mb-3">{{ availFormError }}</p>
-            <p v-if="availSaved" class="text-xs text-emerald-600 mb-3">Availability updated.</p>
+            <p v-if="blockingFormError" class="text-xs text-rose-600 mb-3">{{ blockingFormError }}</p>
+            <p v-if="blockingSaved" class="text-xs text-emerald-600 mb-3">Blocking added</p>
             <button
               class="w-full text-sm font-medium text-white bg-ink py-2.5 rounded-xl hover:bg-black transition-colors disabled:opacity-50 cursor-pointer"
-              :disabled="isSavingAvail"
-              @click="saveAvailability"
-            >{{ isSavingAvail ? 'Saving…' : 'Save availability' }}</button>
+              :disabled="isSavingBlocking"
+              @click="addBlocking"
+            >{{ isSavingBlocking ? 'Saving…' : 'Block dates' }}</button>
           </div>
 
-          <div v-if="availLoading" class="space-y-2">
+          <div v-if="blockingsLoading" class="space-y-2">
             <div v-for="n in 3" :key="n" class="h-12 animate-pulse bg-divider-light rounded-xl" />
           </div>
-          <div v-else-if="availError" class="text-xs text-rose-600">{{ availError }}</div>
-          <div v-else-if="availability.length === 0" class="text-sm text-muted">No availability rules set.</div>
+          <div v-else-if="blockingsError" class="text-xs text-rose-600">{{ blockingsError }}</div>
+          <div v-else-if="blockings.length === 0" class="text-sm text-muted">No dates blocked.</div>
           <div v-else class="space-y-2">
             <div
-              v-for="block in availability"
+              v-for="block in blockings"
               :key="block.id"
               class="flex items-center justify-between gap-4 border border-divider-light rounded-xl px-4 py-3"
             >
               <p class="text-sm text-ink">{{ formatDate(block.startDate) }} – {{ formatDate(block.endDate) }}</p>
-              <span
-                class="text-xs font-medium px-2.5 py-1 rounded-full"
-                :class="block.isBlocked ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'"
-              >{{ block.isBlocked ? 'Blocked' : 'Available' }}</span>
+              <button
+                class="text-xs text-rose-600 hover:text-rose-700 transition-colors cursor-pointer"
+                @click="removeBlocking(block.id)"
+              >Remove</button>
             </div>
           </div>
         </section>

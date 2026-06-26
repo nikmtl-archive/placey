@@ -156,13 +156,10 @@ public static class DbSeeder
             },
         };
 
-        var availabilities = new List<Availability>
+        var blockings = new List<ListingBlock>
         {
-            new() { Id = new Guid("44444444-0000-0000-0000-000000000001"), ListingId = Listing1Id, StartDate = new DateOnly(2026, 6, 1), EndDate = new DateOnly(2026, 12, 31), IsBlocked = false },
-            new() { Id = new Guid("44444444-0000-0000-0000-000000000002"), ListingId = Listing2Id, StartDate = new DateOnly(2026, 6, 1), EndDate = new DateOnly(2026, 12, 31), IsBlocked = false },
-            new() { Id = new Guid("44444444-0000-0000-0000-000000000003"), ListingId = Listing3Id, StartDate = new DateOnly(2026, 6, 1), EndDate = new DateOnly(2026, 12, 31), IsBlocked = false },
-            new() { Id = new Guid("44444444-0000-0000-0000-000000000004"), ListingId = Listing4Id, StartDate = new DateOnly(2026, 6, 1), EndDate = new DateOnly(2026, 12, 31), IsBlocked = false },
-            new() { Id = new Guid("44444444-0000-0000-0000-000000000005"), ListingId = Listing5Id, StartDate = new DateOnly(2026, 6, 1), EndDate = new DateOnly(2026, 12, 31), IsBlocked = false },
+            new() { Id = new Guid("44444444-0000-0000-0000-000000000001"), ListingId = Listing1Id, StartDate = new DateOnly(2026, 8, 1), EndDate = new DateOnly(2026, 8, 15) },
+            new() { Id = new Guid("44444444-0000-0000-0000-000000000002"), ListingId = Listing2Id, StartDate = new DateOnly(2026, 9, 10), EndDate = new DateOnly(2026, 9, 20) },
         };
 
         var bookings = new List<Booking>
@@ -238,7 +235,7 @@ public static class DbSeeder
 
         await db.Users.AddRangeAsync(users);
         await db.Listings.AddRangeAsync(listings);
-        await db.Availabilities.AddRangeAsync(availabilities);
+        await db.ListingBlocks.AddRangeAsync(blockings);
         await db.Bookings.AddRangeAsync(bookings);
         await db.Reviews.AddRangeAsync(reviews);
         await db.Favorites.AddRangeAsync(favorites);

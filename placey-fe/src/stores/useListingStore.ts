@@ -1,15 +1,15 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { Listing, Review, AvailabilityRange } from '@/types'
+import type { Listing, Review, ListingBlock } from '@/types'
 
 export const useListingStore = defineStore('listing', () => {
   const listing = ref<Listing | null>(null)
   const reviews = ref<Review[]>([])
-  const availability = ref<AvailabilityRange[]>([])
+  const blockings = ref<ListingBlock[]>([])
 
   const isLoading = ref(false)
   const reviewsLoading = ref(false)
-  const availabilityLoading = ref(false)
+  const blockingsLoading = ref(false)
 
   const error = ref<string | null>(null)
 
@@ -42,37 +42,37 @@ export const useListingStore = defineStore('listing', () => {
     }
   }
 
-  async function fetchAvailability(id: string) {
-    availabilityLoading.value = true
+  async function fetchBlockings(id: string) {
+    blockingsLoading.value = true
     try {
-      const res = await fetch(`/api/listings/${id}/availability`)
+      const res = await fetch(`/api/listings/${id}/blockings`)
       if (!res.ok) throw new Error()
-      availability.value = await res.json()
+      blockings.value = await res.json()
     } catch {
-      availability.value = []
+      blockings.value = []
     } finally {
-      availabilityLoading.value = false
+      blockingsLoading.value = false
     }
   }
 
   function reset() {
     listing.value = null
     reviews.value = []
-    availability.value = []
+    blockings.value = []
     error.value = null
   }
 
   return {
     listing,
     reviews,
-    availability,
+    blockings,
     isLoading,
     reviewsLoading,
-    availabilityLoading,
+    blockingsLoading,
     error,
     fetchListing,
     fetchReviews,
-    fetchAvailability,
+    fetchBlockings,
     reset,
   }
 })
