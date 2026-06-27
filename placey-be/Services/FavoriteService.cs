@@ -11,7 +11,7 @@ public class FavoriteService(AppDbContext db) : IFavoriteService
     public async Task<List<ListingResponse>> GetFavoritesAsync(Guid userId)
     {
         return await db.Favorites
-            .Where(f => f.UserId == userId)
+            .Where(f => f.UserId == userId && !f.Listing.IsDeleted)
             .Include(f => f.Listing).ThenInclude(l => l.Host)
             .Include(f => f.Listing).ThenInclude(l => l.Photos)
             .Include(f => f.Listing).ThenInclude(l => l.Reviews)
@@ -21,7 +21,7 @@ public class FavoriteService(AppDbContext db) : IFavoriteService
 
     public async Task AddAsync(Guid userId, Guid listingId)
     {
-        if (!await db.Listings.AnyAsync(l => l.Id == listingId))
+        if (!await db.Listings.AnyAsync(l => l.Id == listingId && !l.IsDeleted))
             throw new KeyNotFoundException("Listing not found.");
 
         if (await db.Favorites.AnyAsync(f => f.UserId == userId && f.ListingId == listingId))
