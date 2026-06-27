@@ -271,4 +271,187 @@ public class ListingServiceTests
         Assert.Equal(2, result.Count);
         Assert.True(result[0].StartDate < result[1].StartDate);
     }
+
+    [Fact]
+    public async Task GetBlockings_IncludesConfirmedBookings()
+    {
+        var db = DbHelper.CreateDb(nameof(GetBlockings_IncludesConfirmedBookings));
+        var host = new User { Name = "Host", Email = "host@test.com", PasswordHash = "x" };
+        var guest = new User { Name = "Guest", Email = "guest@test.com", PasswordHash = "x" };
+        db.Users.AddRange(host, guest);
+        db.SaveChanges();
+        var svc = new ListingService(db);
+        var listing = await svc.CreateAsync(host.Id, DefaultRequest());
+
+        db.Bookings.Add(new Booking
+        {
+            ListingId = listing.Id, GuestId = guest.Id,
+            CheckIn = Today.AddDays(2), CheckOut = Today.AddDays(5),
+            Guests = 1, TotalPrice = 300m, Status = BookingStatus.Confirmed
+        });
+        db.SaveChanges();
+
+        var result = await svc.GetBlockingsAsync(listing.Id);
+
+        Assert.Single(result);
+        Assert.Equal(Today.AddDays(2), result[0].StartDate);
+    }
+
+    [Fact]
+    public async Task GetBlockings_ExcludesCancelledBookings()
+    {
+        var db = DbHelper.CreateDb(nameof(GetBlockings_ExcludesCancelledBookings));
+        var host = new User { Name = "Host", Email = "host@test.com", PasswordHash = "x" };
+        var guest = new User { Name = "Guest", Email = "guest@test.com", PasswordHash = "x" };
+        db.Users.AddRange(host, guest);
+        db.SaveChanges();
+        var svc = new ListingService(db);
+        var listing = await svc.CreateAsync(host.Id, DefaultRequest());
+
+        db.Bookings.Add(new Booking
+        {
+            ListingId = listing.Id, GuestId = guest.Id,
+            CheckIn = Today.AddDays(2), CheckOut = Today.AddDays(5),
+            Guests = 1, TotalPrice = 300m, Status = BookingStatus.Cancelled
+        });
+        db.SaveChanges();
+
+        var result = await svc.GetBlockingsAsync(listing.Id);
+
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task DeleteBlocking_HostCanDelete()
+    {
+        var (svc, host) = Setup(nameof(DeleteBlocking_HostCanDelete));
+        var listing = await svc.CreateAsync(host.Id, DefaultRequest());
+        var blocking = await svc.AddBlockingAsync(listing.Id, host.Id, new AddBlockingRequest(Today, Today.AddDays(3)));
+
+        await svc.DeleteBlockingAsync(listing.Id, blocking.Id, host.Id);
+
+        var result = await svc.GetBlockingsAsync(listing.Id);
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task DeleteBlocking_NonHost_Throws()
+    {
+        var (svc, host) = Setup(nameof(DeleteBlocking_NonHost_Throws));
+        var listing = await svc.CreateAsync(host.Id, DefaultRequest());
+        var blocking = await svc.AddBlockingAsync(listing.Id, host.Id, new AddBlockingRequest(Today, Today.AddDays(3)));
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => svc.DeleteBlockingAsync(listing.Id, blocking.Id, Guid.NewGuid()));
+    }
+
+    [Fact]
+    public async Task DeleteBlocking_NotFound_Throws()
+    {
+        var (svc, host) = Setup(nameof(DeleteBlocking_NotFound_Throws));
+        var listing = await svc.CreateAsync(host.Id, DefaultRequest());
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => svc.DeleteBlockingAsync(listing.Id, Guid.NewGuid(), host.Id));
+    }
+
+    [Fact]
+    public async Task Delete_CancelsActiveBookings()
+    {
+        var db = DbHelper.CreateDb(nameof(Delete_CancelsActiveBookings));
+        var host = new User { Name = "Host", Email = "host@test.com", PasswordHash = "x" };
+        var guest = new User { Name = "Guest", Email = "guest@test.com", PasswordHash = "x" };
+        db.Users.AddRange(host, guest);
+        db.SaveChanges();
+        var svc = new ListingService(db);
+        var listing = await svc.CreateAsync(host.Id, DefaultRequest());
+        var booking = new Booking
+        {
+            ListingId = listing.Id, GuestId = guest.Id,
+            CheckIn = Today.AddDays(1), CheckOut = Today.AddDays(5),
+            Guests = 2, TotalPrice = 600m, Status = BookingStatus.Confirmed
+        };
+        db.Bookings.Add(booking);
+        db.SaveChanges();
+
+        await svc.DeleteAsync(listing.Id, host.Id);
+
+        var updated = db.Bookings.Find(booking.Id)!;
+        Assert.Equal(BookingStatus.Cancelled, updated.Status);
+    }
+
+    [Fact]
+    public async Task Search_DateRangeFilter_ExcludesBookedListings()
+    {
+        var db = DbHelper.CreateDb(nameof(Search_DateRangeFilter_ExcludesBookedListings));
+        var host = new User { Name = "Host", Email = "host@test.com", PasswordHash = "x" };
+        var guest = new User { Name = "Guest", Email = "guest@test.com", PasswordHash = "x" };
+        db.Users.AddRange(host, guest);
+        db.SaveChanges();
+        var svc = new ListingService(db);
+        var booked = await svc.CreateAsync(host.Id, DefaultRequest("Berlin", "Germany"));
+        var free = await svc.CreateAsync(host.Id, DefaultRequest("Vienna", "Austria"));
+
+        db.Bookings.Add(new Booking
+        {
+            ListingId = booked.Id, GuestId = guest.Id,
+            CheckIn = Today.AddDays(2), CheckOut = Today.AddDays(6),
+            Guests = 1, TotalPrice = 600m, Status = BookingStatus.Confirmed
+        });
+        db.SaveChanges();
+
+        var (items, total) = await svc.SearchAsync(new ListingSearchParams(
+            null, Today.AddDays(3), Today.AddDays(5), null));
+
+        Assert.Equal(1, total);
+        Assert.Equal(free.Id, items[0].Id);
+    }
+
+    [Fact]
+    public async Task GetPhotos_HostCanView()
+    {
+        var (svc, host) = Setup(nameof(GetPhotos_HostCanView));
+        var listing = await svc.CreateAsync(host.Id, DefaultRequest());
+
+        var photos = await svc.GetPhotosAsync(listing.Id, host.Id);
+
+        Assert.Empty(photos);
+    }
+
+    [Fact]
+    public async Task GetPhotos_NonHost_Throws()
+    {
+        var (svc, host) = Setup(nameof(GetPhotos_NonHost_Throws));
+        var listing = await svc.CreateAsync(host.Id, DefaultRequest());
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => svc.GetPhotosAsync(listing.Id, Guid.NewGuid()));
+    }
+
+    [Fact]
+    public async Task DeletePhoto_NotFound_Throws()
+    {
+        var (svc, host) = Setup(nameof(DeletePhoto_NotFound_Throws));
+        var listing = await svc.CreateAsync(host.Id, DefaultRequest());
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => svc.DeletePhotoAsync(listing.Id, Guid.NewGuid(), host.Id));
+    }
+
+    [Fact]
+    public async Task DeletePhoto_NonHost_Throws()
+    {
+        var db = DbHelper.CreateDb(nameof(DeletePhoto_NonHost_Throws));
+        var host = new User { Name = "Host", Email = "host@test.com", PasswordHash = "x" };
+        db.Users.Add(host);
+        db.SaveChanges();
+        var svc = new ListingService(db);
+        var listing = await svc.CreateAsync(host.Id, DefaultRequest());
+        var photo = new ListingPhoto { ListingId = listing.Id, Url = "/api/listing-photos/test.jpg", Order = 0 };
+        db.ListingPhotos.Add(photo);
+        db.SaveChanges();
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => svc.DeletePhotoAsync(listing.Id, photo.Id, Guid.NewGuid()));
+    }
 }
