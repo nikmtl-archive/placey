@@ -2,11 +2,6 @@ name: Backend CI
 
 on:
   pull_request:
-    paths:
-      - 'placey-be/**'
-      - 'placey-be.Tests/**'
-      - 'placey.sln'
-      - '.github/workflows/be-ci.yml'
 
 jobs:
   build-and-check:

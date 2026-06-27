@@ -99,6 +99,31 @@ If not trivial, include at a minimum:
 
 ---
 
+## Branch protection (`main`)
+
+`main` is protected. GitHub enforces the following on every PR targeting it:
+
+| Rule | Setting |
+|---|---|
+| Pull request required | Yes — direct pushes to `main` are blocked |
+| Required approvals | 1 |
+| Dismiss stale reviews on new commits | Yes |
+| Status checks must pass | Yes — both CI jobs must be green (see [CI checks](#ci-checks)) |
+| Branch must be up to date before merging | Yes |
+| Force pushes | Blocked |
+| Branch deletion | Blocked |
+
+**Required status checks** (must be added in GitHub after the first PR runs the workflows):
+- `Lint, Format & Type-check` — from `fe-ci.yml`
+- `Build, Format Check & Test` — from `be-ci.yml`
+
+> Both workflows run on every PR regardless of which files changed.
+
+**Merge strategy:** squash or rebase only — merge commits are disabled to keep history linear.  
+**Head branches** are deleted automatically after merge.
+
+---
+
 ## CI checks
 
 Two GitHub Actions workflows run on every PR. Both must be green before merging.
