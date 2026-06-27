@@ -117,6 +117,8 @@ If not trivial, include at a minimum:
 - `Lint, Format & Type-check` — from `fe-ci.yml`
 - `Build, Format Check & Test` — from `be-ci.yml`
 
+> Both workflows now run on every PR but skip the expensive steps when no relevant files changed. The status check is always reported so docs-only PRs are not blocked.
+
 **Merge strategy:** squash or rebase only — merge commits are disabled to keep history linear.  
 **Head branches** are deleted automatically after merge.
 

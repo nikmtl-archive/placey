@@ -2,16 +2,30 @@ name: Backend CI
 
 on:
   pull_request:
-    paths:
-      - 'placey-be/**'
-      - 'placey-be.Tests/**'
-      - 'placey.sln'
-      - '.github/workflows/be-ci.yml'
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      be: ${{ steps.filter.outputs.be }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            be:
+              - 'placey-be/**'
+              - 'placey-be.Tests/**'
+              - 'placey.sln'
+              - '.github/workflows/be-ci.yml'
+
   build-and-check:
     name: Build, Format Check & Test
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.be == 'true'
 
     steps:
       - uses: actions/checkout@v4

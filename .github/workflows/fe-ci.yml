@@ -2,18 +2,32 @@ name: Frontend CI
 
 on:
   pull_request:
-    paths:
-      - 'placey-fe/**'
-      - '.github/workflows/fe-ci.yml'
-
-defaults:
-  run:
-    working-directory: placey-fe
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      fe: ${{ steps.filter.outputs.fe }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            fe:
+              - 'placey-fe/**'
+              - '.github/workflows/fe-ci.yml'
+
   lint-format-typecheck:
     name: Lint, Format & Type-check
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.fe == 'true'
+
+    defaults:
+      run:
+        working-directory: placey-fe
 
     steps:
       - uses: actions/checkout@v4
