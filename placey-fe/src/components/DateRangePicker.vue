@@ -252,7 +252,7 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside))
     <Transition name="picker-popup">
       <div
         v-if="open"
-        class="absolute top-[calc(100%+8px)] left-1/2 -translate-x-1/2 bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.14),0_0_0_1px_rgba(0,0,0,0.06)] z-50 p-5"
+        class="absolute top-[calc(100%+8px)] left-1/2 -translate-x-1/2 bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.14),0_0_0_1px_rgba(0,0,0,0.06)] z-50 p-4 sm:p-5 w-[min(calc(100vw-2rem),480px)] sm:w-auto"
       >
         <div class="flex items-center justify-between mb-4 px-1">
           <p class="text-sm font-semibold text-ink">
@@ -269,8 +269,8 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside))
         </div>
 
         <div class="flex gap-6">
-          <!-- Left month -->
-          <div class="w-55">
+          <!-- Left month (always shown) -->
+          <div class="w-full sm:w-55">
             <div class="flex items-center justify-between mb-3">
               <button
                 type="button"
@@ -282,7 +282,15 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside))
               <span class="text-sm font-semibold text-ink"
                 >{{ MONTHS[calendarMonth] }} {{ calendarYear }}</span
               >
-              <div class="w-7" />
+              <!-- On mobile show the next arrow here; on desktop it moves to the right month -->
+              <button
+                type="button"
+                class="sm:hidden p-1.5 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                @click="nextCal"
+              >
+                <ChevronRight class="w-4 h-4 text-ink" :stroke-width="2" />
+              </button>
+              <div class="hidden sm:block w-7" />
             </div>
             <div class="grid grid-cols-7 gap-y-1">
               <div
@@ -334,10 +342,10 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside))
             </div>
           </div>
 
-          <div class="w-px bg-divider-light" />
+          <!-- Right month (desktop only) -->
+          <div class="hidden sm:block w-px bg-divider-light" />
 
-          <!-- Right month -->
-          <div class="w-55">
+          <div class="hidden sm:block w-55">
             <div class="flex items-center justify-between mb-3">
               <div class="w-7" />
               <span class="text-sm font-semibold text-ink"

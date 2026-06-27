@@ -15,12 +15,12 @@ function select(id: string) {
 
 <template>
   <div class="border-b border-divider-light bg-white">
-    <div class="max-w-7xl mx-auto px-10 overflow-x-auto scrollbar-hide">
+    <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-10 overflow-x-auto scrollbar-hide">
       <div class="flex gap-0.5 py-2 w-max min-w-full justify-center">
         <button
           v-for="cat in categories"
           :key="cat.id"
-          class="relative flex flex-col items-center gap-1.5 px-5 py-2.5 rounded-xl transition-all duration-150 cursor-pointer"
+          class="relative flex flex-col items-center gap-1.5 px-3 sm:px-5 py-2.5 rounded-xl transition-all duration-150 cursor-pointer"
           :class="
             modelValue === cat.id ? 'text-ink' : 'text-ink/40 hover:text-ink/70 hover:bg-black/3'
           "

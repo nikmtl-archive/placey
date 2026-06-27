@@ -86,7 +86,7 @@ function initials(name: string): string {
 <template>
   <div
     class="flex flex-col border border-divider rounded-3xl bg-white overflow-hidden shadow-[0_1px_8px_rgba(0,0,0,0.05)]"
-    style="height: calc(100vh - 12rem)"
+    style="height: calc(100dvh - 12rem)"
   >
     <!-- Header -->
     <div class="flex items-center gap-3 px-5 py-4 border-b border-divider shrink-0">

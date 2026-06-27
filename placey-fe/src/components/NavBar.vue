@@ -61,7 +61,7 @@ async function handleLogout() {
     class="sticky top-0 z-50 bg-white transition-shadow duration-200"
     :class="scrolled ? 'shadow-[0_1px_12px_rgba(0,0,0,0.08)]' : 'border-b border-divider-light'"
   >
-    <div class="max-w-7xl mx-auto px-10 h-16 flex items-center justify-between gap-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between gap-4 sm:gap-6">
       <RouterLink
         to="/"
         class="font-serif text-2xl font-semibold text-ink tracking-tight shrink-0 select-none"
@@ -91,7 +91,7 @@ async function handleLogout() {
           <RouterLink
             v-if="!authStore.isHost"
             to="/bookings"
-            class="text-sm font-medium text-ink/70 hover:text-ink transition-colors px-1"
+            class="hidden sm:block text-sm font-medium text-ink/70 hover:text-ink transition-colors px-1"
           >
             My Bookings
           </RouterLink>
@@ -100,7 +100,7 @@ async function handleLogout() {
           <RouterLink
             v-if="authStore.isHost"
             to="/host-dashboard"
-            class="text-sm font-medium text-ink/70 hover:text-ink transition-colors px-1"
+            class="hidden sm:block text-sm font-medium text-ink/70 hover:text-ink transition-colors px-1"
           >
             Host Dashboard
           </RouterLink>
@@ -109,7 +109,7 @@ async function handleLogout() {
         <RouterLink
           v-if="!authStore.isLoggedIn"
           to="/become-a-host"
-          class="text-sm font-medium text-ink px-3.5 py-2 rounded-full transition-colors"
+          class="hidden sm:block text-sm font-medium text-ink px-3.5 py-2 rounded-full transition-colors"
         >
           Become a Host
         </RouterLink>

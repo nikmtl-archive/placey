@@ -489,7 +489,7 @@ onMounted(async () => {
             />
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-ink mb-1.5">Category</label>
               <div class="relative">
@@ -548,7 +548,7 @@ onMounted(async () => {
       <section>
         <h2 class="text-xs font-semibold text-muted uppercase tracking-widest mb-4">Location</h2>
         <div class="space-y-4">
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-ink mb-1.5"
                 >City <span class="text-rose-500">*</span></label
