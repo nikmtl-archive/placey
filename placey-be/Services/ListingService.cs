@@ -292,7 +292,7 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
         var photo = new ListingPhoto
         {
             ListingId = listingId,
-            Url = $"/listing-photos/{filename}",
+            Url = $"/api/listing-photos/{filename}",
             Order = order,
         };
 
@@ -317,10 +317,7 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
             ) ?? throw new KeyNotFoundException("Photo not found.");
 
         var webRoot = env?.WebRootPath ?? "wwwroot";
-        var physicalPath = Path.Combine(
-            webRoot,
-            photo.Url.TrimStart('/').Replace('/', Path.DirectorySeparatorChar)
-        );
+        var physicalPath = Path.Combine(webRoot, "listing-photos", Path.GetFileName(photo.Url));
         if (File.Exists(physicalPath))
             File.Delete(physicalPath);
 
