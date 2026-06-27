@@ -30,6 +30,8 @@ services:
       - Jwt__Secret=${JWT_SECRET}
       - Jwt__Issuer=placey
       - Jwt__Audience=placey
+    volumes:
+      - uploads:/app/wwwroot
     depends_on:
       postgres:
         condition: service_healthy
@@ -44,3 +46,4 @@ services:
 
 volumes:
   postgres_data:
+  uploads:

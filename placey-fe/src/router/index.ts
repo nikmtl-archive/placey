@@ -16,7 +16,7 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: () => import('@/views/HomeView.vue'),
-      meta: { title: 'Placey – Find your next escape' },
+      meta: { title: 'Placey - Find your next escape' },
     },
 
     // Listings
@@ -24,13 +24,13 @@ const router = createRouter({
       path: '/listing/:id',
       name: 'listing',
       component: () => import('@/views/ListingView.vue'),
-      meta: { title: 'Placey – Listing' },
+      meta: { title: 'Placey - Listing' },
     },
     {
       path: '/search',
       name: 'search',
       component: () => import('@/views/SearchView.vue'),
-      meta: { title: 'Placey – Search' },
+      meta: { title: 'Placey - Search' },
     },
 
     // Favorites
@@ -38,7 +38,7 @@ const router = createRouter({
       path: '/favorites',
       name: 'favorites',
       component: () => import('@/views/FavoritesView.vue'),
-      meta: { title: 'Placey – Favorites', requiresAuth: true },
+      meta: { title: 'Placey - Favorites', requiresAuth: true },
     },
 
     // Host profile
@@ -46,7 +46,7 @@ const router = createRouter({
       path: '/host/:id',
       name: 'host-profile',
       component: () => import('@/views/HostProfileView.vue'),
-      meta: { title: 'Placey – Host Profile' },
+      meta: { title: 'Placey - Host Profile' },
     },
 
     // Hosting
@@ -54,19 +54,19 @@ const router = createRouter({
       path: '/become-a-host',
       name: 'become-a-host',
       component: () => import('@/views/BecomeAHostView.vue'),
-      meta: { title: 'Placey – Become a Host' },
+      meta: { title: 'Placey - Become a Host' },
     },
     {
       path: '/listing/new',
       name: 'new-listing',
       component: () => import('@/views/ListingFormView.vue'),
-      meta: { title: 'Placey – Create listing', requiresAuth: true },
+      meta: { title: 'Placey - Create listing', requiresAuth: true },
     },
     {
       path: '/listing/:id/edit',
       name: 'edit-listing',
       component: () => import('@/views/ListingFormView.vue'),
-      meta: { title: 'Placey – Edit listing', requiresAuth: true },
+      meta: { title: 'Placey - Edit listing', requiresAuth: true },
     },
 
     // Bookings & hosting dashboard
@@ -74,13 +74,13 @@ const router = createRouter({
       path: '/bookings',
       name: 'bookings',
       component: () => import('@/views/BookingsView.vue'),
-      meta: { title: 'Placey – My Bookings', requiresAuth: true },
+      meta: { title: 'Placey - My Bookings', requiresAuth: true },
     },
     {
       path: '/host-dashboard',
       name: 'host-dashboard',
       component: () => import('@/views/HostDashboardView.vue'),
-      meta: { title: 'Placey – Host Dashboard', requiresAuth: true },
+      meta: { title: 'Placey - Host Dashboard', requiresAuth: true },
     },
 
     // Auth
@@ -88,13 +88,13 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('@/views/AuthView.vue'),
-      meta: { title: 'Placey – Log in' },
+      meta: { title: 'Placey - Log in' },
     },
     {
       path: '/register',
       name: 'register',
       component: () => import('@/views/AuthView.vue'),
-      meta: { title: 'Placey – Sign up' },
+      meta: { title: 'Placey - Sign up' },
     },
 
     // Info / placeholder
@@ -102,19 +102,19 @@ const router = createRouter({
       path: '/about',
       name: 'about',
       component: () => import('@/views/PlaceholderView.vue'),
-      meta: { title: 'Placey – About' },
+      meta: { title: 'Placey - About' },
     },
     {
       path: '/privacy',
       name: 'privacy',
       component: () => import('@/views/PlaceholderView.vue'),
-      meta: { title: 'Placey – Privacy' },
+      meta: { title: 'Placey - Privacy' },
     },
     {
       path: '/terms',
       name: 'terms',
       component: () => import('@/views/PlaceholderView.vue'),
-      meta: { title: 'Placey – Terms' },
+      meta: { title: 'Placey - Terms' },
     },
 
     // Settings
@@ -122,7 +122,7 @@ const router = createRouter({
       path: '/settings',
       name: 'settings',
       component: () => import('@/views/SettingsView.vue'),
-      meta: { title: 'Placey – Account Settings', requiresAuth: true },
+      meta: { title: 'Placey - Account Settings', requiresAuth: true },
     },
 
     // Messaging
@@ -130,7 +130,7 @@ const router = createRouter({
       path: '/messages/:id?',
       name: 'messages',
       component: () => import('@/views/MessagesView.vue'),
-      meta: { requiresAuth: true, title: 'Placey – Messages' },
+      meta: { requiresAuth: true, title: 'Placey -f Messages' },
     },
 
     // Catch-all

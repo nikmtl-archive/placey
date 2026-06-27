@@ -101,7 +101,7 @@ onUnmounted(() => {
       </div>
     </RouterLink>
 
-    <!-- Login hint popup — anchored below the heart button (top-right) -->
+    <!-- Login hint popup -->
     <Transition name="fade">
       <div
         v-if="showLoginHint"
