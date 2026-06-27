@@ -222,4 +222,47 @@ public class BookingServiceTests
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => svc.UpdateStatusAsync(booking.Id, guest.Id, BookingStatus.Completed));
     }
+
+    [Fact]
+    public async Task Create_BlockedDates_Throws()
+    {
+        var db = DbHelper.CreateDb(nameof(Create_BlockedDates_Throws));
+        var host = new User { Name = "Host", Email = "host@test.com", PasswordHash = "x" };
+        var guest = new User { Name = "Guest", Email = "guest@test.com", PasswordHash = "x" };
+        db.Users.AddRange(host, guest);
+        var listing = new Listing
+        {
+            HostId = host.Id, Title = "T", Description = "D", City = "C", Country = "C",
+            PricePerNight = 100m, MaxGuests = 4, IsInstantBook = true
+        };
+        db.Listings.Add(listing);
+        db.ListingBlocks.Add(new ListingBlock
+        {
+            ListingId = listing.Id, StartDate = Tomorrow, EndDate = NextWeek
+        });
+        db.SaveChanges();
+        var svc = new BookingService(db, new NullMessageService());
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => svc.CreateAsync(guest.Id, new CreateBookingRequest(listing.Id, Tomorrow, NextWeek, 2)));
+    }
+
+    [Fact]
+    public async Task UpdateStatus_NotFound_Throws()
+    {
+        var (svc, host, _, _) = Setup(nameof(UpdateStatus_NotFound_Throws));
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => svc.UpdateStatusAsync(Guid.NewGuid(), host.Id, BookingStatus.Completed));
+    }
+
+    [Fact]
+    public async Task Cancel_NotFound_Throws()
+    {
+        var (svc, _, guest, _) = Setup(nameof(Cancel_NotFound_Throws));
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => svc.CancelAsync(Guid.NewGuid(), guest.Id));
+    }
+
 }
