@@ -5,14 +5,13 @@ import type { LocationQuery } from 'vue-router'
 import { SlidersHorizontal, X } from '@lucide/vue'
 import ListingCard from '@/components/ListingCard.vue'
 import SearchBar from '@/components/SearchBar.vue'
+import SearchFilters from '@/components/SearchFilters.vue'
 import { useListingsStore } from '@/stores'
 import { storeToRefs } from 'pinia'
-import { useCategories } from '@/composables/useCategories'
 import type { ListingSearchParams, ListingCategory, PropertyType } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
-const { categories } = useCategories()
 const listingsStore = useListingsStore()
 const { listings, total, isLoading, error } = storeToRefs(listingsStore)
 const { fetchListings } = listingsStore
@@ -52,7 +51,6 @@ function applyFilter(partial: Partial<Record<string, string | number | undefined
   const next: Record<string, string> = {}
   const merged = { ...route.query, ...partial, page: 1 }
   for (const [k, v] of Object.entries(merged)) {
-    // coerce to string when checking emptiness to avoid comparing different primitive types
     if (v !== undefined && v !== null && String(v) !== '') next[k] = String(v)
   }
   router.replace({ query: next })
@@ -187,106 +185,20 @@ const drawerOpen = ref(false)
               Clear
             </button>
           </div>
-
-          <!-- Category -->
-          <div>
-            <p class="text-[11px] font-bold tracking-widest text-ink/40 uppercase mb-3">Category</p>
-            <div class="flex flex-wrap gap-1.5">
-              <button
-                v-for="cat in categories"
-                :key="cat.id"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[12px] font-medium transition-all cursor-pointer"
-                :class="
-                  activeCategory === cat.id
-                    ? 'bg-ink text-white border-ink'
-                    : 'bg-white text-ink border-divider hover:border-ink/40'
-                "
-                @click="toggleCategory(cat.id as ListingCategory)"
-              >
-                <component :is="cat.icon" class="w-3.5 h-3.5 shrink-0" :stroke-width="2" />{{
-                  cat.label
-                }}
-              </button>
-            </div>
-          </div>
-
-          <div class="h-px bg-divider-light" />
-
-          <!-- Property type -->
-          <div>
-            <p class="text-[11px] font-bold tracking-widest text-ink/40 uppercase mb-3">
-              Property type
-            </p>
-            <div class="flex gap-2">
-              <button
-                v-for="type in ['Apartment', 'House'] as PropertyType[]"
-                :key="type"
-                class="flex-1 py-2 rounded-xl border text-[13px] font-medium transition-all cursor-pointer"
-                :class="
-                  activePropertyType === type
-                    ? 'bg-ink text-white border-ink'
-                    : 'bg-white text-ink border-divider hover:border-ink/40'
-                "
-                @click="togglePropertyType(type)"
-              >
-                {{ type }}
-              </button>
-            </div>
-          </div>
-
-          <div class="h-px bg-divider-light" />
-
-          <!-- Bedrooms -->
-          <div>
-            <p class="text-[11px] font-bold tracking-widest text-ink/40 uppercase mb-3">
-              Min bedrooms
-            </p>
-            <div class="flex gap-2">
-              <button
-                v-for="n in [1, 2, 3, 4, 5]"
-                :key="n"
-                class="w-10 h-10 rounded-full border text-[13px] font-medium transition-all cursor-pointer"
-                :class="
-                  activeMinBedrooms === n
-                    ? 'bg-ink text-white border-ink'
-                    : 'bg-white text-ink border-divider hover:border-ink/40'
-                "
-                @click="toggleBedrooms(n)"
-              >
-                {{ n }}+
-              </button>
-            </div>
-          </div>
-
-          <div class="h-px bg-divider-light" />
-
-          <!-- Price -->
-          <div>
-            <p class="text-[11px] font-bold tracking-widest text-ink/40 uppercase mb-3">
-              Price per night
-            </p>
-            <div class="flex items-center gap-2">
-              <input
-                v-model="minPriceInput"
-                type="number"
-                placeholder="Min $"
-                min="0"
-                class="w-full border border-divider rounded-xl px-3 py-2 text-[13px] text-ink placeholder:text-dim outline-none focus:border-ink/40 transition-colors bg-white"
-                @blur="applyPrice"
-                @keydown.enter="applyPrice"
-              />
-              <span class="text-dim shrink-0 text-sm">–</span>
-              <input
-                v-model="maxPriceInput"
-                type="number"
-                placeholder="Max $"
-                min="0"
-                class="w-full border border-divider rounded-xl px-3 py-2 text-[13px] text-ink placeholder:text-dim outline-none focus:border-ink/40 transition-colors bg-white"
-                @blur="applyPrice"
-                @keydown.enter="applyPrice"
-              />
-            </div>
-          </div>
+          <SearchFilters
+            :active-category="activeCategory"
+            :active-property-type="activePropertyType"
+            :active-min-bedrooms="activeMinBedrooms"
+            :min-price-input="minPriceInput"
+            :max-price-input="maxPriceInput"
+            :compact="false"
+            @toggle-category="toggleCategory"
+            @toggle-property-type="togglePropertyType"
+            @toggle-bedrooms="toggleBedrooms"
+            @apply-price="applyPrice"
+            @update:min-price-input="minPriceInput = $event"
+            @update:max-price-input="maxPriceInput = $event"
+          />
         </div>
       </aside>
 
@@ -431,106 +343,21 @@ const drawerOpen = ref(false)
         </div>
 
         <!-- Scrollable filter content -->
-        <div class="overflow-y-auto flex-1 px-6 py-5 space-y-7">
-          <!-- Category -->
-          <div>
-            <p class="text-[11px] font-bold tracking-widest text-ink/40 uppercase mb-3">Category</p>
-            <div class="flex flex-wrap gap-2">
-              <button
-                v-for="cat in categories"
-                :key="cat.id"
-                class="flex items-center gap-1.5 px-3.5 py-2 rounded-full border text-sm font-medium transition-all cursor-pointer"
-                :class="
-                  activeCategory === cat.id
-                    ? 'bg-ink text-white border-ink'
-                    : 'bg-white text-ink border-divider'
-                "
-                @click="toggleCategory(cat.id as ListingCategory)"
-              >
-                <component :is="cat.icon" class="w-4 h-4 shrink-0" :stroke-width="2" />{{
-                  cat.label
-                }}
-              </button>
-            </div>
-          </div>
-
-          <div class="h-px bg-divider-light" />
-
-          <!-- Property type -->
-          <div>
-            <p class="text-[11px] font-bold tracking-widest text-ink/40 uppercase mb-3">
-              Property type
-            </p>
-            <div class="flex gap-3">
-              <button
-                v-for="type in ['Apartment', 'House'] as PropertyType[]"
-                :key="type"
-                class="flex-1 py-3 rounded-2xl border text-sm font-medium transition-all cursor-pointer"
-                :class="
-                  activePropertyType === type
-                    ? 'bg-ink text-white border-ink'
-                    : 'bg-white text-ink border-divider'
-                "
-                @click="togglePropertyType(type)"
-              >
-                {{ type }}
-              </button>
-            </div>
-          </div>
-
-          <div class="h-px bg-divider-light" />
-
-          <!-- Bedrooms -->
-          <div>
-            <p class="text-[11px] font-bold tracking-widest text-ink/40 uppercase mb-3">
-              Min bedrooms
-            </p>
-            <div class="flex gap-2.5">
-              <button
-                v-for="n in [1, 2, 3, 4, 5]"
-                :key="n"
-                class="w-12 h-12 rounded-full border text-sm font-medium transition-all cursor-pointer"
-                :class="
-                  activeMinBedrooms === n
-                    ? 'bg-ink text-white border-ink'
-                    : 'bg-white text-ink border-divider'
-                "
-                @click="toggleBedrooms(n)"
-              >
-                {{ n }}+
-              </button>
-            </div>
-          </div>
-
-          <div class="h-px bg-divider-light" />
-
-          <!-- Price -->
-          <div>
-            <p class="text-[11px] font-bold tracking-widest text-ink/40 uppercase mb-3">
-              Price per night
-            </p>
-            <div class="flex items-center gap-3">
-              <input
-                v-model="minPriceInput"
-                type="number"
-                placeholder="Min $"
-                min="0"
-                class="w-full border border-divider rounded-2xl px-4 py-3 text-sm text-ink placeholder:text-dim outline-none focus:border-ink/40 transition-colors bg-white"
-                @blur="applyPrice"
-                @keydown.enter="applyPrice"
-              />
-              <span class="text-dim shrink-0">–</span>
-              <input
-                v-model="maxPriceInput"
-                type="number"
-                placeholder="Max $"
-                min="0"
-                class="w-full border border-divider rounded-2xl px-4 py-3 text-sm text-ink placeholder:text-dim outline-none focus:border-ink/40 transition-colors bg-white"
-                @blur="applyPrice"
-                @keydown.enter="applyPrice"
-              />
-            </div>
-          </div>
+        <div class="overflow-y-auto flex-1 px-6 py-5">
+          <SearchFilters
+            :active-category="activeCategory"
+            :active-property-type="activePropertyType"
+            :active-min-bedrooms="activeMinBedrooms"
+            :min-price-input="minPriceInput"
+            :max-price-input="maxPriceInput"
+            :compact="true"
+            @toggle-category="toggleCategory"
+            @toggle-property-type="togglePropertyType"
+            @toggle-bedrooms="toggleBedrooms"
+            @apply-price="applyPrice"
+            @update:min-price-input="minPriceInput = $event"
+            @update:max-price-input="maxPriceInput = $event"
+          />
         </div>
 
         <!-- Footer actions -->

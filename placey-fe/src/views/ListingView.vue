@@ -9,10 +9,11 @@ import {
   useMessagingStore,
 } from '@/stores'
 import { storeToRefs } from 'pinia'
-import DateRangePicker from '@/components/DateRangePicker.vue'
+import BookingCard from '@/components/BookingCard.vue'
+import ListingPhotoGrid from '@/components/ListingPhotoGrid.vue'
+import ListingLightbox from '@/components/ListingLightbox.vue'
 import {
   ChevronLeft,
-  ChevronRight,
   X,
   Star,
   MapPin,
@@ -83,18 +84,21 @@ onMounted(async () => {
 })
 
 function scrollToReviews() {
-  const el = document.getElementById('reviews')
-  if (el) el.scrollIntoView({ behavior: 'smooth' })
+  document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' })
 }
 
 function scrollToBooking() {
-  const el = document.getElementById('booking')
-  if (el) el.scrollIntoView({ behavior: 'smooth' })
+  document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth' })
 }
 
-// Image gallery
+// Image gallery / lightbox
 const lightboxOpen = ref(false)
 const lightboxIndex = ref(0)
+
+function openLightbox(i: number) {
+  lightboxIndex.value = i
+  lightboxOpen.value = true
+}
 
 // Favorites / save
 const showSaveHint = ref(false)
@@ -116,33 +120,9 @@ onUnmounted(() => {
   if (saveHintTimer) clearTimeout(saveHintTimer)
 })
 
-function openLightbox(i: number) {
-  lightboxIndex.value = i
-  lightboxOpen.value = true
-}
-
-function closeLightbox() {
-  lightboxOpen.value = false
-}
-
-function lightboxPrev() {
-  if (!listing.value) return
-  lightboxIndex.value =
-    (lightboxIndex.value - 1 + listing.value.photoUrls.length) % listing.value.photoUrls.length
-}
-
-function lightboxNext() {
-  if (!listing.value) return
-  lightboxIndex.value = (lightboxIndex.value + 1) % listing.value.photoUrls.length
-}
-
-function handleLightboxKey(e: KeyboardEvent) {
-  if (e.key === 'ArrowLeft') lightboxPrev()
-  if (e.key === 'ArrowRight') lightboxNext()
-  if (e.key === 'Escape') closeLightbox()
-}
-
 // Share
+const shareCopied = ref(false)
+
 async function share() {
   const url = window.location.href
   const title = listing.value?.title ?? 'Check out this place on Placey'
@@ -160,7 +140,6 @@ async function share() {
     }, 2000)
   }
 }
-const shareCopied = ref(false)
 
 // Amenity icon map
 const amenityIcons: Record<string, object> = {
@@ -197,7 +176,6 @@ const nights = computed(() => {
 })
 
 const datesReady = computed(() => !!checkIn.value && !!checkOut.value && nights.value > 0)
-
 const total = computed(() => (listing.value ? listing.value.pricePerNight * nights.value : 0))
 
 // Booking
@@ -226,10 +204,6 @@ async function reserve() {
   } catch (e: unknown) {
     bookingError.value = e instanceof Error ? e.message : 'Something went wrong'
   }
-}
-
-function closeModal() {
-  bookingModalOpen.value = false
 }
 
 function goToBookings() {
@@ -419,80 +393,11 @@ function reviewDate(iso: string) {
 
       <!-- Photo grid -->
       <div class="max-w-7xl mx-auto px-6 md:px-10 mb-10">
-        <div
-          v-if="listing.photoUrls.length === 0"
-          class="aspect-16/7 rounded-3xl bg-[#e8e3dc] flex flex-col items-center justify-center gap-3 text-[#b5afa8]"
-        >
-          <svg
-            width="40"
-            height="40"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-            <circle cx="8.5" cy="8.5" r="1.5" />
-            <path d="M21 15l-5-5L5 21" />
-          </svg>
-          <span class="text-sm font-medium opacity-70">No photos yet</span>
-        </div>
-
-        <div
-          v-else-if="listing.photoUrls.length === 1"
-          class="aspect-16/7 rounded-3xl overflow-hidden bg-[#e8e3dc] cursor-pointer"
-          @click="openLightbox(0)"
-        >
-          <img
-            :src="listing.photoUrls[0]"
-            :alt="listing.title"
-            class="w-full h-full object-cover"
-          />
-        </div>
-
-        <div
-          v-else
-          class="grid grid-cols-4 grid-rows-2 gap-2 rounded-3xl overflow-hidden aspect-16/7"
-        >
-          <div
-            class="col-span-2 row-span-2 cursor-pointer overflow-hidden bg-[#e8e3dc]"
-            @click="openLightbox(0)"
-          >
-            <img
-              :src="listing.photoUrls[0]"
-              :alt="listing.title"
-              class="w-full h-full object-cover hover:scale-[1.03] transition-transform duration-500"
-            />
-          </div>
-          <template v-for="(url, i) in listing.photoUrls.slice(1, 5)" :key="i">
-            <div
-              class="relative cursor-pointer overflow-hidden bg-[#e8e3dc]"
-              @click="openLightbox(i + 1)"
-            >
-              <img
-                :src="url"
-                :alt="`${listing.title} photo ${i + 2}`"
-                class="w-full h-full object-cover hover:scale-[1.04] transition-transform duration-500"
-              />
-              <div
-                v-if="i === 3 && listing.photoUrls.length > 5"
-                class="absolute inset-0 bg-black/40 flex items-center justify-center"
-              >
-                <span class="text-white text-sm font-semibold"
-                  >+{{ listing.photoUrls.length - 5 }} more</span
-                >
-              </div>
-            </div>
-          </template>
-          <template
-            v-for="i in Math.max(0, 4 - Math.min(listing.photoUrls.length - 1, 4))"
-            :key="`empty-${i}`"
-          >
-            <div class="bg-[#e8e3dc]" />
-          </template>
-        </div>
+        <ListingPhotoGrid
+          :photo-urls="listing.photoUrls"
+          :title="listing.title"
+          @open="openLightbox"
+        />
       </div>
 
       <!-- Body -->
@@ -555,7 +460,7 @@ function reviewDate(iso: string) {
               </div>
             </div>
 
-            <!-- ── Mobile: compact price + CTA that scrolls to booking form ── -->
+            <!-- Mobile: compact price + CTA -->
             <div class="lg:hidden flex items-center justify-between gap-4 py-1">
               <div class="flex items-baseline gap-1">
                 <span class="text-xl font-bold text-ink">${{ listing.pricePerNight }}</span>
@@ -601,7 +506,7 @@ function reviewDate(iso: string) {
               <p v-else class="text-sm text-muted">No amenities listed.</p>
             </div>
 
-            <!-- Instant Book (moved here) -->
+            <!-- Instant Book -->
             <div
               v-if="listing.isInstantBook"
               class="pb-8 border-b border-divider-light flex items-start gap-3"
@@ -620,97 +525,30 @@ function reviewDate(iso: string) {
               </div>
             </div>
 
-            <!-- Booking form (mobile only, full card) -->
+            <!-- Booking form (mobile) -->
             <div id="booking" class="lg:hidden pb-10 border-b border-divider-light">
               <h3 class="text-xl font-semibold text-ink mb-5">Check availability</h3>
-              <div
-                class="rounded-2xl border border-divider shadow-[0_4px_32px_rgba(0,0,0,0.08)] p-6 bg-white"
-              >
-                <div class="mb-3">
-                  <p class="text-[10px] font-semibold text-ink uppercase tracking-wider mb-1.5">
-                    Dates
-                  </p>
-                  <DateRangePicker
-                    :check-in="checkIn"
-                    :check-out="checkOut"
-                    :blockings="blockings"
-                    @update:check-in="checkIn = $event"
-                    @update:check-out="checkOut = $event"
-                  />
-                </div>
-                <div class="border border-divider rounded-xl px-3 py-2.5 mb-4 text-sm">
-                  <p class="text-[10px] font-semibold text-ink uppercase tracking-wider mb-1">
-                    Guests
-                  </p>
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs text-ink"
-                      >{{ guests }} {{ guests === 1 ? 'guest' : 'guests' }}</span
-                    >
-                    <div class="flex items-center gap-2">
-                      <button
-                        class="w-6 h-6 rounded-full border border-divider flex items-center justify-center text-muted hover:border-ink hover:text-ink transition-colors cursor-pointer disabled:opacity-30"
-                        :disabled="guests <= 1"
-                        @click="guests = Math.max(1, guests - 1)"
-                      >
-                        <span class="text-base leading-none mb-0.5">−</span>
-                      </button>
-                      <button
-                        class="w-6 h-6 rounded-full border border-divider flex items-center justify-center text-muted hover:border-ink hover:text-ink transition-colors cursor-pointer disabled:opacity-30"
-                        :disabled="guests >= listing.maxGuests"
-                        @click="guests = Math.min(listing.maxGuests, guests + 1)"
-                      >
-                        <span class="text-base leading-none mb-0.5">+</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  v-if="isRangeBlocked"
-                  class="mb-3 px-3 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"
-                >
-                  These dates are not available. Please choose different dates.
-                </div>
-                <div
-                  v-if="bookingError"
-                  class="mb-3 px-3 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"
-                >
-                  {{ bookingError }}
-                </div>
-                <button
-                  class="w-full text-sm font-semibold py-3.5 rounded-xl transition-colors disabled:cursor-not-allowed"
-                  :class="
-                    !datesReady || isRangeBlocked || bookingConfirmed
-                      ? 'bg-gray-100 text-gray-400 cursor-default'
-                      : 'bg-ink text-white hover:bg-black cursor-pointer'
-                  "
-                  :disabled="
-                    !datesReady || isRangeBlocked || bookingStore.isSubmitting || bookingConfirmed
-                  "
-                  @click="reserve"
-                >
-                  {{
-                    bookingStore.isSubmitting
-                      ? 'Reserving…'
-                      : !datesReady
-                        ? 'Add dates to check availability'
-                        : authStore.isLoggedIn
-                          ? 'Reserve'
-                          : 'Log in to reserve'
-                  }}
-                </button>
-                <div
-                  v-if="datesReady && !isRangeBlocked"
-                  class="mt-5 pt-5 border-t border-divider-light text-sm"
-                >
-                  <div class="flex justify-between font-semibold text-ink">
-                    <span
-                      >${{ listing.pricePerNight }} × {{ nights }}
-                      {{ nights === 1 ? 'night' : 'nights' }}</span
-                    ><span>${{ total }}</span>
-                  </div>
-                </div>
-                <p class="text-xs text-muted text-center mt-3">You won't be charged yet</p>
-              </div>
+              <BookingCard
+                :price-per-night="listing.pricePerNight"
+                :max-guests="listing.maxGuests"
+                :check-in="checkIn"
+                :check-out="checkOut"
+                :guests="guests"
+                :nights="nights"
+                :total="total"
+                :dates-ready="datesReady"
+                :is-range-blocked="isRangeBlocked"
+                :booking-confirmed="bookingConfirmed"
+                :is-submitting="bookingStore.isSubmitting"
+                :booking-error="bookingError"
+                :is-logged-in="authStore.isLoggedIn"
+                :blockings="blockings"
+                variant="mobile"
+                @update:check-in="checkIn = $event"
+                @update:check-out="checkOut = $event"
+                @update:guests="guests = $event"
+                @reserve="reserve"
+              />
             </div>
 
             <!-- Reviews -->
@@ -776,100 +614,29 @@ function reviewDate(iso: string) {
             </div>
           </div>
 
-          <!-- Right column: Booking card (desktop only) -->
+          <!-- Right column: Booking card (desktop) -->
           <div class="hidden lg:block lg:sticky lg:top-24">
-            <div
-              class="rounded-3xl border border-divider shadow-[0_4px_32px_rgba(0,0,0,0.08)] p-6 bg-white"
-            >
-              <div class="flex items-baseline gap-1 mb-5">
-                <span class="text-2xl font-bold text-ink">${{ listing.pricePerNight }}</span>
-                <span class="text-sm text-muted font-normal">/ night</span>
-              </div>
-              <div class="mb-3">
-                <p class="text-[10px] font-semibold text-ink uppercase tracking-wider mb-1.5">
-                  Dates
-                </p>
-                <DateRangePicker
-                  :check-in="checkIn"
-                  :check-out="checkOut"
-                  :blockings="blockings"
-                  @update:check-in="checkIn = $event"
-                  @update:check-out="checkOut = $event"
-                />
-              </div>
-              <div class="border border-divider rounded-xl px-3 py-2.5 mb-4 text-sm">
-                <p class="text-[10px] font-semibold text-ink uppercase tracking-wider mb-1">
-                  Guests
-                </p>
-                <div class="flex items-center justify-between">
-                  <span class="text-xs text-ink"
-                    >{{ guests }} {{ guests === 1 ? 'guest' : 'guests' }}</span
-                  >
-                  <div class="flex items-center gap-2">
-                    <button
-                      class="w-6 h-6 rounded-full border border-divider flex items-center justify-center text-muted hover:border-ink hover:text-ink transition-colors cursor-pointer disabled:opacity-30"
-                      :disabled="guests <= 1"
-                      @click="guests = Math.max(1, guests - 1)"
-                    >
-                      <span class="text-base leading-none mb-0.5">−</span>
-                    </button>
-                    <button
-                      class="w-6 h-6 rounded-full border border-divider flex items-center justify-center text-muted hover:border-ink hover:text-ink transition-colors cursor-pointer disabled:opacity-30"
-                      :disabled="guests >= listing.maxGuests"
-                      @click="guests = Math.min(listing.maxGuests, guests + 1)"
-                    >
-                      <span class="text-base leading-none mb-0.5">+</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div
-                v-if="isRangeBlocked"
-                class="mb-3 px-3 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"
-              >
-                These dates are not available. Please choose different dates.
-              </div>
-              <div
-                v-if="bookingError"
-                class="mb-3 px-3 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"
-              >
-                {{ bookingError }}
-              </div>
-              <button
-                class="w-full text-sm font-semibold py-3.5 rounded-xl transition-colors disabled:cursor-not-allowed"
-                :class="
-                  !datesReady || isRangeBlocked || bookingConfirmed
-                    ? 'bg-gray-100 text-gray-400 cursor-default'
-                    : 'bg-ink text-white hover:bg-black cursor-pointer'
-                "
-                :disabled="
-                  !datesReady || isRangeBlocked || bookingStore.isSubmitting || bookingConfirmed
-                "
-                @click="reserve"
-              >
-                {{
-                  bookingStore.isSubmitting
-                    ? 'Reserving…'
-                    : !datesReady
-                      ? 'Add dates to check availability'
-                      : authStore.isLoggedIn
-                        ? 'Reserve'
-                        : 'Log in to reserve'
-                }}
-              </button>
-              <div
-                v-if="datesReady && !isRangeBlocked"
-                class="mt-5 pt-5 border-t border-divider-light text-sm"
-              >
-                <div class="flex justify-between font-semibold text-ink">
-                  <span
-                    >${{ listing.pricePerNight }} × {{ nights }}
-                    {{ nights === 1 ? 'night' : 'nights' }}</span
-                  ><span>${{ total }}</span>
-                </div>
-              </div>
-              <p class="text-xs text-muted text-center mt-3">You won't be charged yet</p>
-            </div>
+            <BookingCard
+              :price-per-night="listing.pricePerNight"
+              :max-guests="listing.maxGuests"
+              :check-in="checkIn"
+              :check-out="checkOut"
+              :guests="guests"
+              :nights="nights"
+              :total="total"
+              :dates-ready="datesReady"
+              :is-range-blocked="isRangeBlocked"
+              :booking-confirmed="bookingConfirmed"
+              :is-submitting="bookingStore.isSubmitting"
+              :booking-error="bookingError"
+              :is-logged-in="authStore.isLoggedIn"
+              :blockings="blockings"
+              variant="desktop"
+              @update:check-in="checkIn = $event"
+              @update:check-out="checkOut = $event"
+              @update:guests="guests = $event"
+              @reserve="reserve"
+            />
           </div>
         </div>
       </div>
@@ -881,13 +648,16 @@ function reviewDate(iso: string) {
         <div
           v-if="bookingModalOpen"
           class="fixed inset-0 z-300 flex items-center justify-center px-4"
-          @click.self="closeModal"
+          @click.self="bookingModalOpen = false"
         >
-          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closeModal" />
+          <div
+            class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            @click="bookingModalOpen = false"
+          />
           <div class="relative bg-white rounded-4xl shadow-2xl w-full max-w-sm p-8 text-center">
             <button
               class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
-              @click="closeModal"
+              @click="bookingModalOpen = false"
             >
               <X :size="16" />
             </button>
@@ -942,66 +712,14 @@ function reviewDate(iso: string) {
     </Teleport>
 
     <!-- Lightbox -->
-    <Teleport to="body">
-      <div
-        v-if="lightboxOpen && listing"
-        class="fixed inset-0 z-200 bg-black/95 flex items-center justify-center"
-        @keydown="handleLightboxKey"
-        tabindex="0"
-      >
-        <button
-          class="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
-          @click="closeLightbox"
-        >
-          <X :size="18" />
-        </button>
-
-        <span class="absolute top-4 left-1/2 -translate-x-1/2 text-white/60 text-sm tabular-nums">
-          {{ lightboxIndex + 1 }} / {{ listing.photoUrls.length }}
-        </span>
-
-        <button
-          v-if="listing.photoUrls.length > 1"
-          class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
-          @click="lightboxPrev"
-        >
-          <ChevronLeft :size="20" />
-        </button>
-
-        <img
-          :src="listing.photoUrls[lightboxIndex]"
-          :alt="`${listing.title} – photo ${lightboxIndex + 1}`"
-          class="max-h-[90vh] max-w-[90vw] object-contain rounded-lg"
-        />
-
-        <button
-          v-if="listing.photoUrls.length > 1"
-          class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
-          @click="lightboxNext"
-        >
-          <ChevronRight :size="20" />
-        </button>
-
-        <div
-          v-if="listing.photoUrls.length > 1"
-          class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 max-w-[90vw] overflow-x-auto scrollbar-hide px-2"
-        >
-          <button
-            v-for="(url, i) in listing.photoUrls"
-            :key="i"
-            class="w-12 h-9 rounded-md overflow-hidden shrink-0 border-2 transition-all cursor-pointer"
-            :class="
-              i === lightboxIndex
-                ? 'border-white opacity-100'
-                : 'border-transparent opacity-50 hover:opacity-75'
-            "
-            @click="lightboxIndex = i"
-          >
-            <img :src="url" :alt="`thumb ${i + 1}`" class="w-full h-full object-cover" />
-          </button>
-        </div>
-      </div>
-    </Teleport>
+    <ListingLightbox
+      v-if="lightboxOpen && listing"
+      :photo-urls="listing.photoUrls"
+      :index="lightboxIndex"
+      :title="listing.title"
+      @close="lightboxOpen = false"
+      @update:index="lightboxIndex = $event"
+    />
   </div>
 </template>
 
