@@ -65,9 +65,7 @@ const columns = [
   },
   {
     title: 'Placey',
-    links: [
-      { label: 'About', to: '/about' }
-    ],
+    links: [{ label: 'About', to: '/about' }],
   },
 ]
 
