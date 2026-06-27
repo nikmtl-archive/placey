@@ -142,6 +142,9 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
 
         await CancelActiveBookingsAsync(listingId);
 
+        var favorites = await db.Favorites.Where(f => f.ListingId == listingId).ToListAsync();
+        db.Favorites.RemoveRange(favorites);
+
         listing.IsDeleted = true;
         await db.SaveChangesAsync();
     }
