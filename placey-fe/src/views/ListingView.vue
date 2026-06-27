@@ -590,6 +590,7 @@ function reviewDate(iso: string) {
                   <DateRangePicker
                     :check-in="checkIn"
                     :check-out="checkOut"
+                    :blockings="blockings"
                     @update:check-in="checkIn = $event"
                     @update:check-out="checkOut = $event"
                   />
@@ -746,6 +747,7 @@ function reviewDate(iso: string) {
                 <DateRangePicker
                   :check-in="checkIn"
                   :check-out="checkOut"
+                  :blockings="blockings"
                   @update:check-in="checkIn = $event"
                   @update:check-out="checkOut = $event"
                 />

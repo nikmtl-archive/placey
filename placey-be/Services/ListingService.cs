@@ -141,11 +141,21 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
 
     public async Task<List<BlockingResponse>> GetBlockingsAsync(Guid listingId)
     {
-        return await db.ListingBlocks
+        var manualBlocks = await db.ListingBlocks
             .Where(b => b.ListingId == listingId)
-            .OrderBy(b => b.StartDate)
             .Select(b => new BlockingResponse(b.Id, b.StartDate, b.EndDate))
             .ToListAsync();
+
+        var bookingBlocks = await db.Bookings
+            .Where(b => b.ListingId == listingId &&
+                        (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed))
+            .Select(b => new BlockingResponse(b.Id, b.CheckIn, b.CheckOut))
+            .ToListAsync();
+
+        return manualBlocks
+            .Concat(bookingBlocks)
+            .OrderBy(b => b.StartDate)
+            .ToList();
     }
 
     public async Task<BlockingResponse> AddBlockingAsync(Guid listingId, Guid requesterId, AddBlockingRequest request)
