@@ -34,6 +34,19 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isLoggedIn = computed(() => !!accessToken.value)
   const isHost = ref(false)
+  const pendingReservationsCount = ref(0)
+
+  async function fetchPendingReservationsCount() {
+    if (!accessToken.value) return
+    try {
+      const res = await apiFetch('/api/users/me/reservations')
+      if (!res.ok) return
+      const data: { status: string }[] = await res.json()
+      pendingReservationsCount.value = data.filter((r) => r.status === 'Pending').length
+    } catch {
+      // silently ignore
+    }
+  }
 
   async function checkIsHost() {
     if (!accessToken.value) {
@@ -126,6 +139,7 @@ export const useAuthStore = defineStore('auth', () => {
       }
       setSession(await res.json())
       checkIsHost()
+      fetchPendingReservationsCount()
     } catch (e: unknown) {
       error.value = e instanceof Error ? e.message : 'Login failed'
     } finally {
@@ -148,6 +162,7 @@ export const useAuthStore = defineStore('auth', () => {
       }
       setSession(await res.json())
       checkIsHost()
+      fetchPendingReservationsCount()
     } catch (e: unknown) {
       error.value = e instanceof Error ? e.message : 'Registration failed'
     } finally {
@@ -201,7 +216,9 @@ export const useAuthStore = defineStore('auth', () => {
     error,
     isLoggedIn,
     isHost,
+    pendingReservationsCount,
     checkIsHost,
+    fetchPendingReservationsCount,
     login,
     register,
     logout,

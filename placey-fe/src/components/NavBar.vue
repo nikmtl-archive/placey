@@ -34,6 +34,7 @@ onMounted(() => {
   if (authStore.isLoggedIn) {
     messagingStore.fetchUnreadCount()
     authStore.checkIsHost()
+    authStore.fetchPendingReservationsCount()
   }
 })
 onUnmounted(() => window.removeEventListener('scroll', onScroll))
@@ -61,7 +62,9 @@ async function handleLogout() {
     class="sticky top-0 z-50 bg-white transition-shadow duration-200"
     :class="scrolled ? 'shadow-[0_1px_12px_rgba(0,0,0,0.08)]' : 'border-b border-divider-light'"
   >
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between gap-4 sm:gap-6">
+    <div
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between gap-4 sm:gap-6"
+    >
       <RouterLink
         to="/"
         class="font-serif text-2xl font-semibold text-ink tracking-tight shrink-0 select-none"
@@ -100,9 +103,13 @@ async function handleLogout() {
           <RouterLink
             v-if="authStore.isHost"
             to="/host-dashboard"
-            class="hidden sm:block text-sm font-medium text-ink/70 hover:text-ink transition-colors px-1"
+            class="relative hidden sm:block text-sm font-medium text-ink/70 hover:text-ink transition-colors px-1"
           >
             Host Dashboard
+            <span
+              v-if="authStore.pendingReservationsCount > 0"
+              class="absolute -top-1 -right-1 w-2 h-2 shrink-0 bg-rose-500 rounded-full"
+            />
           </RouterLink>
         </template>
 
@@ -205,12 +212,20 @@ async function handleLogout() {
               <div v-if="authStore.isHost" class="border-t border-divider-light mt-1 pt-1">
                 <RouterLink
                   to="/host-dashboard"
-                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-ink hover:bg-black/5 transition-colors cursor-pointer"
+                  class="flex items-center gap-3 justify-between px-4 py-2.5 text-sm text-ink hover:bg-black/5 transition-colors cursor-pointer"
                   role="menuitem"
                   @click="dropdownOpen = false"
                 >
-                  <House :size="15" :stroke-width="1.75" class="text-ink/50 shrink-0" />
-                  Host Dashboard
+                  <span class="flex items-center gap-3">
+                    <House :size="15" :stroke-width="1.75" class="text-ink/50 shrink-0" />
+                    Host Dashboard
+                  </span>
+                  <span
+                    v-if="authStore.pendingReservationsCount > 0"
+                    class="bg-rose-500 text-white text-[10px] font-semibold rounded-full min-w-4.5 h-4.5 flex items-center justify-center px-1 leading-none shrink-0"
+                  >
+                    {{ authStore.pendingReservationsCount }}
+                  </span>
                 </RouterLink>
               </div>
 
