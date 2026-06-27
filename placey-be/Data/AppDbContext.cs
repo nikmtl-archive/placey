@@ -10,7 +10,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<User> Users => Set<User>();
     public DbSet<Listing> Listings => Set<Listing>();
     public DbSet<ListingPhoto> ListingPhotos => Set<ListingPhoto>();
-    public DbSet<Availability> Availabilities => Set<Availability>();
+    public DbSet<ListingBlock> ListingBlocks => Set<ListingBlock>();
     public DbSet<Booking> Bookings => Set<Booking>();
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<Favorite> Favorites => Set<Favorite>();

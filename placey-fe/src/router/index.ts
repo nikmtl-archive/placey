@@ -56,6 +56,18 @@ const router = createRouter({
       component: () => import('@/views/BecomeAHostView.vue'),
       meta: { title: 'Placey – Become a Host' },
     },
+    {
+      path: '/listing/new',
+      name: 'new-listing',
+      component: () => import('@/views/ListingFormView.vue'),
+      meta: { title: 'Placey – Create listing', requiresAuth: true },
+    },
+    {
+      path: '/listing/:id/edit',
+      name: 'edit-listing',
+      component: () => import('@/views/ListingFormView.vue'),
+      meta: { title: 'Placey – Edit listing', requiresAuth: true },
+    },
 
     // Bookings & hosting dashboard
     {
@@ -67,7 +79,7 @@ const router = createRouter({
     {
       path: '/host-dashboard',
       name: 'host-dashboard',
-      component: () => import('@/views/PlaceholderView.vue'),
+      component: () => import('@/views/HostDashboardView.vue'),
       meta: { title: 'Placey – Host Dashboard', requiresAuth: true },
     },
 

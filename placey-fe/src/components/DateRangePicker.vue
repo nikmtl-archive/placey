@@ -2,9 +2,15 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { Calendar, ChevronLeft, ChevronRight } from '@lucide/vue'
 
+interface Blocking {
+  startDate: string
+  endDate: string
+}
+
 const props = defineProps<{
   checkIn: string
   checkOut: string
+  blockings?: Blocking[]
   // When true the component renders no trigger button — the parent opens/closes via expose
   noTrigger?: boolean
 }>()
@@ -137,8 +143,35 @@ function isRangeEnd(day: number, month: number, year: number) {
   return end ? sameDay(d, end) : false
 }
 
+function isBlocked(day: number, month: number, year: number) {
+  if (!props.blockings?.length) return false
+  const d = dateOf(day, month, year)
+  return props.blockings.some((b) => {
+    const start = new Date(b.startDate + 'T00:00:00')
+    const end = new Date(b.endDate + 'T00:00:00')
+    return d >= start && d <= end
+  })
+}
+
+// When picking checkout, disable any date that would make the range cross a blocked period
+function isUnavailableCheckout(day: number, month: number, year: number) {
+  if (!selectingCheckout.value || !internalIn.value || !props.blockings?.length) return false
+  const d = dateOf(day, month, year)
+  if (d <= internalIn.value) return false
+  return props.blockings.some((b) => {
+    const start = new Date(b.startDate + 'T00:00:00')
+    const end = new Date(b.endDate + 'T00:00:00')
+    // the range [checkIn, d] overlaps this blocking if any blocked day falls between them
+    return start <= d && end >= internalIn.value!
+  })
+}
+
+function isDayDisabled(day: number, month: number, year: number) {
+  return isPast(day, month, year) || isBlocked(day, month, year) || isUnavailableCheckout(day, month, year)
+}
+
 function selectDay(day: number, month: number, year: number) {
-  if (isPast(day, month, year)) return
+  if (isDayDisabled(day, month, year)) return
   const d = dateOf(day, month, year)
   if (!selectingCheckout.value) {
     internalIn.value = d
@@ -260,12 +293,17 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside))
                 <button
                   v-else
                   type="button"
-                  :disabled="isPast(day, calendarMonth, calendarYear)"
+                  :disabled="isDayDisabled(day, calendarMonth, calendarYear)"
                   class="relative h-8 w-8 text-sm rounded-full flex items-center justify-center transition-all mx-auto"
                   :class="[
-                    isPast(day, calendarMonth, calendarYear)
-                      ? 'text-gray-300 cursor-not-allowed'
+                    isDayDisabled(day, calendarMonth, calendarYear)
+                      ? 'cursor-not-allowed'
                       : 'cursor-pointer hover:bg-gray-100',
+                    isBlocked(day, calendarMonth, calendarYear)
+                      ? 'text-gray-300 line-through decoration-gray-300'
+                      : isPast(day, calendarMonth, calendarYear) || isUnavailableCheckout(day, calendarMonth, calendarYear)
+                        ? 'text-gray-300'
+                        : '',
                     isSelected(day, calendarMonth, calendarYear)
                       ? 'bg-ink! text-white hover:bg-ink! font-semibold'
                       : '',
@@ -279,7 +317,7 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside))
                   ]"
                   @click="selectDay(day, calendarMonth, calendarYear)"
                   @mouseenter="
-                    hoverDate = isPast(day, calendarMonth, calendarYear)
+                    hoverDate = isDayDisabled(day, calendarMonth, calendarYear)
                       ? null
                       : dateOf(day, calendarMonth, calendarYear)
                   "
@@ -321,12 +359,17 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside))
                 <button
                   v-else
                   type="button"
-                  :disabled="isPast(day, nextMonth, nextYear)"
+                  :disabled="isDayDisabled(day, nextMonth, nextYear)"
                   class="relative h-8 w-8 text-sm rounded-full flex items-center justify-center transition-all mx-auto"
                   :class="[
-                    isPast(day, nextMonth, nextYear)
-                      ? 'text-gray-300 cursor-not-allowed'
+                    isDayDisabled(day, nextMonth, nextYear)
+                      ? 'cursor-not-allowed'
                       : 'cursor-pointer hover:bg-gray-100',
+                    isBlocked(day, nextMonth, nextYear)
+                      ? 'text-gray-300 line-through decoration-gray-300'
+                      : isPast(day, nextMonth, nextYear) || isUnavailableCheckout(day, nextMonth, nextYear)
+                        ? 'text-gray-300'
+                        : '',
                     isSelected(day, nextMonth, nextYear)
                       ? 'bg-ink! text-white hover:bg-ink! font-semibold'
                       : '',
@@ -338,7 +381,7 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside))
                   ]"
                   @click="selectDay(day, nextMonth, nextYear)"
                   @mouseenter="
-                    hoverDate = isPast(day, nextMonth, nextYear)
+                    hoverDate = isDayDisabled(day, nextMonth, nextYear)
                       ? null
                       : dateOf(day, nextMonth, nextYear)
                   "

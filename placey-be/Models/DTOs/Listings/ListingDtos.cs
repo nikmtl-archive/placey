@@ -80,15 +80,13 @@ public record ListingPhotoResponse(
     int Order
 );
 
-public record SetAvailabilityRequest(
+public record AddBlockingRequest(
     [Required] DateOnly StartDate,
-    [Required] DateOnly EndDate,
-    [Required] bool IsBlocked
+    [Required] DateOnly EndDate
 );
 
-public record AvailabilityResponse(
+public record BlockingResponse(
     Guid Id,
     DateOnly StartDate,
-    DateOnly EndDate,
-    bool IsBlocked
+    DateOnly EndDate
 );

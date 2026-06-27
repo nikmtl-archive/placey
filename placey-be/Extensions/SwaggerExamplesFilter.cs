@@ -42,11 +42,10 @@ public class SwaggerExamplesFilter : ISchemaFilter
             ["pricePerNight"] = new OpenApiDouble(99.00),
             ["isInstantBook"] = new OpenApiBoolean(false)
         },
-        [typeof(SetAvailabilityRequest)] = new()
+        [typeof(AddBlockingRequest)] = new()
         {
             ["startDate"] = new OpenApiString("2026-08-01"),
             ["endDate"] = new OpenApiString("2026-08-15"),
-            ["isBlocked"] = new OpenApiBoolean(true)
         },
         [typeof(CreateBookingRequest)] = new()
         {

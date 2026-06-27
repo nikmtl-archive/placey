@@ -28,6 +28,14 @@ public class BookingService(AppDbContext db) : IBookingService
         if (hasConflict)
             throw new InvalidOperationException("Listing is not available for the selected dates.");
 
+        var isBlocked = await db.ListingBlocks.AnyAsync(b =>
+            b.ListingId == request.ListingId &&
+            b.StartDate < request.CheckOut &&
+            b.EndDate > request.CheckIn);
+
+        if (isBlocked)
+            throw new InvalidOperationException("Listing is not available for the selected dates.");
+
         var nights = request.CheckOut.DayNumber - request.CheckIn.DayNumber;
         var booking = new Booking
         {
@@ -116,6 +124,7 @@ public class BookingService(AppDbContext db) : IBookingService
         b.Guests,
         b.TotalPrice,
         b.Status,
-        b.CreatedAt
+        b.CreatedAt,
+        null
     );
 }

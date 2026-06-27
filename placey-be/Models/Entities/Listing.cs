@@ -26,7 +26,7 @@ public class Listing
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<ListingPhoto> Photos { get; set; } = new List<ListingPhoto>();
-    public ICollection<Availability> Availabilities { get; set; } = new List<Availability>();
+    public ICollection<ListingBlock> Blockings { get; set; } = new List<ListingBlock>();
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
     public ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();

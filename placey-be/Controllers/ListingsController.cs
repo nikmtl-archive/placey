@@ -51,19 +51,27 @@ public class ListingsController(
         return NoContent();
     }
 
-    [HttpGet("{id:guid}/availability")]
-    public async Task<IActionResult> GetAvailability(Guid id)
+    [HttpGet("{id:guid}/blockings")]
+    public async Task<IActionResult> GetBlockings(Guid id)
     {
-        var result = await listingService.GetAvailabilityAsync(id);
+        var result = await listingService.GetBlockingsAsync(id);
         return Ok(result);
     }
 
     [Authorize]
-    [HttpPatch("{id:guid}/availability")]
-    public async Task<IActionResult> SetAvailability(Guid id, SetAvailabilityRequest request)
+    [HttpPost("{id:guid}/blockings")]
+    public async Task<IActionResult> AddBlocking(Guid id, AddBlockingRequest request)
     {
-        var result = await listingService.SetAvailabilityAsync(id, User.GetUserId(), request);
-        return Ok(result);
+        var result = await listingService.AddBlockingAsync(id, User.GetUserId(), request);
+        return CreatedAtAction(nameof(GetBlockings), new { id }, result);
+    }
+
+    [Authorize]
+    [HttpDelete("{id:guid}/blockings/{blockingId:guid}")]
+    public async Task<IActionResult> DeleteBlocking(Guid id, Guid blockingId)
+    {
+        await listingService.DeleteBlockingAsync(id, blockingId, User.GetUserId());
+        return NoContent();
     }
 
     [Authorize]
