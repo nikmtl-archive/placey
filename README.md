@@ -10,19 +10,15 @@ Placey is a short-term property rental platform inspired by Airbnb. Hosts publis
 - [x] Property listings with photos and availability
 - [x] Search and filter by location, dates, and guest count
 - [x] Availability checks during the booking flow
-- [ ] Host dashboard: manage listings and view incoming reservations
-- [ ] Guest dashboard: view and manage own bookings
+- [x] Host dashboard: manage listings and view incoming reservations
+- [x] Guest dashboard: view and manage own bookings
 
 ### Optional Scope
 - [x] Reviews and ratings for listings
 - [x] Messaging between host and guest
-- [ ] Payments via PayPal Sandbox
 
-<!--
 ### Out of Scope
-- [ ] Item that was no longer implemented
-- [ ] Item that is intentionally not part of the project
--->
+- [ ] Payments via PayPal Sandbox
 
 ---
 
@@ -60,20 +56,23 @@ placey/
 
 ### Requirements
 
-- [Docker](https://www.docker.com/) and Docker Compose
+- Docker and Docker Compose
 - .NET 8 SDK (for local backend development only)
 - Node.js 20 + pnpm (for local frontend development only)
 
 ### Quick start with Docker Compose (Start everything)
 
+The following commands will build and start all services (frontend, backend, database) in Docker containers. The backend will automatically apply migrations and seed example data on first startup if the environment variables are set correctly.
+
 ```bash
-# 1. Copy the env template and fill in your values (if security is not a concern, you can use the same values as in .env.example)
+# 1. Copy the env template and fill in your values (see the Environment variables section below for details)
 cp .env.example .env
 
 # 2. Build and start all services
 docker compose up --build
 ```
 
+After startup, the following services are available (ports may vary):
 | Service    | URL                           |
 | ---------- | ----------------------------- |
 | Frontend   | http://localhost:8080         |
@@ -82,7 +81,7 @@ docker compose up --build
 
 ### Local backend development
 
-JWT config and the dev database connection string are set in `placey-be/appsettings.Development.json` — no extra environment setup needed.
+JWT config and the dev database connection string are set in `placey-be/appsettings.Development.json`, no extra environment setup needed.
 
 ```bash
 # Start only the database
@@ -95,7 +94,7 @@ dotnet restore
 dotnet ef database update
 
 dotnet run
-# API available at https://localhost:7220
+# API available at https://localhost:7220 (port may vary)
 ```
 
 ### Local frontend development
@@ -108,17 +107,6 @@ cd placey-fe
 pnpm install
 pnpm dev
 ```
-
-if you get an error like this:
-
-```
-7:37:24 PM [vite] http proxy error: <an api request URL>
-AggregateError [ECONNREFUSED]: 
-    at internalConnectMultiple (node:net:1193:18)
-    at afterConnectMultiple (node:net:1783:7)
-```
-
-Make sure the backend is running and the proxy target in `vite.config.ts` matches the backend Port (default: `http://localhost:5001`).
 
 ### Environment variables
 
@@ -137,7 +125,10 @@ JWT issuer and audience are hardcoded to `placey` in `docker-compose.yml`. For l
 
 ### Example seed data
 
-When running in `Development` mode, the backend automatically seeds example data on startup. All seed accounts share the password **`password123`**.
+> [!NOTE]
+> The seed data is automatically applied on first startup if the database is empty and the environment variable `ASPNETCORE_ENVIRONMENT` is set to `Development`. You can also run the seed script manually with `dotnet run --project placey-be/Placey.SeedData`.
+
+Seed data includes example users, listings, bookings, reviews, and favorites:
 
 **Users**
 
@@ -159,6 +150,21 @@ When running in `Development` mode, the backend automatically seeds example data
 
 Seed data also includes completed bookings, reviews, and favorites so all API endpoints return realistic data immediately.
 
+### Troubleshooting
+
+#### Backend not reachable from frontend
+If you get an error like this in the frontend console:
+
+```
+7:37:24 PM [vite] http proxy error: <an api request URL>
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+```
+
+Make sure the backend is running and the proxy target in `vite.config.ts` matches the backend Port (default: `http://localhost:5001`).
+
+---
 
 ## Documentation
 
@@ -202,14 +208,12 @@ dotnet test placey.sln
 
 ---
 
-<!--
+
 ## Known Limitations
-- Which points are still open?
-- What limitations does the project have?
-- What would be improved in a future version?
+- At the moment, there are no email notifications for new messages or bookings. Users must check the app to see updates.
 
 ---
--->
+
 
 ## Contributors
 
