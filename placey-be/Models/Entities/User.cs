@@ -9,6 +9,7 @@ public class User
     public string? Bio { get; set; }
     public string? AvatarUrl { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public bool IsDeleted { get; set; } = false;
 
     public ICollection<Listing> Listings { get; set; } = new List<Listing>();
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();

@@ -24,6 +24,7 @@ public class Listing
     public PropertyType PropertyType { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public bool IsDeleted { get; set; } = false;
 
     public ICollection<ListingPhoto> Photos { get; set; } = new List<ListingPhoto>();
     public ICollection<ListingBlock> Blockings { get; set; } = new List<ListingBlock>();
