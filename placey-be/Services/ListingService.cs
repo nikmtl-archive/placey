@@ -11,6 +11,7 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
     public async Task<(List<ListingResponse> Items, int Total)> SearchAsync(ListingSearchParams p)
     {
         var query = db.Listings
+            .Where(l => !l.IsDeleted)
             .Include(l => l.Host)
             .Include(l => l.Photos)
             .Include(l => l.Reviews)
@@ -69,7 +70,7 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
             .Include(l => l.Host)
             .Include(l => l.Photos)
             .Include(l => l.Reviews)
-            .FirstOrDefaultAsync(l => l.Id == id)
+            .FirstOrDefaultAsync(l => l.Id == id && !l.IsDeleted)
             ?? throw new KeyNotFoundException("Listing not found.");
 
         return ToResponse(listing);
@@ -135,8 +136,21 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
         if (listing.HostId != requesterId)
             throw new UnauthorizedAccessException("Only the host can delete this listing.");
 
-        db.Listings.Remove(listing);
+        await CancelActiveBookingsAsync(listingId);
+
+        listing.IsDeleted = true;
         await db.SaveChangesAsync();
+    }
+
+    private async Task CancelActiveBookingsAsync(Guid listingId)
+    {
+        var activeBookings = await db.Bookings
+            .Where(b => b.ListingId == listingId &&
+                        (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed))
+            .ToListAsync();
+
+        foreach (var booking in activeBookings)
+            booking.Status = BookingStatus.Cancelled;
     }
 
     public async Task<List<BlockingResponse>> GetBlockingsAsync(Guid listingId)

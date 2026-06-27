@@ -82,7 +82,7 @@ async function submitReview(booking: Booking) {
       <div
         v-for="booking in props.bookings"
         :key="booking.id"
-        class="rounded-lg border border-neutral-200 p-4"
+        class="rounded-3xl border border-neutral-200 p-4"
       >
         <button
           type="button"

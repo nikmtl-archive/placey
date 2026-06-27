@@ -36,7 +36,7 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
         var user = await db.Users.FirstOrDefaultAsync(u => u.Email == request.Email)
             ?? throw new UnauthorizedAccessException("Invalid credentials.");
 
-        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        if (user.IsDeleted || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             throw new UnauthorizedAccessException("Invalid credentials.");
 
         return await IssueTokensAsync(user);
@@ -49,7 +49,7 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
             .FirstOrDefaultAsync(t => t.Token == refreshToken)
             ?? throw new UnauthorizedAccessException("Invalid refresh token.");
 
-        if (!token.IsActive)
+        if (!token.IsActive || token.User.IsDeleted)
             throw new UnauthorizedAccessException("Refresh token expired or revoked.");
 
         token.RevokedAt = DateTime.UtcNow;

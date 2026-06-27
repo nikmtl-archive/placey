@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using placey_be.Data;
 using placey_be.Models.DTOs.Users;
+using placey_be.Models.Entities;
 using placey_be.Services.Interfaces;
 
 namespace placey_be.Services;
@@ -32,7 +33,52 @@ public class UserService(AppDbContext db, IWebHostEnvironment env) : IUserServic
         var user = await db.Users.FindAsync(userId)
             ?? throw new KeyNotFoundException("User not found.");
 
-        db.Users.Remove(user);
+        // Wipe PII and mark as deleted — row is kept so FK references (bookings, reviews) remain valid for other users
+        user.IsDeleted = true;
+        user.Email = $"deleted_{userId}@deleted";
+        user.PasswordHash = string.Empty;
+        user.Name = "Deleted User";
+        user.Bio = null;
+        user.AvatarUrl = null;
+
+        // Cancel active bookings on the user's listings and soft-delete the listings
+        var listings = await db.Listings.Where(l => l.HostId == userId && !l.IsDeleted).ToListAsync();
+        var listingIds = listings.Select(l => l.Id).ToList();
+        var activeBookingsOnListings = await db.Bookings
+            .Where(b => listingIds.Contains(b.ListingId) &&
+                        (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed))
+            .ToListAsync();
+        foreach (var booking in activeBookingsOnListings)
+            booking.Status = BookingStatus.Cancelled;
+        foreach (var listing in listings)
+            listing.IsDeleted = true;
+
+        // Cancel active bookings made by this user as a guest
+        var activeGuestBookings = await db.Bookings
+            .Where(b => b.GuestId == userId &&
+                        (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed))
+            .ToListAsync();
+        foreach (var booking in activeGuestBookings)
+            booking.Status = BookingStatus.Cancelled;
+
+        // Revoke all refresh tokens so existing sessions stop working
+        var tokens = await db.RefreshTokens.Where(t => t.UserId == userId && t.RevokedAt == null).ToListAsync();
+        foreach (var token in tokens)
+            token.RevokedAt = DateTime.UtcNow;
+
+        // Remove personal favourites and conversations (private data with no value to others)
+        var favorites = await db.Favorites.Where(f => f.UserId == userId).ToListAsync();
+        db.Favorites.RemoveRange(favorites);
+
+        var conversationIds = await db.Conversations
+            .Where(c => c.User1Id == userId || c.User2Id == userId)
+            .Select(c => c.Id)
+            .ToListAsync();
+        var conversationMessages = await db.Messages.Where(m => conversationIds.Contains(m.ConversationId)).ToListAsync();
+        db.Messages.RemoveRange(conversationMessages);
+        var conversations = await db.Conversations.Where(c => conversationIds.Contains(c.Id)).ToListAsync();
+        db.Conversations.RemoveRange(conversations);
+
         await db.SaveChangesAsync();
     }
 

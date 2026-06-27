@@ -202,7 +202,7 @@ async function deleteAccount() {
 
 
     <!-- Danger zone -->
-    <section class="mb-10 border border-rose-200 rounded-2xl p-6">
+    <section class="mb-10 border border-rose-200 rounded-3xl p-6">
       <h2 class="text-sm font-semibold text-rose-600 mb-1">Danger zone</h2>
       <p class="text-sm text-muted mb-4">Permanently delete your account and all associated data. This cannot be undone.</p>
 

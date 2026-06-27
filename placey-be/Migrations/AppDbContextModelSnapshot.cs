@@ -146,6 +146,9 @@ namespace placey_be.Migrations
                     b.Property<Guid>("HostId")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsInstantBook")
                         .HasColumnType("boolean");
 
@@ -332,6 +335,9 @@ namespace placey_be.Migrations
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
