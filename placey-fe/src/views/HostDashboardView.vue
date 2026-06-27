@@ -109,6 +109,7 @@ async function updateReservationStatus(id: string, status: 'Confirmed' | 'Cancel
     const updated: Reservation = await res.json()
     const idx = reservations.value.findIndex((r) => r.id === id)
     if (idx !== -1) reservations.value[idx] = updated
+    authStore.fetchPendingReservationsCount()
   } catch (e: unknown) {
     updateError.value = e instanceof Error ? e.message : 'Failed to update reservation'
   } finally {
@@ -190,10 +191,17 @@ onMounted(() => {
       >
         {{ tab === 'listings' ? 'My listings' : 'Reservations' }}
         <span
-          class="ml-1.5 text-xs rounded-full px-1.5 py-0.5 font-normal"
-          :class="activeTab === tab ? 'bg-ink text-white' : 'bg-black/[0.06] text-muted'"
+          v-if="tab === 'listings' || pendingReservations.length > 0"
+          class="ml-1.5 text-xs rounded-full w-5 h-5 inline-flex items-center justify-center font-normal"
+          :class="
+            tab === 'reservations' && pendingReservations.length > 0
+              ? 'bg-rose-500 text-white'
+              : activeTab === tab
+                ? 'bg-ink text-white'
+                : 'bg-black/6 text-muted'
+          "
         >
-          {{ tab === 'listings' ? listings.length : reservations.length }}
+          {{ tab === 'listings' ? listings.length : pendingReservations.length }}
         </span>
       </button>
     </div>
