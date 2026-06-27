@@ -14,7 +14,7 @@ const PROPERTY_TYPES = ['Apartment', 'House']
 const listingId = route.params.id as string | undefined
 const isEdit = !!listingId
 
-// ── Form ─────────────────────────────────────────────────────────────────────
+// Form
 
 const form = ref({
   title: '',
@@ -33,7 +33,7 @@ const form = ref({
   amenities: [] as string[],
 })
 
-// ── Load existing listing (edit mode) ────────────────────────────────────────
+// Load existing listing (edit mode)
 
 const loading = ref(false)
 const loadError = ref<string | null>(null)
@@ -68,7 +68,7 @@ async function fetchListing() {
   }
 }
 
-// ── Photos (edit mode) ───────────────────────────────────────────────────────
+// Photos (edit mode)
 
 interface Photo {
   id: string
@@ -140,7 +140,7 @@ async function deleteExistingPhoto(photo: Photo) {
   }
 }
 
-// ── Photos (create mode) ─────────────────────────────────────────────────────
+// Photos (create mode)
 
 interface StagedPhoto {
   file: File
@@ -180,7 +180,7 @@ onUnmounted(() => {
   for (const p of stagedPhotos.value) URL.revokeObjectURL(p.previewUrl)
 })
 
-// ── Blockings (edit mode) ────────────────────────────────────────────────────
+// Blockings (edit mode)
 
 interface BlockingItem {
   id: string
@@ -254,7 +254,7 @@ async function removeBlocking(blockingId: string) {
   }
 }
 
-// ── Amenities ────────────────────────────────────────────────────────────────
+// Amenities
 
 function addAmenity() {
   const val = form.value.amenityInput.trim()
@@ -266,7 +266,7 @@ function removeAmenity(a: string) {
   form.value.amenities = form.value.amenities.filter((x) => x !== a)
 }
 
-// ── Delete listing ───────────────────────────────────────────────────────────
+// Delete listing
 
 const confirmDeleteOpen = ref(false)
 const isDeleting = ref(false)
@@ -289,7 +289,7 @@ async function confirmDelete() {
   }
 }
 
-// ── Submit / save ────────────────────────────────────────────────────────────
+// Submit / save
 
 const isSubmitting = ref(false)
 const uploadProgress = ref<{ done: number; total: number } | null>(null)
@@ -373,14 +373,14 @@ async function submit() {
   }
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// Helpers
 
 function formatDate(d: string) {
   const date = d.length === 10 ? new Date(`${d}T00:00:00`) : new Date(d)
   return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// Init
 
 onMounted(async () => {
   if (isEdit) {
