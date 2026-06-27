@@ -1,17 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using placey_be.Data;
 using placey_be.Models.DTOs.Bookings;
+using placey_be.Models.DTOs.Messages;
 using placey_be.Models.Entities;
 using placey_be.Services.Interfaces;
 
 namespace placey_be.Services;
 
-public class BookingService(AppDbContext db) : IBookingService
+public class BookingService(AppDbContext db, IMessageService messageService) : IBookingService
 {
     public async Task<BookingResponse> CreateAsync(Guid guestId, CreateBookingRequest request)
     {
         var listing =
-            await db.Listings.FindAsync(request.ListingId)
+            await db.Listings.Include(l => l.Host).FirstOrDefaultAsync(l => l.Id == request.ListingId)
             ?? throw new KeyNotFoundException("Listing not found.");
 
         if (listing.HostId == guestId)
@@ -53,6 +54,9 @@ public class BookingService(AppDbContext db) : IBookingService
 
         db.Bookings.Add(booking);
         await db.SaveChangesAsync();
+
+        if (listing.IsInstantBook)
+            await SendBookingConfirmedMessageAsync(listing.HostId, guestId, listing.Title, booking.CheckIn, booking.CheckOut);
 
         return await LoadResponseAsync(booking.Id);
     }
@@ -109,7 +113,17 @@ public class BookingService(AppDbContext db) : IBookingService
         booking.Status = status;
         await db.SaveChangesAsync();
 
+        if (status == BookingStatus.Confirmed)
+            await SendBookingConfirmedMessageAsync(booking.Listing.HostId, booking.GuestId, booking.Listing.Title, booking.CheckIn, booking.CheckOut);
+
         return ToResponse(booking);
+    }
+
+    private async Task SendBookingConfirmedMessageAsync(Guid hostId, Guid guestId, string listingTitle, DateOnly checkIn, DateOnly checkOut)
+    {
+        var conv = await messageService.GetOrCreateConversationAsync(hostId, guestId);
+        var body = $"Your booking for \"{listingTitle}\" ({checkIn:dd MMM yyyy} – {checkOut:dd MMM yyyy}) has been confirmed. Looking forward to hosting you!";
+        await messageService.SendMessageAsync(conv.Id, hostId, new SendMessageRequest(body));
     }
 
     private async Task<BookingResponse> LoadResponseAsync(Guid bookingId)
