@@ -187,22 +187,22 @@ Detailed documentation is available in the `docs/` folder:
 
 ## Tests
 
-### What was tested
+### Backend tests
 
-Unit tests cover all six service layers of the backend using an in-memory database (EF Core InMemory). No external dependencies (database, running server) are needed to run the suite.
+Unit tests cover the service layers of the backend using an in-memory database (EF Core InMemory). No external dependencies (database, running server) are needed to run the suite.
 
-| Service           | Scenarios tested                                                                                                                                                                                                                                                      |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AuthService`     | Register (happy path, duplicate email), login (valid, unknown email, wrong password), refresh (valid, invalid, revoked token), logout                                                                                                                                 |
-| `BookingService`  | Create (instant-book → Confirmed, non-instant → Pending, host self-booking, invalid dates, date conflicts, cancelled-then-rebook), get by ID (as guest, as host, unauthorized), cancel (guest, host, unauthorized, completed booking), update status (host, non-host) |
-| `ListingService`  | Create, get by ID (found, not found), update (host, non-host, not found), delete (host, non-host), search (no filter, location, guest count, pagination), set/get availability (host, non-host)                                                                       |
-| `ReviewService`   | Create (valid completed booking, wrong guest, booking not completed, duplicate, booking not found), delete (author, non-author), get by listing, get by host user                                                                                                     |
-| `FavoriteService` | Add (valid, listing not found, idempotent), remove (existing, idempotent), get favorites                                                                                                                                                                              |
-| `UserService`     | Get me (found, not found), update me (fields updated, null fields preserved), delete me, get public profile                                                                                                                                                           |
+| Service           | Scenarios covered                                                                                                                                                                                                                                                                                        |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AuthService`     | Register (happy path, duplicate email), login (valid, unknown email, wrong password), refresh (valid, invalid, revoked token), logout (valid, unknown token)                                                                                                                                             |
+| `BookingService`  | Create (instant-book → Confirmed, non-instant → Pending, host self-booking, invalid dates, equal dates, date conflict, blocked dates, cancelled-then-rebook, listing not found), get by ID (guest, host, unauthorized, not found), cancel (guest, host, unauthorized, completed, not found), update status (host, non-host, not found) |
+| `ListingService`  | Create, get by ID (found, not found, deleted), update (host, non-host, not found), delete (host, non-host, cascades active bookings), search (no filter, location, guest count, category, property type, min bedrooms, price range, date range, pagination), add/delete blocking (host, non-host, not found), get blockings (ordering, includes confirmed bookings, excludes cancelled), get/delete photos (host, non-host, not found) |
+| `ReviewService`   | Create (valid completed booking, wrong guest, booking not completed, duplicate, booking not found), delete (author, non-author), get by listing, get by host user (matching, other user)                                                                                                                  |
+| `FavoriteService` | Add (valid, listing not found, idempotent), remove (existing, idempotent), get favorites (empty)                                                                                                                                                                                                         |
+| `UserService`     | Get me (found, not found), update me (fields updated, null fields preserved), delete me, get public profile (found, not found)                                                                                                                                                                           |
+| `MessageService`  | Get/create conversation (new pair, existing pair, reversed order, self, unknown user), list conversations (empty, after create, unread count and last message), send message (valid, conversation not found, non-member), get conversation (as participant with messages, non-member, not found, marks as read), unread count (zero, after message, after reading) |
 
-**Total: 66 tests**
 
-### Running tests
+### Running backend tests
 
 ```bash
 # Run from the repo root
@@ -210,6 +210,36 @@ dotnet test placey-be.Tests/
 
 # Or run the full solution
 dotnet test placey.sln
+```
+
+---
+
+### Frontend tests
+
+Frontend unit tests use [Vitest](https://vitest.dev/) and [`@vue/test-utils`](https://test-utils.vuejs.org/). All five Pinia stores are tested with mocked API calls (`vi.stubGlobal` / `vi.spyOn`).
+
+| Store                | Scenarios covered                                                                                                                                                                                    |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useAuthStore`       | Initial state (empty, restored from localStorage, corrupt data), login (success, failure, loading flag, persistence), register (success, duplicate email), logout (success, network error), patchUser, refreshSession (success, no token, deduplication), authHeaders, apiFetch (401 retry, clears session on failed refresh) |
+| `useFavoritesStore`  | isFavorited, hydrate (success, failure), toggleFavorite (add optimistic, remove optimistic, rollback add on error, rollback remove on error), reset                                                  |
+| `useListingsStore`   | fetchListings (success, HTTP error, query string for location/guests, optional filters, omits absent params, ignores AbortError, loading flag)                                                        |
+| `useBookingStore`    | fetchMyBookings (success, error, non-array response), createBooking (success, conflict error, loading flag), cancelBooking (removes from list, clears lastBooking, error, loading flag), rateBooking (refreshes list, error, loading flag) |
+| `useMessagingStore`  | fetchConversations (success, error), fetchConversation (sets active, resets before load, error), getOrCreateConversation (success, error), sendMessage (success + appends, wrong conversation, error, loading flag), fetchUnreadCount (success, silent error), resetActive |
+
+
+### Running frontend tests
+
+```bash
+cd placey-fe
+
+# Run once
+pnpm test
+
+# Watch mode
+pnpm test:watch
+
+# With coverage report
+pnpm test:coverage
 ```
 
 ---
