@@ -891,7 +891,7 @@ onMounted(async () => {
             Blocked dates
           </h2>
 
-          <div class="bg-cream rounded-2xl p-5 mb-5">
+          <div class="mb-5">
             <div class="grid grid-cols-2 gap-3 mb-4">
               <div>
                 <label class="block text-xs text-muted mb-1">Start date</label>
