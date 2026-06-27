@@ -33,7 +33,7 @@ public class BookingServiceTests
         db.Listings.Add(listing);
         db.SaveChanges();
 
-        return (new BookingService(db), host, guest, listing);
+        return (new BookingService(db, new NullMessageService()), host, guest, listing);
     }
 
     [Fact]
