@@ -22,6 +22,7 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
         var (status, title) = ex switch
         {
             KeyNotFoundException => (StatusCodes.Status404NotFound, "Not Found"),
+            ResourceDeletedException => (StatusCodes.Status410Gone, "Gone"),
             UnauthorizedAccessException => (StatusCodes.Status403Forbidden, "Forbidden"),
             InvalidOperationException => (StatusCodes.Status400BadRequest, "Bad Request"),
             _ => (StatusCodes.Status500InternalServerError, "Internal Server Error")

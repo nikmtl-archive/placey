@@ -416,7 +416,7 @@ onMounted(() => {
         <div
           v-for="r in currentReservations"
           :key="r.id"
-          class="border border-divider-light rounded-2xl overflow-hidden"
+          class="border border-divider-light rounded-3xl overflow-hidden"
         >
           <div class="flex gap-4 p-4">
             <!-- Listing photo -->
