@@ -2,10 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace placey_be.Models.DTOs.Users;
 
-public record UpdateProfileRequest(
-    string? Name,
-    string? Bio
-);
+public record UpdateProfileRequest(string? Name, string? Bio);
 
 public record PublicUserResponse(
     Guid Id,

@@ -167,7 +167,11 @@ function isUnavailableCheckout(day: number, month: number, year: number) {
 }
 
 function isDayDisabled(day: number, month: number, year: number) {
-  return isPast(day, month, year) || isBlocked(day, month, year) || isUnavailableCheckout(day, month, year)
+  return (
+    isPast(day, month, year) ||
+    isBlocked(day, month, year) ||
+    isUnavailableCheckout(day, month, year)
+  )
 }
 
 function selectDay(day: number, month: number, year: number) {
@@ -301,7 +305,8 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside))
                       : 'cursor-pointer hover:bg-gray-100',
                     isBlocked(day, calendarMonth, calendarYear)
                       ? 'text-gray-300 line-through decoration-gray-300'
-                      : isPast(day, calendarMonth, calendarYear) || isUnavailableCheckout(day, calendarMonth, calendarYear)
+                      : isPast(day, calendarMonth, calendarYear) ||
+                          isUnavailableCheckout(day, calendarMonth, calendarYear)
                         ? 'text-gray-300'
                         : '',
                     isSelected(day, calendarMonth, calendarYear)
@@ -367,7 +372,8 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside))
                       : 'cursor-pointer hover:bg-gray-100',
                     isBlocked(day, nextMonth, nextYear)
                       ? 'text-gray-300 line-through decoration-gray-300'
-                      : isPast(day, nextMonth, nextYear) || isUnavailableCheckout(day, nextMonth, nextYear)
+                      : isPast(day, nextMonth, nextYear) ||
+                          isUnavailableCheckout(day, nextMonth, nextYear)
                         ? 'text-gray-300'
                         : '',
                     isSelected(day, nextMonth, nextYear)

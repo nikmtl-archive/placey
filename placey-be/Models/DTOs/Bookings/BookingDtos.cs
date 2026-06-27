@@ -12,9 +12,7 @@ public record CreateBookingRequest(
     [Required, Range(1, 50)] int Guests
 );
 
-public record UpdateBookingStatusRequest(
-    [Required] BookingStatus Status
-);
+public record UpdateBookingStatusRequest([Required] BookingStatus Status);
 
 public record BookingResponse(
     [property: JsonPropertyName("id")] Guid Id,

@@ -74,12 +74,20 @@ function formatTime(iso: string): string {
 }
 
 function initials(name: string): string {
-  return name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2)
+  return name
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 }
 </script>
 
 <template>
-  <div class="flex flex-col border border-divider rounded-3xl bg-white overflow-hidden shadow-[0_1px_8px_rgba(0,0,0,0.05)]" style="height: calc(100vh - 12rem);">
+  <div
+    class="flex flex-col border border-divider rounded-3xl bg-white overflow-hidden shadow-[0_1px_8px_rgba(0,0,0,0.05)]"
+    style="height: calc(100vh - 12rem)"
+  >
     <!-- Header -->
     <div class="flex items-center gap-3 px-5 py-4 border-b border-divider shrink-0">
       <button
@@ -91,7 +99,9 @@ function initials(name: string): string {
       </button>
 
       <template v-if="activeConversation">
-        <div class="w-9 h-9 rounded-full bg-cream border border-divider-light flex items-center justify-center shrink-0 overflow-hidden">
+        <div
+          class="w-9 h-9 rounded-full bg-cream border border-divider-light flex items-center justify-center shrink-0 overflow-hidden"
+        >
           <img
             v-if="activeConversation.otherUserAvatarUrl"
             :src="activeConversation.otherUserAvatarUrl"
@@ -119,9 +129,15 @@ function initials(name: string): string {
     </div>
 
     <!-- Error -->
-    <div v-else-if="error && !activeConversation" class="flex-1 flex flex-col items-center justify-center gap-3 p-6 text-center">
+    <div
+      v-else-if="error && !activeConversation"
+      class="flex-1 flex flex-col items-center justify-center gap-3 p-6 text-center"
+    >
       <p class="text-sm text-muted">{{ error }}</p>
-      <button class="text-sm font-medium text-ink underline underline-offset-2 cursor-pointer" @click="emit('back')">
+      <button
+        class="text-sm font-medium text-ink underline underline-offset-2 cursor-pointer"
+        @click="emit('back')"
+      >
         Go back
       </button>
     </div>
@@ -146,10 +162,20 @@ function initials(name: string): string {
           >
             <!-- Date separator -->
             <div
-              v-if="i === 0 || new Date(msg.createdAt).toDateString() !== new Date(activeConversation.messages[i - 1]!.createdAt).toDateString()"
+              v-if="
+                i === 0 ||
+                new Date(msg.createdAt).toDateString() !==
+                  new Date(activeConversation.messages[i - 1]!.createdAt).toDateString()
+              "
               class="self-center text-[10px] text-muted bg-white border border-divider px-3 py-0.5 rounded-full my-4"
             >
-              {{ new Date(msg.createdAt).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) }}
+              {{
+                new Date(msg.createdAt).toLocaleDateString('en-US', {
+                  weekday: 'short',
+                  month: 'short',
+                  day: 'numeric',
+                })
+              }}
             </div>
 
             <div

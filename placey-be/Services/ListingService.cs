@@ -11,8 +11,8 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
 {
     public async Task<(List<ListingResponse> Items, int Total)> SearchAsync(ListingSearchParams p)
     {
-        var query = db.Listings
-            .Where(l => !l.IsDeleted)
+        var query = db
+            .Listings.Where(l => !l.IsDeleted)
             .Include(l => l.Host)
             .Include(l => l.Photos)
             .Include(l => l.Reviews)
@@ -22,9 +22,10 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
         {
             var loc = p.Location.ToLower();
             query = query.Where(l =>
-                l.City.ToLower().Contains(loc) ||
-                l.Country.ToLower().Contains(loc) ||
-                l.Street.ToLower().Contains(loc));
+                l.City.ToLower().Contains(loc)
+                || l.Country.ToLower().Contains(loc)
+                || l.Street.ToLower().Contains(loc)
+            );
         }
 
         if (p.Guests.HasValue)
@@ -49,10 +50,13 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
         {
             var checkIn = p.CheckIn.Value;
             var checkOut = p.CheckOut.Value;
-            query = query.Where(l => !l.Bookings.Any(b =>
-                b.Status != BookingStatus.Cancelled &&
-                b.CheckIn < checkOut &&
-                b.CheckOut > checkIn));
+            query = query.Where(l =>
+                !l.Bookings.Any(b =>
+                    b.Status != BookingStatus.Cancelled
+                    && b.CheckIn < checkOut
+                    && b.CheckOut > checkIn
+                )
+            );
         }
 
         var total = await query.CountAsync();
@@ -67,11 +71,12 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
 
     public async Task<ListingResponse> GetByIdAsync(Guid id)
     {
-        var listing = await db.Listings
-            .Include(l => l.Host)
-            .Include(l => l.Photos)
-            .Include(l => l.Reviews)
-            .FirstOrDefaultAsync(l => l.Id == id)
+        var listing =
+            await db
+                .Listings.Include(l => l.Host)
+                .Include(l => l.Photos)
+                .Include(l => l.Reviews)
+                .FirstOrDefaultAsync(l => l.Id == id)
             ?? throw new KeyNotFoundException("Listing not found.");
 
         if (listing.IsDeleted)
@@ -97,7 +102,7 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
             IsInstantBook = request.IsInstantBook,
             Amenities = request.Amenities ?? new List<string>(),
             Category = request.Category,
-            PropertyType = request.PropertyType
+            PropertyType = request.PropertyType,
         };
 
         db.Listings.Add(listing);
@@ -106,27 +111,45 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
         return await GetByIdAsync(listing.Id);
     }
 
-    public async Task<ListingResponse> UpdateAsync(Guid listingId, Guid requesterId, UpdateListingRequest request)
+    public async Task<ListingResponse> UpdateAsync(
+        Guid listingId,
+        Guid requesterId,
+        UpdateListingRequest request
+    )
     {
-        var listing = await db.Listings.FindAsync(listingId)
+        var listing =
+            await db.Listings.FindAsync(listingId)
             ?? throw new KeyNotFoundException("Listing not found.");
 
         if (listing.HostId != requesterId)
             throw new UnauthorizedAccessException("Only the host can update this listing.");
 
-        if (request.Title is not null) listing.Title = request.Title;
-        if (request.Description is not null) listing.Description = request.Description;
-        if (request.City is not null) listing.City = request.City;
-        if (request.Country is not null) listing.Country = request.Country;
-        if (request.Street is not null) listing.Street = request.Street;
-        if (request.PricePerNight.HasValue) listing.PricePerNight = request.PricePerNight.Value;
-        if (request.MaxGuests.HasValue) listing.MaxGuests = request.MaxGuests.Value;
-        if (request.Bedrooms.HasValue) listing.Bedrooms = request.Bedrooms.Value;
-        if (request.Bathrooms.HasValue) listing.Bathrooms = request.Bathrooms.Value;
-        if (request.IsInstantBook.HasValue) listing.IsInstantBook = request.IsInstantBook.Value;
-        if (request.Amenities is not null) listing.Amenities = request.Amenities;
-        if (request.Category.HasValue) listing.Category = request.Category.Value;
-        if (request.PropertyType.HasValue) listing.PropertyType = request.PropertyType.Value;
+        if (request.Title is not null)
+            listing.Title = request.Title;
+        if (request.Description is not null)
+            listing.Description = request.Description;
+        if (request.City is not null)
+            listing.City = request.City;
+        if (request.Country is not null)
+            listing.Country = request.Country;
+        if (request.Street is not null)
+            listing.Street = request.Street;
+        if (request.PricePerNight.HasValue)
+            listing.PricePerNight = request.PricePerNight.Value;
+        if (request.MaxGuests.HasValue)
+            listing.MaxGuests = request.MaxGuests.Value;
+        if (request.Bedrooms.HasValue)
+            listing.Bedrooms = request.Bedrooms.Value;
+        if (request.Bathrooms.HasValue)
+            listing.Bathrooms = request.Bathrooms.Value;
+        if (request.IsInstantBook.HasValue)
+            listing.IsInstantBook = request.IsInstantBook.Value;
+        if (request.Amenities is not null)
+            listing.Amenities = request.Amenities;
+        if (request.Category.HasValue)
+            listing.Category = request.Category.Value;
+        if (request.PropertyType.HasValue)
+            listing.PropertyType = request.PropertyType.Value;
 
         await db.SaveChangesAsync();
         return await GetByIdAsync(listingId);
@@ -134,7 +157,8 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
 
     public async Task DeleteAsync(Guid listingId, Guid requesterId)
     {
-        var listing = await db.Listings.FindAsync(listingId)
+        var listing =
+            await db.Listings.FindAsync(listingId)
             ?? throw new KeyNotFoundException("Listing not found.");
 
         if (listing.HostId != requesterId)
@@ -151,9 +175,11 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
 
     private async Task CancelActiveBookingsAsync(Guid listingId)
     {
-        var activeBookings = await db.Bookings
-            .Where(b => b.ListingId == listingId &&
-                        (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed))
+        var activeBookings = await db
+            .Bookings.Where(b =>
+                b.ListingId == listingId
+                && (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed)
+            )
             .ToListAsync();
 
         foreach (var booking in activeBookings)
@@ -162,26 +188,30 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
 
     public async Task<List<BlockingResponse>> GetBlockingsAsync(Guid listingId)
     {
-        var manualBlocks = await db.ListingBlocks
-            .Where(b => b.ListingId == listingId)
+        var manualBlocks = await db
+            .ListingBlocks.Where(b => b.ListingId == listingId)
             .Select(b => new BlockingResponse(b.Id, b.StartDate, b.EndDate))
             .ToListAsync();
 
-        var bookingBlocks = await db.Bookings
-            .Where(b => b.ListingId == listingId &&
-                        (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed))
+        var bookingBlocks = await db
+            .Bookings.Where(b =>
+                b.ListingId == listingId
+                && (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed)
+            )
             .Select(b => new BlockingResponse(b.Id, b.CheckIn, b.CheckOut))
             .ToListAsync();
 
-        return manualBlocks
-            .Concat(bookingBlocks)
-            .OrderBy(b => b.StartDate)
-            .ToList();
+        return manualBlocks.Concat(bookingBlocks).OrderBy(b => b.StartDate).ToList();
     }
 
-    public async Task<BlockingResponse> AddBlockingAsync(Guid listingId, Guid requesterId, AddBlockingRequest request)
+    public async Task<BlockingResponse> AddBlockingAsync(
+        Guid listingId,
+        Guid requesterId,
+        AddBlockingRequest request
+    )
     {
-        var listing = await db.Listings.FindAsync(listingId)
+        var listing =
+            await db.Listings.FindAsync(listingId)
             ?? throw new KeyNotFoundException("Listing not found.");
 
         if (listing.HostId != requesterId)
@@ -202,14 +232,17 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
 
     public async Task DeleteBlockingAsync(Guid listingId, Guid blockingId, Guid requesterId)
     {
-        var listing = await db.Listings.FindAsync(listingId)
+        var listing =
+            await db.Listings.FindAsync(listingId)
             ?? throw new KeyNotFoundException("Listing not found.");
 
         if (listing.HostId != requesterId)
             throw new UnauthorizedAccessException("Only the host can remove blockings.");
 
-        var block = await db.ListingBlocks.FirstOrDefaultAsync(b => b.Id == blockingId && b.ListingId == listingId)
-            ?? throw new KeyNotFoundException("Blocking not found.");
+        var block =
+            await db.ListingBlocks.FirstOrDefaultAsync(b =>
+                b.Id == blockingId && b.ListingId == listingId
+            ) ?? throw new KeyNotFoundException("Blocking not found.");
 
         db.ListingBlocks.Remove(block);
         await db.SaveChangesAsync();
@@ -217,22 +250,28 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
 
     public async Task<List<ListingPhotoResponse>> GetPhotosAsync(Guid listingId, Guid requesterId)
     {
-        var listing = await db.Listings.FindAsync(listingId)
+        var listing =
+            await db.Listings.FindAsync(listingId)
             ?? throw new KeyNotFoundException("Listing not found.");
 
         if (listing.HostId != requesterId)
             throw new UnauthorizedAccessException("Only the host can view photo details.");
 
-        return await db.ListingPhotos
-            .Where(p => p.ListingId == listingId)
+        return await db
+            .ListingPhotos.Where(p => p.ListingId == listingId)
             .OrderBy(p => p.Order)
             .Select(p => new ListingPhotoResponse(p.Id, p.Url, p.Order))
             .ToListAsync();
     }
 
-    public async Task<ListingPhotoResponse> UploadPhotoAsync(Guid listingId, Guid requesterId, IFormFile file)
+    public async Task<ListingPhotoResponse> UploadPhotoAsync(
+        Guid listingId,
+        Guid requesterId,
+        IFormFile file
+    )
     {
-        var listing = await db.Listings.Include(l => l.Photos).FirstOrDefaultAsync(l => l.Id == listingId)
+        var listing =
+            await db.Listings.Include(l => l.Photos).FirstOrDefaultAsync(l => l.Id == listingId)
             ?? throw new KeyNotFoundException("Listing not found.");
 
         if (listing.HostId != requesterId)
@@ -254,7 +293,7 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
         {
             ListingId = listingId,
             Url = $"/listing-photos/{filename}",
-            Order = order
+            Order = order,
         };
 
         db.ListingPhotos.Add(photo);
@@ -265,17 +304,23 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
 
     public async Task DeletePhotoAsync(Guid listingId, Guid photoId, Guid requesterId)
     {
-        var listing = await db.Listings.FindAsync(listingId)
+        var listing =
+            await db.Listings.FindAsync(listingId)
             ?? throw new KeyNotFoundException("Listing not found.");
 
         if (listing.HostId != requesterId)
             throw new UnauthorizedAccessException("Only the host can delete photos.");
 
-        var photo = await db.ListingPhotos.FirstOrDefaultAsync(p => p.Id == photoId && p.ListingId == listingId)
-            ?? throw new KeyNotFoundException("Photo not found.");
+        var photo =
+            await db.ListingPhotos.FirstOrDefaultAsync(p =>
+                p.Id == photoId && p.ListingId == listingId
+            ) ?? throw new KeyNotFoundException("Photo not found.");
 
         var webRoot = env?.WebRootPath ?? "wwwroot";
-        var physicalPath = Path.Combine(webRoot, photo.Url.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+        var physicalPath = Path.Combine(
+            webRoot,
+            photo.Url.TrimStart('/').Replace('/', Path.DirectorySeparatorChar)
+        );
         if (File.Exists(physicalPath))
             File.Delete(physicalPath);
 
@@ -283,28 +328,29 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
         await db.SaveChangesAsync();
     }
 
-    private static ListingResponse ToResponse(Listing l) => new(
-        l.Id,
-        l.HostId,
-        l.Host.Name,
-        l.Host.AvatarUrl,
-        l.Title,
-        l.Description,
-        l.City,
-        l.Country,
-        string.IsNullOrEmpty(l.Street) ? null : l.Street,
-        $"{l.City}, {l.Country}",
-        l.PricePerNight,
-        l.Bedrooms,
-        l.Bathrooms,
-        l.MaxGuests,
-        l.IsInstantBook,
-        l.Amenities,
-        l.Category,
-        l.PropertyType,
-        l.Photos.OrderBy(p => p.Order).Select(p => p.Url).ToList(),
-        l.Reviews.Count > 0 ? l.Reviews.Average(r => r.Rating) : null,
-        l.Reviews.Count,
-        l.CreatedAt
-    );
+    private static ListingResponse ToResponse(Listing l) =>
+        new(
+            l.Id,
+            l.HostId,
+            l.Host.Name,
+            l.Host.AvatarUrl,
+            l.Title,
+            l.Description,
+            l.City,
+            l.Country,
+            string.IsNullOrEmpty(l.Street) ? null : l.Street,
+            $"{l.City}, {l.Country}",
+            l.PricePerNight,
+            l.Bedrooms,
+            l.Bathrooms,
+            l.MaxGuests,
+            l.IsInstantBook,
+            l.Amenities,
+            l.Category,
+            l.PropertyType,
+            l.Photos.OrderBy(p => p.Order).Select(p => p.Url).ToList(),
+            l.Reviews.Count > 0 ? l.Reviews.Average(r => r.Rating) : null,
+            l.Reviews.Count,
+            l.CreatedAt
+        );
 }

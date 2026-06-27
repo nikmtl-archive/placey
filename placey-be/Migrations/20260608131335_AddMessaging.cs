@@ -19,7 +19,8 @@ namespace placey_be.Migrations
                 nullable: false,
                 oldClrType: typeof(List<string>),
                 oldType: "text[]",
-                oldDefaultValueSql: "ARRAY[]::text[]");
+                oldDefaultValueSql: "ARRAY[]::text[]"
+            );
 
             migrationBuilder.CreateTable(
                 name: "Conversations",
@@ -28,7 +29,10 @@ namespace placey_be.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     User1Id = table.Column<Guid>(type: "uuid", nullable: false),
                     User2Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTime>(
+                        type: "timestamp with time zone",
+                        nullable: false
+                    ),
                 },
                 constraints: table =>
                 {
@@ -38,14 +42,17 @@ namespace placey_be.Migrations
                         column: x => x.User1Id,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Restrict
+                    );
                     table.ForeignKey(
                         name: "FK_Conversations_Users_User2Id",
                         column: x => x.User2Id,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
+                        onDelete: ReferentialAction.Restrict
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "Messages",
@@ -54,9 +61,16 @@ namespace placey_be.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     ConversationId = table.Column<Guid>(type: "uuid", nullable: false),
                     SenderId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Body = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: false),
+                    Body = table.Column<string>(
+                        type: "character varying(4000)",
+                        maxLength: 4000,
+                        nullable: false
+                    ),
                     IsRead = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTime>(
+                        type: "timestamp with time zone",
+                        nullable: false
+                    ),
                 },
                 constraints: table =>
                 {
@@ -66,45 +80,50 @@ namespace placey_be.Migrations
                         column: x => x.ConversationId,
                         principalTable: "Conversations",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_Messages_Users_SenderId",
                         column: x => x.SenderId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
+                        onDelete: ReferentialAction.Restrict
+                    );
+                }
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Conversations_User1Id_User2Id",
                 table: "Conversations",
                 columns: new[] { "User1Id", "User2Id" },
-                unique: true);
+                unique: true
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Conversations_User2Id",
                 table: "Conversations",
-                column: "User2Id");
+                column: "User2Id"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_ConversationId",
                 table: "Messages",
-                column: "ConversationId");
+                column: "ConversationId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_SenderId",
                 table: "Messages",
-                column: "SenderId");
+                column: "SenderId"
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Messages");
+            migrationBuilder.DropTable(name: "Messages");
 
-            migrationBuilder.DropTable(
-                name: "Conversations");
+            migrationBuilder.DropTable(name: "Conversations");
 
             migrationBuilder.AlterColumn<List<string>>(
                 name: "Amenities",
@@ -113,7 +132,8 @@ namespace placey_be.Migrations
                 nullable: false,
                 defaultValueSql: "ARRAY[]::text[]",
                 oldClrType: typeof(List<string>),
-                oldType: "text[]");
+                oldType: "text[]"
+            );
         }
     }
 }

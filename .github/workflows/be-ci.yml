@@ -1,0 +1,38 @@
+name: Backend CI
+
+on:
+  pull_request:
+    paths:
+      - 'placey-be/**'
+      - 'placey-be.Tests/**'
+      - 'placey.sln'
+      - '.github/workflows/be-ci.yml'
+
+jobs:
+  build-and-check:
+    name: Build, Format Check & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore tools
+        run: dotnet tool restore
+        working-directory: placey-be
+
+      - name: Restore dependencies
+        run: dotnet restore placey.sln
+
+      - name: Check formatting (CSharpier)
+        run: dotnet csharpier check .
+        working-directory: placey-be
+
+      - name: Build
+        run: dotnet build placey.sln --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test placey.sln --no-build --configuration Release

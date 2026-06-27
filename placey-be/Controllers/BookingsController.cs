@@ -44,11 +44,20 @@ public class BookingsController(IBookingService bookingService, AppDbContext db)
     [HttpGet("{id:guid}/review")]
     public async Task<IActionResult> GetReview(Guid id)
     {
-        var review = await db.Reviews
-            .Include(r => r.Author)
+        var review = await db
+            .Reviews.Include(r => r.Author)
             .FirstOrDefaultAsync(r => r.BookingId == id);
 
-        if (review == null) return NotFound();
-        return Ok(new { review.Id, review.Rating, review.Comment, review.CreatedAt });
+        if (review == null)
+            return NotFound();
+        return Ok(
+            new
+            {
+                review.Id,
+                review.Rating,
+                review.Comment,
+                review.CreatedAt,
+            }
+        );
     }
 }

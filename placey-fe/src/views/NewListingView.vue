@@ -26,7 +26,7 @@ const form = ref({
   amenities: [] as string[],
 })
 
-// Photos 
+// Photos
 
 interface StagedPhoto {
   file: File
@@ -41,7 +41,8 @@ function addFiles(files: FileList | null) {
   if (!files) return
   for (const file of Array.from(files)) {
     if (!file.type.startsWith('image/')) continue
-    if (stagedPhotos.value.some(p => p.file.name === file.name && p.file.size === file.size)) continue
+    if (stagedPhotos.value.some((p) => p.file.name === file.name && p.file.size === file.size))
+      continue
     stagedPhotos.value.push({ file, previewUrl: URL.createObjectURL(file) })
   }
 }
@@ -73,7 +74,7 @@ function addAmenity() {
 }
 
 function removeAmenity(a: string) {
-  form.value.amenities = form.value.amenities.filter(x => x !== a)
+  form.value.amenities = form.value.amenities.filter((x) => x !== a)
 }
 
 // Submit
@@ -82,12 +83,13 @@ const isSubmitting = ref(false)
 const uploadProgress = ref<{ done: number; total: number } | null>(null)
 const error = ref<string | null>(null)
 
-const canSubmit = computed(() =>
-  form.value.title.trim() &&
-  form.value.description.trim() &&
-  form.value.city.trim() &&
-  form.value.country.trim() &&
-  form.value.pricePerNight > 0
+const canSubmit = computed(
+  () =>
+    form.value.title.trim() &&
+    form.value.description.trim() &&
+    form.value.city.trim() &&
+    form.value.country.trim() &&
+    form.value.pricePerNight > 0,
 )
 
 const submitLabel = computed(() => {
@@ -162,7 +164,18 @@ async function submit() {
         class="flex items-center gap-1.5 text-sm text-muted hover:text-ink transition-colors mb-6 cursor-pointer"
         @click="router.back()"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
         Back
       </button>
       <h1 class="font-serif text-3xl font-semibold text-ink mb-1">Create a listing</h1>
@@ -175,7 +188,9 @@ async function submit() {
         <h2 class="text-xs font-semibold text-muted uppercase tracking-widest mb-4">Basic info</h2>
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-ink mb-1.5">Title <span class="text-rose-500">*</span></label>
+            <label class="block text-sm font-medium text-ink mb-1.5"
+              >Title <span class="text-rose-500">*</span></label
+            >
             <input
               v-model="form.title"
               type="text"
@@ -185,7 +200,9 @@ async function submit() {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-ink mb-1.5">Description <span class="text-rose-500">*</span></label>
+            <label class="block text-sm font-medium text-ink mb-1.5"
+              >Description <span class="text-rose-500">*</span></label
+            >
             <textarea
               v-model="form.description"
               rows="5"
@@ -225,7 +242,9 @@ async function submit() {
         <div class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-ink mb-1.5">City <span class="text-rose-500">*</span></label>
+              <label class="block text-sm font-medium text-ink mb-1.5"
+                >City <span class="text-rose-500">*</span></label
+              >
               <input
                 v-model="form.city"
                 type="text"
@@ -234,7 +253,9 @@ async function submit() {
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-ink mb-1.5">Country <span class="text-rose-500">*</span></label>
+              <label class="block text-sm font-medium text-ink mb-1.5"
+                >Country <span class="text-rose-500">*</span></label
+              >
               <input
                 v-model="form.country"
                 type="text"
@@ -262,10 +283,14 @@ async function submit() {
 
       <!-- Pricing & capacity -->
       <section>
-        <h2 class="text-xs font-semibold text-muted uppercase tracking-widest mb-4">Pricing & capacity</h2>
+        <h2 class="text-xs font-semibold text-muted uppercase tracking-widest mb-4">
+          Pricing & capacity
+        </h2>
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-ink mb-1.5">Price per night <span class="text-rose-500">*</span></label>
+            <label class="block text-sm font-medium text-ink mb-1.5"
+              >Price per night <span class="text-rose-500">*</span></label
+            >
             <div class="relative">
               <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-muted">$</span>
               <input
@@ -346,10 +371,24 @@ async function submit() {
               class="text-ink/40 hover:text-rose-500 transition-colors cursor-pointer"
               @click="removeAmenity(a)"
             >
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
             </button>
           </span>
-          <span v-if="form.amenities.length === 0" class="text-sm text-muted">No amenities added yet.</span>
+          <span v-if="form.amenities.length === 0" class="text-sm text-muted"
+            >No amenities added yet.</span
+          >
         </div>
         <div class="flex gap-2">
           <input
@@ -373,7 +412,9 @@ async function submit() {
       <!-- Photos -->
       <section>
         <h2 class="text-xs font-semibold text-muted uppercase tracking-widest mb-1">Photos</h2>
-        <p class="text-xs text-muted mb-4">Add photos now or upload them later from your dashboard.</p>
+        <p class="text-xs text-muted mb-4">
+          Add photos now or upload them later from your dashboard.
+        </p>
 
         <!-- Drop zone -->
         <label
@@ -384,9 +425,20 @@ async function submit() {
           @drop.prevent="onDrop"
         >
           <div class="w-10 h-10 rounded-full bg-cream flex items-center justify-center">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-ink/50">
-              <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
-              <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="text-ink/50"
+            >
+              <polyline points="16 16 12 12 8 16" />
+              <line x1="12" y1="12" x2="12" y2="21" />
+              <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
             </svg>
           </div>
           <div class="text-center">
@@ -410,21 +462,44 @@ async function submit() {
             :key="photo.previewUrl"
             class="relative aspect-square rounded-xl overflow-hidden group bg-divider-light"
           >
-            <img :src="photo.previewUrl" :alt="photo.file.name" class="w-full h-full object-cover" />
-            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+            <img
+              :src="photo.previewUrl"
+              :alt="photo.file.name"
+              class="w-full h-full object-cover"
+            />
+            <div
+              class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center"
+            >
               <button
                 type="button"
                 class="opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-2 shadow hover:bg-rose-50 cursor-pointer"
                 @click.prevent="removePhoto(i)"
               >
-                <svg class="text-rose-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="3 6 5 6 21 6"/>
-                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                  <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+                <svg
+                  class="text-rose-500"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                  <path d="M10 11v6" />
+                  <path d="M14 11v6" />
+                  <path d="M9 6V4h6v2" />
                 </svg>
               </button>
             </div>
-            <div v-if="i === 0" class="absolute top-1.5 left-1.5 bg-ink text-white text-[10px] font-medium px-2 py-0.5 rounded-full">Cover</div>
+            <div
+              v-if="i === 0"
+              class="absolute top-1.5 left-1.5 bg-ink text-white text-[10px] font-medium px-2 py-0.5 rounded-full"
+            >
+              Cover
+            </div>
           </div>
         </div>
       </section>

@@ -1,0 +1,41 @@
+name: Frontend CI
+
+on:
+  pull_request:
+    paths:
+      - 'placey-fe/**'
+      - '.github/workflows/fe-ci.yml'
+
+defaults:
+  run:
+    working-directory: placey-fe
+
+jobs:
+  lint-format-typecheck:
+    name: Lint, Format & Type-check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: placey-fe/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting (Prettier)
+        run: pnpm ci:format
+
+      - name: Lint (oxlint + ESLint)
+        run: pnpm ci:lint
+
+      - name: Type-check (vue-tsc)
+        run: pnpm ci:type-check

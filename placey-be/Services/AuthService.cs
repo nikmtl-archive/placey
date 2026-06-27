@@ -22,7 +22,7 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
         {
             Email = request.Email,
             Name = request.Name,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
         };
 
         db.Users.Add(user);
@@ -33,7 +33,8 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
-        var user = await db.Users.FirstOrDefaultAsync(u => u.Email == request.Email)
+        var user =
+            await db.Users.FirstOrDefaultAsync(u => u.Email == request.Email)
             ?? throw new UnauthorizedAccessException("Invalid credentials.");
 
         if (user.IsDeleted || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
@@ -44,9 +45,10 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
 
     public async Task<AuthResponse> RefreshAsync(string refreshToken)
     {
-        var token = await db.RefreshTokens
-            .Include(t => t.User)
-            .FirstOrDefaultAsync(t => t.Token == refreshToken)
+        var token =
+            await db
+                .RefreshTokens.Include(t => t.User)
+                .FirstOrDefaultAsync(t => t.Token == refreshToken)
             ?? throw new UnauthorizedAccessException("Invalid refresh token.");
 
         if (!token.IsActive || token.User.IsDeleted)
@@ -84,7 +86,7 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
         var token = new JwtSecurityToken(
@@ -104,7 +106,7 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
         {
             UserId = userId,
             Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
-            ExpiresAt = DateTime.UtcNow.AddDays(7)
+            ExpiresAt = DateTime.UtcNow.AddDays(7),
         };
 
         db.RefreshTokens.Add(token);

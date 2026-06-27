@@ -104,8 +104,10 @@ const whenLabel = computed(() => {
       @submit.prevent="handleSearch"
     >
       <!-- WHERE — direct inline input -->
-      <div class="flex-1 flex items-center gap-2 px-2 sm:px-3 py-1 rounded-full transition-colors min-w-0 cursor-pointer"
-        :class="whenActive ? 'bg-gray-50' : 'hover:bg-gray-50'">
+      <div
+        class="flex-1 flex items-center gap-2 px-2 sm:px-3 py-1 rounded-full transition-colors min-w-0 cursor-pointer"
+        :class="whenActive ? 'bg-gray-50' : 'hover:bg-gray-50'"
+      >
         <MapPin class="w-4 h-4 text-muted shrink-0" :stroke-width="2" />
         <div class="flex flex-col min-w-0 flex-1 items-start">
           <span
@@ -185,8 +187,8 @@ const whenLabel = computed(() => {
       no-trigger
       :check-in="checkIn"
       :check-out="checkOut"
-      @update:check-in="checkIn = $event; whenActive = true"
-      @update:check-out="checkOut = $event; whenActive = false"
+      @update:check-in="((checkIn = $event), (whenActive = true))"
+      @update:check-out="((checkOut = $event), (whenActive = false))"
     />
 
     <!-- WHO popup -->

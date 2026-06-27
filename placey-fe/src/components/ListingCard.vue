@@ -72,7 +72,8 @@ onUnmounted(() => {
         </div>
 
         <!-- Wishlist button -->
-        <button v-if="!hideWishlist"
+        <button
+          v-if="!hideWishlist"
           class="absolute top-2.5 right-2.5 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm transition-all duration-150 hover:scale-110 active:scale-95 cursor-pointer"
           :class="
             authStore.isLoggedIn && favoritesStore.isFavorited(id)

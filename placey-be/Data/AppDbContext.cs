@@ -36,7 +36,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                     new ValueComparer<List<string>>(
                         (a, b) => a != null && b != null && a.SequenceEqual(b),
                         v => v.Aggregate(0, (h, s) => HashCode.Combine(h, s.GetHashCode())),
-                        v => v.ToList()));
+                        v => v.ToList()
+                    )
+                );
             e.Property(l => l.Category).HasConversion<string>();
             e.Property(l => l.PropertyType).HasConversion<string>();
             e.HasOne(l => l.Host)

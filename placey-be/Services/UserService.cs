@@ -10,28 +10,47 @@ public class UserService(AppDbContext db, IWebHostEnvironment env) : IUserServic
 {
     public async Task<PrivateUserResponse> GetMeAsync(Guid userId)
     {
-        var user = await db.Users.FindAsync(userId)
-            ?? throw new KeyNotFoundException("User not found.");
+        var user =
+            await db.Users.FindAsync(userId) ?? throw new KeyNotFoundException("User not found.");
 
-        return new PrivateUserResponse(user.Id, user.Email, user.Name, user.Bio, user.AvatarUrl, user.CreatedAt);
+        if (user.IsDeleted)
+            throw new KeyNotFoundException("User not found.");
+
+        return new PrivateUserResponse(
+            user.Id,
+            user.Email,
+            user.Name,
+            user.Bio,
+            user.AvatarUrl,
+            user.CreatedAt
+        );
     }
 
     public async Task<PrivateUserResponse> UpdateMeAsync(Guid userId, UpdateProfileRequest request)
     {
-        var user = await db.Users.FindAsync(userId)
-            ?? throw new KeyNotFoundException("User not found.");
+        var user =
+            await db.Users.FindAsync(userId) ?? throw new KeyNotFoundException("User not found.");
 
-        if (request.Name is not null) user.Name = request.Name;
-        user.Bio = request.Bio;
+        if (request.Name is not null)
+            user.Name = request.Name;
+        if (request.Bio is not null)
+            user.Bio = request.Bio;
 
         await db.SaveChangesAsync();
-        return new PrivateUserResponse(user.Id, user.Email, user.Name, user.Bio, user.AvatarUrl, user.CreatedAt);
+        return new PrivateUserResponse(
+            user.Id,
+            user.Email,
+            user.Name,
+            user.Bio,
+            user.AvatarUrl,
+            user.CreatedAt
+        );
     }
 
     public async Task DeleteMeAsync(Guid userId)
     {
-        var user = await db.Users.FindAsync(userId)
-            ?? throw new KeyNotFoundException("User not found.");
+        var user =
+            await db.Users.FindAsync(userId) ?? throw new KeyNotFoundException("User not found.");
 
         // Wipe PII and mark as deleted — row is kept so FK references (bookings, reviews) remain valid for other users
         user.IsDeleted = true;
@@ -42,11 +61,15 @@ public class UserService(AppDbContext db, IWebHostEnvironment env) : IUserServic
         user.AvatarUrl = null;
 
         // Cancel active bookings on the user's listings and soft-delete the listings
-        var listings = await db.Listings.Where(l => l.HostId == userId && !l.IsDeleted).ToListAsync();
+        var listings = await db
+            .Listings.Where(l => l.HostId == userId && !l.IsDeleted)
+            .ToListAsync();
         var listingIds = listings.Select(l => l.Id).ToList();
-        var activeBookingsOnListings = await db.Bookings
-            .Where(b => listingIds.Contains(b.ListingId) &&
-                        (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed))
+        var activeBookingsOnListings = await db
+            .Bookings.Where(b =>
+                listingIds.Contains(b.ListingId)
+                && (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed)
+            )
             .ToListAsync();
         foreach (var booking in activeBookingsOnListings)
             booking.Status = BookingStatus.Cancelled;
@@ -54,15 +77,19 @@ public class UserService(AppDbContext db, IWebHostEnvironment env) : IUserServic
             listing.IsDeleted = true;
 
         // Cancel active bookings made by this user as a guest
-        var activeGuestBookings = await db.Bookings
-            .Where(b => b.GuestId == userId &&
-                        (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed))
+        var activeGuestBookings = await db
+            .Bookings.Where(b =>
+                b.GuestId == userId
+                && (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed)
+            )
             .ToListAsync();
         foreach (var booking in activeGuestBookings)
             booking.Status = BookingStatus.Cancelled;
 
         // Revoke all refresh tokens so existing sessions stop working
-        var tokens = await db.RefreshTokens.Where(t => t.UserId == userId && t.RevokedAt == null).ToListAsync();
+        var tokens = await db
+            .RefreshTokens.Where(t => t.UserId == userId && t.RevokedAt == null)
+            .ToListAsync();
         foreach (var token in tokens)
             token.RevokedAt = DateTime.UtcNow;
 
@@ -70,13 +97,17 @@ public class UserService(AppDbContext db, IWebHostEnvironment env) : IUserServic
         var favorites = await db.Favorites.Where(f => f.UserId == userId).ToListAsync();
         db.Favorites.RemoveRange(favorites);
 
-        var conversationIds = await db.Conversations
-            .Where(c => c.User1Id == userId || c.User2Id == userId)
+        var conversationIds = await db
+            .Conversations.Where(c => c.User1Id == userId || c.User2Id == userId)
             .Select(c => c.Id)
             .ToListAsync();
-        var conversationMessages = await db.Messages.Where(m => conversationIds.Contains(m.ConversationId)).ToListAsync();
+        var conversationMessages = await db
+            .Messages.Where(m => conversationIds.Contains(m.ConversationId))
+            .ToListAsync();
         db.Messages.RemoveRange(conversationMessages);
-        var conversations = await db.Conversations.Where(c => conversationIds.Contains(c.Id)).ToListAsync();
+        var conversations = await db
+            .Conversations.Where(c => conversationIds.Contains(c.Id))
+            .ToListAsync();
         db.Conversations.RemoveRange(conversations);
 
         await db.SaveChangesAsync();
@@ -84,16 +115,16 @@ public class UserService(AppDbContext db, IWebHostEnvironment env) : IUserServic
 
     public async Task<PublicUserResponse> GetPublicAsync(Guid userId)
     {
-        var user = await db.Users.FindAsync(userId)
-            ?? throw new KeyNotFoundException("User not found.");
+        var user =
+            await db.Users.FindAsync(userId) ?? throw new KeyNotFoundException("User not found.");
 
         return new PublicUserResponse(user.Id, user.Name, user.Bio, user.AvatarUrl, user.CreatedAt);
     }
 
     public async Task<string> UploadAvatarAsync(Guid userId, IFormFile file)
     {
-        var user = await db.Users.FindAsync(userId)
-            ?? throw new KeyNotFoundException("User not found.");
+        var user =
+            await db.Users.FindAsync(userId) ?? throw new KeyNotFoundException("User not found.");
 
         var uploads = Path.Combine(env.WebRootPath ?? "wwwroot", "avatars");
         Directory.CreateDirectory(uploads);

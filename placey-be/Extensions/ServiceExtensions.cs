@@ -12,7 +12,10 @@ namespace placey_be.Extensions;
 
 public static class ServiceExtensions
 {
-    public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddDatabase(
+        this IServiceCollection services,
+        IConfiguration config
+    )
     {
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(config.GetConnectionString("Default"));
         dataSourceBuilder.EnableDynamicJson();
@@ -23,9 +26,13 @@ public static class ServiceExtensions
         return services;
     }
 
-    public static IServiceCollection AddJwtAuth(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddJwtAuth(
+        this IServiceCollection services,
+        IConfiguration config
+    )
     {
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -37,20 +44,23 @@ public static class ServiceExtensions
                     ValidIssuer = config["Jwt:Issuer"],
                     ValidAudience = config["Jwt:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(config["Jwt:Secret"]!))
+                        Encoding.UTF8.GetBytes(config["Jwt:Secret"]!)
+                    ),
                 };
                 options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
                 {
                     OnMessageReceived = ctx =>
                     {
                         var token = ctx.Request.Query["access_token"];
-                        if (!string.IsNullOrEmpty(token) &&
-                            ctx.Request.Path.StartsWithSegments("/messages/stream"))
+                        if (
+                            !string.IsNullOrEmpty(token)
+                            && ctx.Request.Path.StartsWithSegments("/messages/stream")
+                        )
                         {
                             ctx.Token = token;
                         }
                         return Task.CompletedTask;
-                    }
+                    },
                 };
             });
 
@@ -77,28 +87,33 @@ public static class ServiceExtensions
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Placey API", Version = "v1" });
             c.SchemaFilter<SwaggerExamplesFilter>();
-            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Name = "Authorization",
-                Type = SecuritySchemeType.Http,
-                Scheme = "bearer",
-                BearerFormat = "JWT",
-                In = ParameterLocation.Header
-            });
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
+            c.AddSecurityDefinition(
+                "Bearer",
+                new OpenApiSecurityScheme
                 {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
                 }
-            });
+            );
+            c.AddSecurityRequirement(
+                new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer",
+                            },
+                        },
+                        Array.Empty<string>()
+                    },
+                }
+            );
         });
 
         return services;

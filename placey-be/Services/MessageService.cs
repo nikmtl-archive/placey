@@ -8,7 +8,10 @@ namespace placey_be.Services;
 
 public class MessageService(AppDbContext db, SseHub sseHub) : IMessageService
 {
-    public async Task<ConversationSummaryResponse> GetOrCreateConversationAsync(Guid requesterId, Guid otherUserId)
+    public async Task<ConversationSummaryResponse> GetOrCreateConversationAsync(
+        Guid requesterId,
+        Guid otherUserId
+    )
     {
         if (requesterId == otherUserId)
             throw new InvalidOperationException("Cannot start a conversation with yourself.");
@@ -16,12 +19,11 @@ public class MessageService(AppDbContext db, SseHub sseHub) : IMessageService
         if (!await db.Users.AnyAsync(u => u.Id == otherUserId))
             throw new KeyNotFoundException("User not found.");
 
-        var (u1, u2) = requesterId < otherUserId
-            ? (requesterId, otherUserId)
-            : (otherUserId, requesterId);
+        var (u1, u2) =
+            requesterId < otherUserId ? (requesterId, otherUserId) : (otherUserId, requesterId);
 
-        var conv = await db.Conversations
-            .Include(c => c.User1)
+        var conv = await db
+            .Conversations.Include(c => c.User1)
             .Include(c => c.User2)
             .Include(c => c.Messages.OrderByDescending(m => m.CreatedAt).Take(1))
             .FirstOrDefaultAsync(c => c.User1Id == u1 && c.User2Id == u2);
@@ -40,51 +42,54 @@ public class MessageService(AppDbContext db, SseHub sseHub) : IMessageService
 
     public async Task<List<ConversationSummaryResponse>> GetConversationsAsync(Guid requesterId)
     {
-        var rows = await db.Conversations
-            .Where(c => c.User1Id == requesterId || c.User2Id == requesterId)
+        var rows = await db
+            .Conversations.Where(c => c.User1Id == requesterId || c.User2Id == requesterId)
             .Select(c => new
             {
                 Conv = c,
                 User1 = c.User1,
                 User2 = c.User2,
                 LastMsg = c.Messages.OrderByDescending(m => m.CreatedAt).FirstOrDefault(),
-                UnreadCount = c.Messages.Count(m => !m.IsRead && m.SenderId != requesterId)
+                UnreadCount = c.Messages.Count(m => !m.IsRead && m.SenderId != requesterId),
             })
             .OrderByDescending(x => x.LastMsg != null ? x.LastMsg.CreatedAt : x.Conv.CreatedAt)
             .ToListAsync();
 
         return rows.Select(x =>
-        {
-            var otherUser = x.Conv.User1Id == requesterId ? x.User2 : x.User1;
-            return new ConversationSummaryResponse(
-                x.Conv.Id,
-                otherUser.Id,
-                otherUser.Name,
-                otherUser.AvatarUrl,
-                x.LastMsg?.Body,
-                x.LastMsg?.CreatedAt,
-                x.UnreadCount,
-                x.Conv.CreatedAt
-            );
-        }).ToList();
+            {
+                var otherUser = x.Conv.User1Id == requesterId ? x.User2 : x.User1;
+                return new ConversationSummaryResponse(
+                    x.Conv.Id,
+                    otherUser.Id,
+                    otherUser.Name,
+                    otherUser.AvatarUrl,
+                    x.LastMsg?.Body,
+                    x.LastMsg?.CreatedAt,
+                    x.UnreadCount,
+                    x.Conv.CreatedAt
+                );
+            })
+            .ToList();
     }
 
-    public async Task<ConversationDetailResponse> GetConversationAsync(Guid conversationId, Guid requesterId)
+    public async Task<ConversationDetailResponse> GetConversationAsync(
+        Guid conversationId,
+        Guid requesterId
+    )
     {
-        var conv = await db.Conversations
-            .Include(c => c.User1)
-            .Include(c => c.User2)
-            .Include(c => c.Messages.OrderBy(m => m.CreatedAt))
-            .ThenInclude(m => m.Sender)
-            .FirstOrDefaultAsync(c => c.Id == conversationId)
+        var conv =
+            await db
+                .Conversations.Include(c => c.User1)
+                .Include(c => c.User2)
+                .Include(c => c.Messages.OrderBy(m => m.CreatedAt))
+                    .ThenInclude(m => m.Sender)
+                .FirstOrDefaultAsync(c => c.Id == conversationId)
             ?? throw new KeyNotFoundException("Conversation not found.");
 
         if (conv.User1Id != requesterId && conv.User2Id != requesterId)
             throw new UnauthorizedAccessException("Access denied.");
 
-        var unread = conv.Messages
-            .Where(m => !m.IsRead && m.SenderId != requesterId)
-            .ToList();
+        var unread = conv.Messages.Where(m => !m.IsRead && m.SenderId != requesterId).ToList();
 
         if (unread.Count > 0)
         {
@@ -104,12 +109,17 @@ public class MessageService(AppDbContext db, SseHub sseHub) : IMessageService
         );
     }
 
-    public async Task<MessageResponse> SendMessageAsync(Guid conversationId, Guid senderId, SendMessageRequest request)
+    public async Task<MessageResponse> SendMessageAsync(
+        Guid conversationId,
+        Guid senderId,
+        SendMessageRequest request
+    )
     {
-        var conv = await db.Conversations
-            .Include(c => c.User1)
-            .Include(c => c.User2)
-            .FirstOrDefaultAsync(c => c.Id == conversationId)
+        var conv =
+            await db
+                .Conversations.Include(c => c.User1)
+                .Include(c => c.User2)
+                .FirstOrDefaultAsync(c => c.Id == conversationId)
             ?? throw new KeyNotFoundException("Conversation not found.");
 
         if (conv.User1Id != senderId && conv.User2Id != senderId)
@@ -119,7 +129,7 @@ public class MessageService(AppDbContext db, SseHub sseHub) : IMessageService
         {
             ConversationId = conversationId,
             SenderId = senderId,
-            Body = request.Body
+            Body = request.Body,
         };
 
         db.Messages.Add(msg);
@@ -138,21 +148,23 @@ public class MessageService(AppDbContext db, SseHub sseHub) : IMessageService
     public async Task<int> GetUnreadCountAsync(Guid userId)
     {
         return await db.Messages.CountAsync(m =>
-            !m.IsRead &&
-            m.SenderId != userId &&
-            (m.Conversation.User1Id == userId || m.Conversation.User2Id == userId));
+            !m.IsRead
+            && m.SenderId != userId
+            && (m.Conversation.User1Id == userId || m.Conversation.User2Id == userId)
+        );
     }
 
-    private static MessageResponse ToMessageResponse(Message m) => new(
-        m.Id,
-        m.ConversationId,
-        m.SenderId,
-        m.Sender.Name,
-        m.Sender.AvatarUrl,
-        m.Body,
-        m.IsRead,
-        m.CreatedAt
-    );
+    private static MessageResponse ToMessageResponse(Message m) =>
+        new(
+            m.Id,
+            m.ConversationId,
+            m.SenderId,
+            m.Sender.Name,
+            m.Sender.AvatarUrl,
+            m.Body,
+            m.IsRead,
+            m.CreatedAt
+        );
 
     private static ConversationSummaryResponse ToSummary(Conversation conv, Guid requesterId)
     {
