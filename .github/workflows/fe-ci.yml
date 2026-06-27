@@ -36,3 +36,6 @@ jobs:
 
       - name: Type-check (vue-tsc)
         run: pnpm ci:type-check
+
+      - name: Test (Vitest)
+        run: pnpm test
