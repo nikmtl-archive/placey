@@ -124,6 +124,7 @@ public class BookingService(AppDbContext db) : IBookingService
         b.Guests,
         b.TotalPrice,
         b.Status,
-        b.CreatedAt
+        b.CreatedAt,
+        null
     );
 }
