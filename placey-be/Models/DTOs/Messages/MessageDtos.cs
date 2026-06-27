@@ -2,13 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace placey_be.Models.DTOs.Messages;
 
-public record GetOrCreateConversationRequest(
-    [Required] Guid OtherUserId
-);
+public record GetOrCreateConversationRequest([Required] Guid OtherUserId);
 
-public record SendMessageRequest(
-    [Required, StringLength(4000, MinimumLength = 1)] string Body
-);
+public record SendMessageRequest([Required, StringLength(4000, MinimumLength = 1)] string Body);
 
 public record MessageResponse(
     Guid Id,

@@ -9,9 +9,8 @@ namespace placey_be.Controllers;
 
 [ApiController]
 [Route("listings")]
-public class ListingsController(
-    IListingService listingService,
-    IReviewService reviewService) : ControllerBase
+public class ListingsController(IListingService listingService, IReviewService reviewService)
+    : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> Search([FromQuery] ListingSearchParams p)

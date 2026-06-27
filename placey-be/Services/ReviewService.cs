@@ -10,9 +10,10 @@ public class ReviewService(AppDbContext db) : IReviewService
 {
     public async Task<ReviewResponse> CreateAsync(Guid authorId, CreateReviewRequest request)
     {
-        var booking = await db.Bookings
-            .Include(b => b.Listing)
-            .FirstOrDefaultAsync(b => b.Id == request.BookingId)
+        var booking =
+            await db
+                .Bookings.Include(b => b.Listing)
+                .FirstOrDefaultAsync(b => b.Id == request.BookingId)
             ?? throw new KeyNotFoundException("Booking not found.");
 
         if (booking.GuestId != authorId)
@@ -30,7 +31,7 @@ public class ReviewService(AppDbContext db) : IReviewService
             BookingId = request.BookingId,
             AuthorId = authorId,
             Rating = request.Rating,
-            Comment = request.Comment
+            Comment = request.Comment,
         };
 
         db.Reviews.Add(review);
@@ -42,7 +43,8 @@ public class ReviewService(AppDbContext db) : IReviewService
 
     public async Task DeleteAsync(Guid reviewId, Guid requesterId)
     {
-        var review = await db.Reviews.FindAsync(reviewId)
+        var review =
+            await db.Reviews.FindAsync(reviewId)
             ?? throw new KeyNotFoundException("Review not found.");
 
         if (review.AuthorId != requesterId)
@@ -54,8 +56,8 @@ public class ReviewService(AppDbContext db) : IReviewService
 
     public async Task<List<ReviewResponse>> GetByListingAsync(Guid listingId)
     {
-        return await db.Reviews
-            .Include(r => r.Author)
+        return await db
+            .Reviews.Include(r => r.Author)
             .Where(r => r.ListingId == listingId)
             .OrderByDescending(r => r.CreatedAt)
             .Select(r => ToResponse(r))
@@ -64,8 +66,8 @@ public class ReviewService(AppDbContext db) : IReviewService
 
     public async Task<List<ReviewResponse>> GetByUserAsync(Guid userId)
     {
-        return await db.Reviews
-            .Include(r => r.Author)
+        return await db
+            .Reviews.Include(r => r.Author)
             .Include(r => r.Listing)
             .Where(r => r.Listing.HostId == userId)
             .OrderByDescending(r => r.CreatedAt)
@@ -73,14 +75,15 @@ public class ReviewService(AppDbContext db) : IReviewService
             .ToListAsync();
     }
 
-    private static ReviewResponse ToResponse(Review r) => new(
-        r.Id,
-        r.ListingId,
-        r.AuthorId,
-        r.Author.Name,
-        r.Author.AvatarUrl,
-        r.Rating,
-        r.Comment,
-        r.CreatedAt
-    );
+    private static ReviewResponse ToResponse(Review r) =>
+        new(
+            r.Id,
+            r.ListingId,
+            r.AuthorId,
+            r.Author.Name,
+            r.Author.AvatarUrl,
+            r.Rating,
+            r.Comment,
+            r.CreatedAt
+        );
 }

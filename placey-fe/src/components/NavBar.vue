@@ -3,7 +3,16 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore, useMessagingStore } from '@/stores'
 import { useClickOutside } from '@/composables/useClickOutside'
-import { MessageCircle, CalendarDays, House, Heart, Plus, LogOut, AlignJustify, Settings } from '@lucide/vue'
+import {
+  MessageCircle,
+  CalendarDays,
+  House,
+  Heart,
+  Plus,
+  LogOut,
+  AlignJustify,
+  Settings,
+} from '@lucide/vue'
 
 const router = useRouter()
 const authStore = useAuthStore()

@@ -8,11 +8,11 @@ public enum ListingCategory
     Luxe,
     Countryside,
     Island,
-    Lake
+    Lake,
 }
 
 public enum PropertyType
 {
     Apartment,
-    House
+    House,
 }

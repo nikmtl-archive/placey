@@ -25,7 +25,12 @@ function formatDate(iso: string | null): string {
 }
 
 function initials(name: string): string {
-  return name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2)
+  return name
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 }
 </script>
 
@@ -48,13 +53,19 @@ function initials(name: string): string {
   <!-- Error -->
   <div v-else-if="error" class="text-center py-16">
     <p class="text-sm text-muted mb-3">{{ error }}</p>
-    <button class="text-sm font-medium text-ink underline underline-offset-2 cursor-pointer" @click="emit('retry')">
+    <button
+      class="text-sm font-medium text-ink underline underline-offset-2 cursor-pointer"
+      @click="emit('retry')"
+    >
       Try again
     </button>
   </div>
 
   <!-- Empty -->
-  <div v-else-if="conversations.length === 0" class="flex flex-col items-center justify-center py-20 text-center">
+  <div
+    v-else-if="conversations.length === 0"
+    class="flex flex-col items-center justify-center py-20 text-center"
+  >
     <div class="w-16 h-16 rounded-full bg-cream flex items-center justify-center mx-auto mb-4">
       <MessageCircle :size="26" class="text-ink/25" />
     </div>
@@ -78,7 +89,9 @@ function initials(name: string): string {
     >
       <!-- Avatar -->
       <div class="relative shrink-0">
-        <div class="w-11 h-11 rounded-full bg-cream border border-divider-light flex items-center justify-center select-none overflow-hidden">
+        <div
+          class="w-11 h-11 rounded-full bg-cream border border-divider-light flex items-center justify-center select-none overflow-hidden"
+        >
           <img
             v-if="conv.otherUserAvatarUrl"
             :src="conv.otherUserAvatarUrl"

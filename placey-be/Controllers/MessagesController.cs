@@ -23,7 +23,10 @@ public class MessagesController(IMessageService messageService, SseHub sseHub) :
     [HttpPost("conversations")]
     public async Task<IActionResult> GetOrCreate([FromBody] GetOrCreateConversationRequest request)
     {
-        var result = await messageService.GetOrCreateConversationAsync(User.GetUserId(), request.OtherUserId);
+        var result = await messageService.GetOrCreateConversationAsync(
+            User.GetUserId(),
+            request.OtherUserId
+        );
         return Ok(result);
     }
 
@@ -61,10 +64,10 @@ public class MessagesController(IMessageService messageService, SseHub sseHub) :
         {
             await foreach (var msg in reader.ReadAllAsync(ct))
             {
-                var json = JsonSerializer.Serialize(msg, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
+                var json = JsonSerializer.Serialize(
+                    msg,
+                    new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+                );
                 await Response.WriteAsync($"data: {json}\n\n", ct);
                 await Response.Body.FlushAsync(ct);
             }

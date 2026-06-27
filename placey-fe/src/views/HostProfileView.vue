@@ -191,11 +191,7 @@ async function goToMessages() {
         </div>
 
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          <ListingCard
-            v-for="listing in listings"
-            :key="listing.id"
-            v-bind="listing"
-          />
+          <ListingCard v-for="listing in listings" :key="listing.id" v-bind="listing" />
         </div>
       </div>
 

@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useListingStore, useAuthStore, useFavoritesStore, useBookingStore, useMessagingStore } from '@/stores'
+import {
+  useListingStore,
+  useAuthStore,
+  useFavoritesStore,
+  useBookingStore,
+  useMessagingStore,
+} from '@/stores'
 import { storeToRefs } from 'pinia'
 import DateRangePicker from '@/components/DateRangePicker.vue'
 import {
@@ -208,7 +214,12 @@ async function reserve() {
   if (!listing.value || !checkIn.value || !checkOut.value || nights.value <= 0) return
   bookingError.value = null
   try {
-    const booking = await bookingStore.createBooking(listing.value.id, checkIn.value, checkOut.value, guests.value)
+    const booking = await bookingStore.createBooking(
+      listing.value.id,
+      checkIn.value,
+      checkOut.value,
+      guests.value,
+    )
     bookingConfirmed.value = true
     bookingStatus.value = booking.status
     bookingModalOpen.value = true
@@ -252,14 +263,31 @@ function reviewDate(iso: string) {
 
     <!-- Deleted listing -->
     <div v-else-if="isDeleted" class="max-w-7xl mx-auto px-6 md:px-10 py-24 text-center">
-      <div class="mx-auto mb-6 w-16 h-16 rounded-full bg-[#e8e3dc] flex items-center justify-center">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-muted">
+      <div
+        class="mx-auto mb-6 w-16 h-16 rounded-full bg-[#e8e3dc] flex items-center justify-center"
+      >
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="text-muted"
+        >
           <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
         </svg>
       </div>
       <h2 class="text-xl font-semibold text-ink mb-2">This listing is no longer available</h2>
-      <p class="text-sm text-muted mb-6">The host has removed this listing. Any existing bookings have been cancelled.</p>
-      <button class="text-sm font-medium underline underline-offset-2 text-muted hover:text-ink transition-colors" @click="router.back()">
+      <p class="text-sm text-muted mb-6">
+        The host has removed this listing. Any existing bookings have been cancelled.
+      </p>
+      <button
+        class="text-sm font-medium underline underline-offset-2 text-muted hover:text-ink transition-colors"
+        @click="router.back()"
+      >
         Go back
       </button>
     </div>
@@ -482,7 +510,8 @@ function reviewDate(iso: string) {
                   <RouterLink
                     :to="`/host/${listing.hostId}`"
                     class="hover:underline underline-offset-2 transition-colors"
-                  >{{ listing.hostName }}</RouterLink>
+                    >{{ listing.hostName }}</RouterLink
+                  >
                 </h2>
                 <div class="flex items-center flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted">
                   <span class="flex items-center gap-1.5"
@@ -654,7 +683,9 @@ function reviewDate(iso: string) {
                       ? 'bg-gray-100 text-gray-400 cursor-default'
                       : 'bg-ink text-white hover:bg-black cursor-pointer'
                   "
-                  :disabled="!datesReady || isRangeBlocked || bookingStore.isSubmitting || bookingConfirmed"
+                  :disabled="
+                    !datesReady || isRangeBlocked || bookingStore.isSubmitting || bookingConfirmed
+                  "
                   @click="reserve"
                 >
                   {{
@@ -811,7 +842,9 @@ function reviewDate(iso: string) {
                     ? 'bg-gray-100 text-gray-400 cursor-default'
                     : 'bg-ink text-white hover:bg-black cursor-pointer'
                 "
-                :disabled="!datesReady || isRangeBlocked || bookingStore.isSubmitting || bookingConfirmed"
+                :disabled="
+                  !datesReady || isRangeBlocked || bookingStore.isSubmitting || bookingConfirmed
+                "
                 @click="reserve"
               >
                 {{
@@ -865,16 +898,26 @@ function reviewDate(iso: string) {
               <svg
                 v-if="bookingStatus === 'Confirmed'"
                 class="w-8 h-8 text-emerald-500"
-                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
               >
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
               <svg
                 v-else
                 class="w-8 h-8 text-amber-500"
-                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
               >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
             <h2 class="text-xl font-bold text-ink mb-2">

@@ -40,7 +40,9 @@ async function saveProfile() {
     const updated = await res.json()
     authStore.patchUser({ name: updated.name, bio: updated.bio ?? null })
     saveSuccess.value = true
-    setTimeout(() => { saveSuccess.value = false }, 3000)
+    setTimeout(() => {
+      saveSuccess.value = false
+    }, 3000)
   } catch (e: unknown) {
     saveError.value = e instanceof Error ? e.message : 'Failed to save changes'
   } finally {
@@ -80,7 +82,12 @@ async function uploadAvatar(event: Event) {
 const initials = () => {
   const n = authStore.user?.name
   if (!n) return '?'
-  return n.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
+  return n
+    .split(' ')
+    .map((w: string) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 }
 
 const showDeleteConfirm = ref(false)
@@ -116,7 +123,9 @@ async function deleteAccount() {
     <section class="mb-10">
       <h2 class="text-sm font-semibold text-ink mb-4">Profile photo</h2>
       <div class="flex items-center gap-5">
-        <div class="w-20 h-20 rounded-full bg-[#e8e3dc] border border-divider-light overflow-hidden flex items-center justify-center shrink-0">
+        <div
+          class="w-20 h-20 rounded-full bg-[#e8e3dc] border border-divider-light overflow-hidden flex items-center justify-center shrink-0"
+        >
           <img
             v-if="authStore.user?.avatarUrl"
             :src="authStore.user.avatarUrl"
@@ -200,11 +209,12 @@ async function deleteAccount() {
       </form>
     </section>
 
-
     <!-- Danger zone -->
     <section class="mb-10 border border-rose-200 rounded-3xl p-6">
       <h2 class="text-sm font-semibold text-rose-600 mb-1">Danger zone</h2>
-      <p class="text-sm text-muted mb-4">Permanently delete your account and all associated data. This cannot be undone.</p>
+      <p class="text-sm text-muted mb-4">
+        Permanently delete your account and all associated data. This cannot be undone.
+      </p>
 
       <div v-if="!showDeleteConfirm">
         <button
@@ -216,7 +226,9 @@ async function deleteAccount() {
       </div>
 
       <div v-else class="space-y-3">
-        <p class="text-sm font-medium text-ink">Are you sure? This will delete all your data including bookings, messages, and listings.</p>
+        <p class="text-sm font-medium text-ink">
+          Are you sure? This will delete all your data including bookings, messages, and listings.
+        </p>
         <div class="flex items-center gap-3">
           <button
             class="text-sm font-medium text-white bg-rose-600 px-5 py-2 rounded-full hover:bg-rose-700 transition-colors disabled:opacity-50 cursor-pointer"
@@ -236,7 +248,7 @@ async function deleteAccount() {
         <p v-if="deleteError" class="text-xs text-rose-600">{{ deleteError }}</p>
       </div>
     </section>
-  </div>  
+  </div>
 </template>
 
 <style scoped>

@@ -18,9 +18,7 @@ function isUpcoming(booking: Booking) {
 }
 
 const upcomingBookings = computed(() => bookings.value.filter((b) => isUpcoming(b)))
-const pastBookings = computed(() =>
-  bookings.value.filter((b) => !isUpcoming(b)),
-)
+const pastBookings = computed(() => bookings.value.filter((b) => !isUpcoming(b)))
 const errorMessage = computed(() => bookingStore.error)
 
 onMounted(async () => {
@@ -83,7 +81,11 @@ onMounted(async () => {
 
     <!-- Skeleton -->
     <div v-if="isLoading" class="space-y-4 pt-4">
-      <div v-for="n in 3" :key="n" class="animate-pulse flex gap-4 border border-divider-light rounded-2xl p-4">
+      <div
+        v-for="n in 3"
+        :key="n"
+        class="animate-pulse flex gap-4 border border-divider-light rounded-2xl p-4"
+      >
         <div class="w-28 h-28 rounded-xl bg-divider-light shrink-0" />
         <div class="flex-1 space-y-2 py-1">
           <div class="h-4 bg-divider-light rounded w-2/3" />
@@ -98,17 +100,31 @@ onMounted(async () => {
       v-else-if="(activeTab === 'upcoming' ? upcomingBookings : pastBookings).length === 0"
       class="flex flex-col items-center justify-center py-28 text-center"
     >
-      <svg class="mb-5 text-ink/20" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-        <line x1="16" y1="2" x2="16" y2="6"/>
-        <line x1="8" y1="2" x2="8" y2="6"/>
-        <line x1="3" y1="10" x2="21" y2="10"/>
+      <svg
+        class="mb-5 text-ink/20"
+        width="48"
+        height="48"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
       </svg>
       <p class="font-serif text-2xl text-ink mb-2">
         {{ activeTab === 'upcoming' ? 'No upcoming trips' : 'No past bookings' }}
       </p>
       <p class="text-sm text-muted mb-6 max-w-xs">
-        {{ activeTab === 'upcoming' ? 'Book a place and it will show up here.' : 'Completed and cancelled bookings appear here.' }}
+        {{
+          activeTab === 'upcoming'
+            ? 'Book a place and it will show up here.'
+            : 'Completed and cancelled bookings appear here.'
+        }}
       </p>
       <RouterLink
         v-if="activeTab === 'upcoming'"
@@ -120,9 +136,6 @@ onMounted(async () => {
     </div>
 
     <!-- Booking list via Michele's inline component -->
-    <Bookings
-      v-else
-      :bookings="activeTab === 'upcoming' ? upcomingBookings : pastBookings"
-    />
+    <Bookings v-else :bookings="activeTab === 'upcoming' ? upcomingBookings : pastBookings" />
   </div>
 </template>

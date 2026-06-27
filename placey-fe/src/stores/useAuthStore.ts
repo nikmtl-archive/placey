@@ -36,10 +36,16 @@ export const useAuthStore = defineStore('auth', () => {
   const isHost = ref(false)
 
   async function checkIsHost() {
-    if (!accessToken.value) { isHost.value = false; return }
+    if (!accessToken.value) {
+      isHost.value = false
+      return
+    }
     try {
       const res = await apiFetch('/api/users/me/listings')
-      if (!res.ok) { isHost.value = false; return }
+      if (!res.ok) {
+        isHost.value = false
+        return
+      }
       const data = await res.json()
       isHost.value = Array.isArray(data) ? data.length > 0 : (data.total ?? 0) > 0
     } catch {
@@ -177,11 +183,14 @@ export const useAuthStore = defineStore('auth', () => {
   function patchUser(partial: Partial<AuthUser>) {
     if (!user.value) return
     user.value = { ...user.value, ...partial }
-    localStorage.setItem(LS_KEY, JSON.stringify({
-      user: user.value,
-      accessToken: accessToken.value,
-      refreshToken: refreshToken.value,
-    }))
+    localStorage.setItem(
+      LS_KEY,
+      JSON.stringify({
+        user: user.value,
+        accessToken: accessToken.value,
+        refreshToken: refreshToken.value,
+      }),
+    )
   }
 
   return {

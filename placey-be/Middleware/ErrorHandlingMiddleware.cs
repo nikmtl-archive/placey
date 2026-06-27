@@ -25,7 +25,7 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
             ResourceDeletedException => (StatusCodes.Status410Gone, "Gone"),
             UnauthorizedAccessException => (StatusCodes.Status403Forbidden, "Forbidden"),
             InvalidOperationException => (StatusCodes.Status400BadRequest, "Bad Request"),
-            _ => (StatusCodes.Status500InternalServerError, "Internal Server Error")
+            _ => (StatusCodes.Status500InternalServerError, "Internal Server Error"),
         };
 
         context.Response.ContentType = "application/problem+json";
@@ -36,7 +36,7 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
             type = $"https://httpstatuses.io/{status}",
             title,
             status,
-            detail = ex.Message
+            detail = ex.Message,
         };
 
         return context.Response.WriteAsync(JsonSerializer.Serialize(problem));

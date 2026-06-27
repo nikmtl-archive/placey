@@ -74,19 +74,8 @@ public record ListingSearchParams(
     int Limit = 20
 );
 
-public record ListingPhotoResponse(
-    Guid Id,
-    string Url,
-    int Order
-);
+public record ListingPhotoResponse(Guid Id, string Url, int Order);
 
-public record AddBlockingRequest(
-    [Required] DateOnly StartDate,
-    [Required] DateOnly EndDate
-);
+public record AddBlockingRequest([Required] DateOnly StartDate, [Required] DateOnly EndDate);
 
-public record BlockingResponse(
-    Guid Id,
-    DateOnly StartDate,
-    DateOnly EndDate
-);
+public record BlockingResponse(Guid Id, DateOnly StartDate, DateOnly EndDate);

@@ -19,9 +19,13 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
             .AddEnvironmentVariables()
             .Build();
 
-        var conn = config.GetConnectionString("Default") ?? Environment.GetEnvironmentVariable("ConnectionStrings__Default");
+        var conn =
+            config.GetConnectionString("Default")
+            ?? Environment.GetEnvironmentVariable("ConnectionStrings__Default");
         if (string.IsNullOrWhiteSpace(conn))
-            throw new InvalidOperationException("Connection string 'Default' not found. Set ConnectionStrings__Default environment variable or add it to appsettings.json.");
+            throw new InvalidOperationException(
+                "Connection string 'Default' not found. Set ConnectionStrings__Default environment variable or add it to appsettings.json."
+            );
 
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
         optionsBuilder.UseNpgsql(conn);

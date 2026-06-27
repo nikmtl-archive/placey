@@ -33,7 +33,8 @@ public static class DbSeeder
                 Id = User1Id,
                 Email = "alice@example.com",
                 Name = "Alice Müller",
-                Bio = "Passionate traveller and Airbnb superhost. I love sharing my cozy spaces with guests from around the world.",
+                Bio =
+                    "Passionate traveller and Airbnb superhost. I love sharing my cozy spaces with guests from around the world.",
                 PasswordHash = passwordHash,
                 CreatedAt = new DateTime(2024, 1, 10, 0, 0, 0, DateTimeKind.Utc),
             },
@@ -42,7 +43,8 @@ public static class DbSeeder
                 Id = User2Id,
                 Email = "bob@example.com",
                 Name = "Bob Schneider",
-                Bio = "Architect and design enthusiast. My apartments reflect my love for clean lines and comfortable living.",
+                Bio =
+                    "Architect and design enthusiast. My apartments reflect my love for clean lines and comfortable living.",
                 PasswordHash = passwordHash,
                 CreatedAt = new DateTime(2024, 2, 5, 0, 0, 0, DateTimeKind.Utc),
             },
@@ -64,7 +66,8 @@ public static class DbSeeder
                 Id = Listing1Id,
                 HostId = User1Id,
                 Title = "Cozy Studio in Mitte",
-                Description = "A charming studio apartment in the heart of Berlin's Mitte district. Walking distance to Museum Island, the Hackescher Markt, and countless cafés. The apartment features exposed brick walls, a fully equipped kitchen, and a comfortable queen-size bed.",
+                Description =
+                    "A charming studio apartment in the heart of Berlin's Mitte district. Walking distance to Museum Island, the Hackescher Markt, and countless cafés. The apartment features exposed brick walls, a fully equipped kitchen, and a comfortable queen-size bed.",
                 Street = "Rosenthaler Straße 42",
                 City = "Berlin",
                 Country = "Germany",
@@ -75,7 +78,15 @@ public static class DbSeeder
                 IsInstantBook = true,
                 Category = ListingCategory.Urban,
                 PropertyType = PropertyType.Apartment,
-                Amenities = new List<string> { "WiFi", "Kitchen", "Heating", "TV", "Elevator", "Washer" },
+                Amenities = new List<string>
+                {
+                    "WiFi",
+                    "Kitchen",
+                    "Heating",
+                    "TV",
+                    "Elevator",
+                    "Washer",
+                },
                 CreatedAt = new DateTime(2024, 1, 15, 0, 0, 0, DateTimeKind.Utc),
             },
             new()
@@ -83,7 +94,8 @@ public static class DbSeeder
                 Id = Listing2Id,
                 HostId = User1Id,
                 Title = "Modern Loft with Rooftop Access",
-                Description = "Stunning two-bedroom loft on the 5th floor with exclusive rooftop access. Panoramic views over the city skyline. Features include an open-plan living area, designer furniture, and a private terrace. Perfect for couples or small families.",
+                Description =
+                    "Stunning two-bedroom loft on the 5th floor with exclusive rooftop access. Panoramic views over the city skyline. Features include an open-plan living area, designer furniture, and a private terrace. Perfect for couples or small families.",
                 Street = "Mariahilfer Straße 18",
                 City = "Vienna",
                 Country = "Austria",
@@ -94,7 +106,18 @@ public static class DbSeeder
                 IsInstantBook = false,
                 Category = ListingCategory.Luxe,
                 PropertyType = PropertyType.Apartment,
-                Amenities = new List<string> { "WiFi", "Kitchen", "Air Conditioning", "Heating", "TV", "Balcony", "Washer", "Elevator", "Gym" },
+                Amenities = new List<string>
+                {
+                    "WiFi",
+                    "Kitchen",
+                    "Air Conditioning",
+                    "Heating",
+                    "TV",
+                    "Balcony",
+                    "Washer",
+                    "Elevator",
+                    "Gym",
+                },
                 CreatedAt = new DateTime(2024, 1, 20, 0, 0, 0, DateTimeKind.Utc),
             },
             new()
@@ -102,7 +125,8 @@ public static class DbSeeder
                 Id = Listing3Id,
                 HostId = User2Id,
                 Title = "Architect-Designed Townhouse",
-                Description = "A beautifully restored 19th-century townhouse redesigned with modern minimalist interiors. Three floors, three bedrooms, a private garden, and a fully equipped kitchen. Located in a quiet residential area, 10 minutes from the old town.",
+                Description =
+                    "A beautifully restored 19th-century townhouse redesigned with modern minimalist interiors. Three floors, three bedrooms, a private garden, and a fully equipped kitchen. Located in a quiet residential area, 10 minutes from the old town.",
                 Street = "Mánesova 7",
                 City = "Prague",
                 Country = "Czech Republic",
@@ -113,7 +137,18 @@ public static class DbSeeder
                 IsInstantBook = false,
                 Category = ListingCategory.Urban,
                 PropertyType = PropertyType.House,
-                Amenities = new List<string> { "WiFi", "Kitchen", "Heating", "TV", "Garden", "Washer", "Parking", "Fireplace", "Pet Friendly" },
+                Amenities = new List<string>
+                {
+                    "WiFi",
+                    "Kitchen",
+                    "Heating",
+                    "TV",
+                    "Garden",
+                    "Washer",
+                    "Parking",
+                    "Fireplace",
+                    "Pet Friendly",
+                },
                 CreatedAt = new DateTime(2024, 2, 8, 0, 0, 0, DateTimeKind.Utc),
             },
             new()
@@ -121,7 +156,8 @@ public static class DbSeeder
                 Id = Listing4Id,
                 HostId = User2Id,
                 Title = "Lakeside Cabin Retreat",
-                Description = "Escape to this peaceful wooden cabin on the shores of Lake Bled. Wake up to stunning mountain views, swim in crystal-clear water, and hike directly from the doorstep. Sleeps up to 4 guests with a wood-burning stove and a private dock.",
+                Description =
+                    "Escape to this peaceful wooden cabin on the shores of Lake Bled. Wake up to stunning mountain views, swim in crystal-clear water, and hike directly from the doorstep. Sleeps up to 4 guests with a wood-burning stove and a private dock.",
                 Street = "Cesta svobode 15",
                 City = "Bled",
                 Country = "Slovenia",
@@ -132,7 +168,18 @@ public static class DbSeeder
                 IsInstantBook = true,
                 Category = ListingCategory.Lake,
                 PropertyType = PropertyType.House,
-                Amenities = new List<string> { "WiFi", "Kitchen", "Heating", "Fireplace", "BBQ Grill", "Lake Access", "Mountain View", "Parking", "Pet Friendly" },
+                Amenities = new List<string>
+                {
+                    "WiFi",
+                    "Kitchen",
+                    "Heating",
+                    "Fireplace",
+                    "BBQ Grill",
+                    "Lake Access",
+                    "Mountain View",
+                    "Parking",
+                    "Pet Friendly",
+                },
                 CreatedAt = new DateTime(2024, 2, 14, 0, 0, 0, DateTimeKind.Utc),
             },
             new()
@@ -140,7 +187,8 @@ public static class DbSeeder
                 Id = Listing5Id,
                 HostId = User1Id,
                 Title = "Bright Apartment near Old Town",
-                Description = "Light-filled one-bedroom apartment just two blocks from the Old Town Square. Recently renovated with Scandi-inspired décor, high-speed WiFi, and a well-stocked kitchen. Great base for exploring the city by foot.",
+                Description =
+                    "Light-filled one-bedroom apartment just two blocks from the Old Town Square. Recently renovated with Scandi-inspired décor, high-speed WiFi, and a well-stocked kitchen. Great base for exploring the city by foot.",
                 Street = "Viru 3",
                 City = "Tallinn",
                 Country = "Estonia",
@@ -158,8 +206,20 @@ public static class DbSeeder
 
         var blockings = new List<ListingBlock>
         {
-            new() { Id = new Guid("44444444-0000-0000-0000-000000000001"), ListingId = Listing1Id, StartDate = new DateOnly(2026, 8, 1), EndDate = new DateOnly(2026, 8, 15) },
-            new() { Id = new Guid("44444444-0000-0000-0000-000000000002"), ListingId = Listing2Id, StartDate = new DateOnly(2026, 9, 10), EndDate = new DateOnly(2026, 9, 20) },
+            new()
+            {
+                Id = new Guid("44444444-0000-0000-0000-000000000001"),
+                ListingId = Listing1Id,
+                StartDate = new DateOnly(2026, 8, 1),
+                EndDate = new DateOnly(2026, 8, 15),
+            },
+            new()
+            {
+                Id = new Guid("44444444-0000-0000-0000-000000000002"),
+                ListingId = Listing2Id,
+                StartDate = new DateOnly(2026, 9, 10),
+                EndDate = new DateOnly(2026, 9, 20),
+            },
         };
 
         var bookings = new List<Booking>
@@ -211,7 +271,8 @@ public static class DbSeeder
                 BookingId = Booking1Id,
                 AuthorId = User3Id,
                 Rating = 5,
-                Comment = "Alice's studio is absolutely lovely. The location in Mitte is unbeatable — we walked everywhere. The apartment was spotless and had everything we needed. Would definitely stay again!",
+                Comment =
+                    "Alice's studio is absolutely lovely. The location in Mitte is unbeatable — we walked everywhere. The apartment was spotless and had everything we needed. Would definitely stay again!",
                 CreatedAt = new DateTime(2026, 3, 16, 0, 0, 0, DateTimeKind.Utc),
             },
             new()
@@ -221,16 +282,32 @@ public static class DbSeeder
                 BookingId = Booking2Id,
                 AuthorId = User3Id,
                 Rating = 4,
-                Comment = "The townhouse is stunning — every detail has been thoughtfully designed. Plenty of space for our group and the garden was a bonus. Minor note: parking nearby can be tricky during peak hours.",
+                Comment =
+                    "The townhouse is stunning — every detail has been thoughtfully designed. Plenty of space for our group and the garden was a bonus. Minor note: parking nearby can be tricky during peak hours.",
                 CreatedAt = new DateTime(2026, 4, 10, 0, 0, 0, DateTimeKind.Utc),
             },
         };
 
         var favorites = new List<Favorite>
         {
-            new() { Id = new Guid("66666666-0000-0000-0000-000000000001"), UserId = User3Id, ListingId = Listing4Id },
-            new() { Id = new Guid("66666666-0000-0000-0000-000000000002"), UserId = User3Id, ListingId = Listing2Id },
-            new() { Id = new Guid("66666666-0000-0000-0000-000000000003"), UserId = User1Id, ListingId = Listing3Id },
+            new()
+            {
+                Id = new Guid("66666666-0000-0000-0000-000000000001"),
+                UserId = User3Id,
+                ListingId = Listing4Id,
+            },
+            new()
+            {
+                Id = new Guid("66666666-0000-0000-0000-000000000002"),
+                UserId = User3Id,
+                ListingId = Listing2Id,
+            },
+            new()
+            {
+                Id = new Guid("66666666-0000-0000-0000-000000000003"),
+                UserId = User1Id,
+                ListingId = Listing3Id,
+            },
         };
 
         await db.Users.AddRangeAsync(users);

@@ -166,6 +166,12 @@ Make sure the backend is running and the proxy target in `vite.config.ts` matche
 
 ---
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for branch naming, commit message conventions, PR guidelines, and how to run CI checks locally.
+
+---
+
 ## Documentation
 
 Detailed documentation is available in the `docs/` folder:

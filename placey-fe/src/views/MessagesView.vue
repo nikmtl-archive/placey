@@ -31,10 +31,7 @@ function openConversation(id: string) {
     <!-- Two-panel layout -->
     <div class="flex gap-6 items-start">
       <!-- Left: conversation list -->
-      <div
-        class="shrink-0 w-full md:w-85 lg:w-95"
-        :class="activeId ? 'hidden md:block' : 'block'"
-      >
+      <div class="shrink-0 w-full md:w-85 lg:w-95" :class="activeId ? 'hidden md:block' : 'block'">
         <ConversationList
           :conversations="conversations"
           :is-loading="isLoading"
@@ -47,7 +44,12 @@ function openConversation(id: string) {
 
       <!-- Right: open conversation or placeholder -->
       <div class="flex-1 min-w-0" :class="activeId ? 'block' : 'hidden md:block'">
-        <ConversationView v-if="activeId" :key="activeId" :conversation-id="activeId" @back="router.push({ name: 'messages' })" />
+        <ConversationView
+          v-if="activeId"
+          :key="activeId"
+          :conversation-id="activeId"
+          @back="router.push({ name: 'messages' })"
+        />
 
         <!-- No conversation selected placeholder -->
         <div

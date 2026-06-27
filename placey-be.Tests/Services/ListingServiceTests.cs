@@ -1,3 +1,4 @@
+using placey_be.Middleware;
 using placey_be.Models.DTOs.Listings;
 using placey_be.Models.Entities;
 using placey_be.Services;
@@ -115,7 +116,7 @@ public class ListingServiceTests
 
         await svc.DeleteAsync(created.Id, host.Id);
 
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => svc.GetByIdAsync(created.Id));
+        await Assert.ThrowsAsync<ResourceDeletedException>(() => svc.GetByIdAsync(created.Id));
     }
 
     [Fact]
@@ -234,38 +235,38 @@ public class ListingServiceTests
     }
 
     [Fact]
-    public async Task SetAvailability_HostCanSet()
+    public async Task AddBlocking_HostCanAdd()
     {
-        var (svc, host) = Setup(nameof(SetAvailability_HostCanSet));
+        var (svc, host) = Setup(nameof(AddBlocking_HostCanAdd));
         var listing = await svc.CreateAsync(host.Id, DefaultRequest());
-        var req = new SetAvailabilityRequest(Today, Today.AddDays(5), IsBlocked: true);
+        var req = new AddBlockingRequest(Today, Today.AddDays(5));
 
-        var result = await svc.SetAvailabilityAsync(listing.Id, host.Id, req);
+        var result = await svc.AddBlockingAsync(listing.Id, host.Id, req);
 
         Assert.Equal(Today, result.StartDate);
-        Assert.True(result.IsBlocked);
+        Assert.Equal(Today.AddDays(5), result.EndDate);
     }
 
     [Fact]
-    public async Task SetAvailability_NonHost_Throws()
+    public async Task AddBlocking_NonHost_Throws()
     {
-        var (svc, host) = Setup(nameof(SetAvailability_NonHost_Throws));
+        var (svc, host) = Setup(nameof(AddBlocking_NonHost_Throws));
         var listing = await svc.CreateAsync(host.Id, DefaultRequest());
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => svc.SetAvailabilityAsync(listing.Id, Guid.NewGuid(),
-                new SetAvailabilityRequest(Today, Today.AddDays(3), false)));
+            () => svc.AddBlockingAsync(listing.Id, Guid.NewGuid(),
+                new AddBlockingRequest(Today, Today.AddDays(3))));
     }
 
     [Fact]
-    public async Task GetAvailability_ReturnsEntriesInOrder()
+    public async Task GetBlockings_ReturnsEntriesInOrder()
     {
-        var (svc, host) = Setup(nameof(GetAvailability_ReturnsEntriesInOrder));
+        var (svc, host) = Setup(nameof(GetBlockings_ReturnsEntriesInOrder));
         var listing = await svc.CreateAsync(host.Id, DefaultRequest());
-        await svc.SetAvailabilityAsync(listing.Id, host.Id, new SetAvailabilityRequest(Today.AddDays(10), Today.AddDays(15), false));
-        await svc.SetAvailabilityAsync(listing.Id, host.Id, new SetAvailabilityRequest(Today, Today.AddDays(5), true));
+        await svc.AddBlockingAsync(listing.Id, host.Id, new AddBlockingRequest(Today.AddDays(10), Today.AddDays(15)));
+        await svc.AddBlockingAsync(listing.Id, host.Id, new AddBlockingRequest(Today, Today.AddDays(5)));
 
-        var result = await svc.GetAvailabilityAsync(listing.Id);
+        var result = await svc.GetBlockingsAsync(listing.Id);
 
         Assert.Equal(2, result.Count);
         Assert.True(result[0].StartDate < result[1].StartDate);

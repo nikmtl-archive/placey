@@ -15,15 +15,14 @@ namespace placey_be.Migrations
                 table: "Listings",
                 type: "boolean",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: false
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "IsDeleted",
-                table: "Listings");
+            migrationBuilder.DropColumn(name: "IsDeleted", table: "Listings");
         }
     }
 }

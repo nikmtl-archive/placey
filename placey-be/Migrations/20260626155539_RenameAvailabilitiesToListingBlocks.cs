@@ -13,28 +13,25 @@ namespace placey_be.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_Availabilities_Listings_ListingId",
-                table: "Availabilities");
+                table: "Availabilities"
+            );
 
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_Availabilities",
-                table: "Availabilities");
+            migrationBuilder.DropPrimaryKey(name: "PK_Availabilities", table: "Availabilities");
 
             migrationBuilder.DropIndex(
                 name: "IX_Availabilities_ListingId",
-                table: "Availabilities");
+                table: "Availabilities"
+            );
 
-            migrationBuilder.DropColumn(
-                name: "IsBlocked",
-                table: "Availabilities");
+            migrationBuilder.DropColumn(name: "IsBlocked", table: "Availabilities");
 
-            migrationBuilder.RenameTable(
-                name: "Availabilities",
-                newName: "ListingBlocks");
+            migrationBuilder.RenameTable(name: "Availabilities", newName: "ListingBlocks");
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_ListingBlocks",
                 table: "ListingBlocks",
-                column: "Id");
+                column: "Id"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_ListingBlocks_Listings_ListingId",
@@ -42,12 +39,14 @@ namespace placey_be.Migrations
                 column: "ListingId",
                 principalTable: "Listings",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_ListingBlocks_ListingId",
                 table: "ListingBlocks",
-                column: "ListingId");
+                column: "ListingId"
+            );
         }
 
         /// <inheritdoc />
@@ -55,31 +54,28 @@ namespace placey_be.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_ListingBlocks_Listings_ListingId",
-                table: "ListingBlocks");
+                table: "ListingBlocks"
+            );
 
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_ListingBlocks",
-                table: "ListingBlocks");
+            migrationBuilder.DropPrimaryKey(name: "PK_ListingBlocks", table: "ListingBlocks");
 
-            migrationBuilder.DropIndex(
-                name: "IX_ListingBlocks_ListingId",
-                table: "ListingBlocks");
+            migrationBuilder.DropIndex(name: "IX_ListingBlocks_ListingId", table: "ListingBlocks");
 
-            migrationBuilder.RenameTable(
-                name: "ListingBlocks",
-                newName: "Availabilities");
+            migrationBuilder.RenameTable(name: "ListingBlocks", newName: "Availabilities");
 
             migrationBuilder.AddColumn<bool>(
                 name: "IsBlocked",
                 table: "Availabilities",
                 type: "boolean",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: false
+            );
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Availabilities",
                 table: "Availabilities",
-                column: "Id");
+                column: "Id"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Availabilities_Listings_ListingId",
@@ -87,12 +83,14 @@ namespace placey_be.Migrations
                 column: "ListingId",
                 principalTable: "Listings",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Availabilities_ListingId",
                 table: "Availabilities",
-                column: "ListingId");
+                column: "ListingId"
+            );
         }
     }
 }

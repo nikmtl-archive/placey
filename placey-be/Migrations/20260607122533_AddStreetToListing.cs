@@ -15,15 +15,14 @@ namespace placey_be.Migrations
                 table: "Listings",
                 type: "text",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Street",
-                table: "Listings");
+            migrationBuilder.DropColumn(name: "Street", table: "Listings");
         }
     }
 }
