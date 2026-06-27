@@ -3,7 +3,7 @@ import SearchBar from '@/components/SearchBar.vue'
 </script>
 
 <template>
-  <section class="relative pt-16 pb-14 px-10 text-center">
+  <section class="relative pt-10 pb-10 sm:pt-16 sm:pb-14 px-4 sm:px-8 lg:px-10 text-center">
     <!-- Subtle radial gradient blob -->
     <div
       class="pointer-events-none absolute inset-0 overflow-hidden flex items-start justify-center -top-20"

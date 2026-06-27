@@ -34,7 +34,7 @@ function onEmpty(label: string) {
     />
   </div>
 
-  <p v-if="emptyLabels.length" class="max-w-7xl mx-auto px-10 pb-10 text-[12px] text-muted/60">
+  <p v-if="emptyLabels.length" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 pb-10 text-[12px] text-muted/60">
     No listings yet for: {{ emptyLabels.join(', ') }}.
   </p>
 </template>

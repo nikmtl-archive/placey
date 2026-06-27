@@ -186,7 +186,7 @@ function reviewDate(iso: string) {
 <template>
   <div class="min-h-screen bg-page-bg">
     <!-- Loading skeleton -->
-    <div v-if="isLoading" class="max-w-7xl mx-auto px-6 md:px-10 py-10 animate-pulse">
+    <div v-if="isLoading" class="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 py-10 animate-pulse">
       <div class="h-6 w-40 bg-divider rounded mb-6" />
       <div class="h-8 w-2/3 bg-divider rounded mb-3" />
       <div class="h-4 w-1/3 bg-divider rounded mb-8" />
@@ -202,7 +202,7 @@ function reviewDate(iso: string) {
     </div>
 
     <!-- Deleted listing -->
-    <div v-else-if="isDeleted" class="max-w-7xl mx-auto px-6 md:px-10 py-24 text-center">
+    <div v-else-if="isDeleted" class="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 py-24 text-center">
       <div
         class="mx-auto mb-6 w-16 h-16 rounded-full bg-[#e8e3dc] flex items-center justify-center"
       >
@@ -233,7 +233,7 @@ function reviewDate(iso: string) {
     </div>
 
     <!-- Error -->
-    <div v-else-if="error" class="max-w-7xl mx-auto px-6 md:px-10 py-24 text-center">
+    <div v-else-if="error" class="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 py-24 text-center">
       <p class="text-muted mb-4">{{ error }}</p>
       <button class="text-sm font-medium underline underline-offset-2" @click="router.back()">
         Go back
@@ -243,7 +243,7 @@ function reviewDate(iso: string) {
     <!-- Content -->
     <template v-else-if="listing">
       <!-- Back nav -->
-      <div class="max-w-7xl mx-auto px-6 md:px-10 pt-6 pb-2">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 pt-6 pb-2">
         <button
           class="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-ink transition-colors cursor-pointer"
           @click="router.back()"
@@ -255,7 +255,7 @@ function reviewDate(iso: string) {
 
       <!-- Title block -->
       <div
-        class="max-w-7xl mx-auto px-6 md:px-10 pt-2 pb-5 flex items-start justify-between gap-4 flex-wrap"
+        class="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 pt-2 pb-5 flex items-start justify-between gap-4 flex-wrap"
       >
         <div>
           <h1 class="font-serif text-3xl md:text-4xl font-semibold text-ink leading-tight mb-1.5">
@@ -358,7 +358,7 @@ function reviewDate(iso: string) {
       </div>
 
       <!-- Photo grid -->
-      <div class="max-w-7xl mx-auto px-6 md:px-10 mb-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 mb-10">
         <ListingPhotoGrid
           :photo-urls="listing.photoUrls"
           :title="listing.title"
@@ -367,7 +367,7 @@ function reviewDate(iso: string) {
       </div>
 
       <!-- Body -->
-      <div class="max-w-7xl mx-auto px-6 md:px-10 pb-24">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 pb-24">
         <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-12 items-start">
           <!-- Left column -->
           <div class="space-y-10 min-w-0">
