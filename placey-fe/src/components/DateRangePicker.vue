@@ -239,7 +239,7 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside))
     <button
       v-if="!noTrigger"
       type="button"
-      class="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border border-divider hover:border-ink/40 transition-colors text-sm bg-white text-left cursor-pointer"
+      class="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border border-divider hover:border-ink/40 transition-colors text-sm text-left cursor-pointer"
       :class="open ? 'border-ink/40 ring-2 ring-ink/10' : ''"
       @click="openPicker"
     >

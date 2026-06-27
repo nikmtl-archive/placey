@@ -2,6 +2,8 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores'
+import DateRangePicker from '@/components/DateRangePicker.vue'
+import { useAmenityIcons } from '@/composables/useAmenityIcons'
 
 const router = useRouter()
 const route = useRoute()
@@ -256,6 +258,8 @@ async function removeBlocking(blockingId: string) {
 
 // Amenities
 
+const { amenityIcon } = useAmenityIcons()
+
 function addAmenity() {
   const val = form.value.amenityInput.trim()
   if (val && !form.value.amenities.includes(val)) form.value.amenities.push(val)
@@ -488,21 +492,51 @@ onMounted(async () => {
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-ink mb-1.5">Category</label>
-              <select
-                v-model="form.category"
-                class="w-full border border-divider rounded-xl px-4 py-3 text-sm text-ink focus:outline-none focus:border-ink/40 transition-colors bg-white"
-              >
-                <option v-for="c in CATEGORIES" :key="c" :value="c">{{ c }}</option>
-              </select>
+              <div class="relative">
+                <select
+                  v-model="form.category"
+                  class="w-full appearance-none border border-divider rounded-xl px-4 py-3 pr-10 text-sm text-ink focus:outline-none focus:border-ink/40 transition-colors bg-page-bg cursor-pointer"
+                >
+                  <option v-for="c in CATEGORIES" :key="c" :value="c">{{ c }}</option>
+                </select>
+                <svg
+                  class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-muted"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-ink mb-1.5">Property type</label>
-              <select
-                v-model="form.propertyType"
-                class="w-full border border-divider rounded-xl px-4 py-3 text-sm text-ink focus:outline-none focus:border-ink/40 transition-colors bg-white"
-              >
-                <option v-for="p in PROPERTY_TYPES" :key="p" :value="p">{{ p }}</option>
-              </select>
+              <div class="relative">
+                <select
+                  v-model="form.propertyType"
+                  class="w-full appearance-none border border-divider rounded-xl px-4 py-3 pr-10 text-sm text-ink focus:outline-none focus:border-ink/40 transition-colors bg-page-bg cursor-pointer"
+                >
+                  <option v-for="p in PROPERTY_TYPES" :key="p" :value="p">{{ p }}</option>
+                </select>
+                <svg
+                  class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-muted"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
@@ -640,6 +674,7 @@ onMounted(async () => {
             :key="a"
             class="flex items-center gap-1.5 text-sm bg-cream text-ink px-3 py-1.5 rounded-full"
           >
+            <component :is="amenityIcon(a)" :size="13" class="shrink-0 text-ink/60" />
             {{ a }}
             <button
               class="text-ink/40 hover:text-rose-500 transition-colors cursor-pointer"
@@ -892,36 +927,26 @@ onMounted(async () => {
           </h2>
 
           <div class="mb-5">
-            <div class="grid grid-cols-2 gap-3 mb-4">
-              <div>
-                <label class="block text-xs text-muted mb-1">Start date</label>
-                <input
-                  v-model="blockingForm.startDate"
-                  type="date"
-                  class="w-full border border-divider bg-white rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-ink/40 transition-colors"
+            <div class="flex items-center gap-2 mb-3">
+              <div class="flex-1">
+                <DateRangePicker
+                  :check-in="blockingForm.startDate"
+                  :check-out="blockingForm.endDate"
+                  @update:check-in="blockingForm.startDate = $event"
+                  @update:check-out="blockingForm.endDate = $event"
                 />
               </div>
-              <div>
-                <label class="block text-xs text-muted mb-1">End date</label>
-                <input
-                  v-model="blockingForm.endDate"
-                  type="date"
-                  class="w-full border border-divider bg-white rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-ink/40 transition-colors"
-                />
-              </div>
+              <button
+                class="shrink-0 text-sm font-medium text-ink border border-divider px-4 py-2.5 rounded-xl hover:border-ink/40 transition-colors disabled:opacity-50 cursor-pointer"
+                :disabled="isSavingBlocking"
+                @click="addBlocking"
+              >
+                {{ isSavingBlocking ? 'Saving…' : 'Block dates' }}
+              </button>
             </div>
 
-            <p v-if="blockingFormError" class="text-xs text-rose-600 mb-3">
-              {{ blockingFormError }}
-            </p>
-            <p v-if="blockingSaved" class="text-xs text-emerald-600 mb-3">Blocking added</p>
-            <button
-              class="w-full text-sm font-medium text-white bg-ink py-2.5 rounded-xl hover:bg-black transition-colors disabled:opacity-50 cursor-pointer"
-              :disabled="isSavingBlocking"
-              @click="addBlocking"
-            >
-              {{ isSavingBlocking ? 'Saving…' : 'Block dates' }}
-            </button>
+            <p v-if="blockingFormError" class="text-xs text-rose-600">{{ blockingFormError }}</p>
+            <p v-if="blockingSaved" class="text-xs text-emerald-600">Blocking added</p>
           </div>
 
           <div v-if="blockingsLoading" class="space-y-2">
