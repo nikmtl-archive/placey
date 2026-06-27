@@ -12,14 +12,20 @@ export const useListingStore = defineStore('listing', () => {
   const blockingsLoading = ref(false)
 
   const error = ref<string | null>(null)
+  const isDeleted = ref(false)
 
   async function fetchListing(id: string) {
     if (listing.value?.id === id) return
     isLoading.value = true
     error.value = null
+    isDeleted.value = false
     listing.value = null
     try {
       const res = await fetch(`/api/listings/${id}`)
+      if (res.status === 410) {
+        isDeleted.value = true
+        return
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       listing.value = await res.json()
     } catch (e: unknown) {
@@ -60,6 +66,7 @@ export const useListingStore = defineStore('listing', () => {
     reviews.value = []
     blockings.value = []
     error.value = null
+    isDeleted.value = false
   }
 
   return {
@@ -70,6 +77,7 @@ export const useListingStore = defineStore('listing', () => {
     reviewsLoading,
     blockingsLoading,
     error,
+    isDeleted,
     fetchListing,
     fetchReviews,
     fetchBlockings,

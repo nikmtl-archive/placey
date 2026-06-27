@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using placey_be.Data;
+using placey_be.Middleware;
 using placey_be.Models.DTOs.Listings;
 using placey_be.Models.Entities;
 using placey_be.Services.Interfaces;
@@ -70,8 +71,11 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
             .Include(l => l.Host)
             .Include(l => l.Photos)
             .Include(l => l.Reviews)
-            .FirstOrDefaultAsync(l => l.Id == id && !l.IsDeleted)
+            .FirstOrDefaultAsync(l => l.Id == id)
             ?? throw new KeyNotFoundException("Listing not found.");
+
+        if (listing.IsDeleted)
+            throw new ResourceDeletedException("This listing has been removed.");
 
         return ToResponse(listing);
     }

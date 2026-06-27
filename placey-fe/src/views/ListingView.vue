@@ -41,7 +41,7 @@ const favoritesStore = useFavoritesStore()
 const listingStore = useListingStore()
 const bookingStore = useBookingStore()
 const messagingStore = useMessagingStore()
-const { listing, isLoading, error, reviews, reviewsLoading, blockings } =
+const { listing, isLoading, error, isDeleted, reviews, reviewsLoading, blockings } =
   storeToRefs(listingStore)
 
 const isStartingConversation = ref(false)
@@ -248,6 +248,20 @@ function reviewDate(iso: string) {
         </div>
         <div class="h-64 bg-divider rounded-2xl" />
       </div>
+    </div>
+
+    <!-- Deleted listing -->
+    <div v-else-if="isDeleted" class="max-w-7xl mx-auto px-6 md:px-10 py-24 text-center">
+      <div class="mx-auto mb-6 w-16 h-16 rounded-full bg-[#e8e3dc] flex items-center justify-center">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-muted">
+          <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
+        </svg>
+      </div>
+      <h2 class="text-xl font-semibold text-ink mb-2">This listing is no longer available</h2>
+      <p class="text-sm text-muted mb-6">The host has removed this listing. Any existing bookings have been cancelled.</p>
+      <button class="text-sm font-medium underline underline-offset-2 text-muted hover:text-ink transition-colors" @click="router.back()">
+        Go back
+      </button>
     </div>
 
     <!-- Error -->
