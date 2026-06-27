@@ -51,21 +51,23 @@ const columns = [
     title: 'Booking',
     links: [
       { label: 'Find a place', to: '/search' },
-      { label: 'Manage bookings' },
-      { label: 'Cancellation options' },
+      { label: 'My bookings', to: '/bookings' },
+      { label: 'Favorites', to: '/favorites' },
     ],
   },
   {
     title: 'Hosting',
     links: [
       { label: 'Become a host', to: '/become-a-host' },
-      { label: 'Create a listing' },
-      { label: 'Manage bookings' },
+      { label: 'Create a listing', to: '/listing/new' },
+      { label: 'Host dashboard', to: '/host-dashboard' },
     ],
   },
   {
     title: 'Placey',
-    links: [{ label: 'About', to: '/about' }],
+    links: [
+      { label: 'About', to: '/about' }
+    ],
   },
 ]
 
