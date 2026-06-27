@@ -23,22 +23,8 @@ import {
   Zap,
   Share,
   Heart,
-  Wifi,
-  Car,
-  UtensilsCrossed,
-  Wind,
-  Waves,
-  Tv,
-  Dumbbell,
-  Dog,
-  Flame,
-  Coffee,
-  Snowflake,
-  WashingMachine,
-  Lock,
-  Camera,
-  Sparkles,
 } from '@lucide/vue'
+import { useAmenityIcons } from '@/composables/useAmenityIcons'
 
 const route = useRoute()
 const router = useRouter()
@@ -142,27 +128,7 @@ async function share() {
 }
 
 // Amenity icon map
-const amenityIcons: Record<string, object> = {
-  WiFi: Wifi,
-  Parking: Car,
-  Kitchen: UtensilsCrossed,
-  'Air conditioning': Wind,
-  Pool: Waves,
-  TV: Tv,
-  Gym: Dumbbell,
-  'Pets allowed': Dog,
-  Fireplace: Flame,
-  'Coffee maker': Coffee,
-  Heating: Snowflake,
-  Washer: WashingMachine,
-  Dryer: WashingMachine,
-  Safe: Lock,
-  'Security cameras': Camera,
-}
-
-function amenityIcon(name: string): object {
-  return amenityIcons[name] ?? Sparkles
-}
+const { amenityIcon } = useAmenityIcons()
 
 // Booking panel — pre-fill from search query params
 const checkIn = ref(route.query.checkIn ? String(route.query.checkIn) : '')
