@@ -136,7 +136,7 @@ public class UserService(AppDbContext db, IWebHostEnvironment env) : IUserServic
         await using var stream = new FileStream(fullPath, FileMode.Create);
         await file.CopyToAsync(stream);
 
-        user.AvatarUrl = $"/avatars/{filename}";
+        user.AvatarUrl = $"/api/avatars/{filename}";
         await db.SaveChangesAsync();
 
         return user.AvatarUrl;

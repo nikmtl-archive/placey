@@ -435,10 +435,7 @@ onMounted(async () => {
           >
           <button
             class="text-xs font-medium text-rose-600 hover:text-rose-700 border border-rose-200 hover:border-rose-300 transition-colors rounded-full px-3 py-1.5 cursor-pointer"
-            @click="
-              confirmDeleteOpen = true
-              deleteError = null
-            "
+            @click="((confirmDeleteOpen = true), (deleteError = null))"
           >
             Delete
           </button>
