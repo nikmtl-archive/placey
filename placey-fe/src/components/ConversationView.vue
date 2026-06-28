@@ -17,8 +17,11 @@ const messagingStore = useMessagingStore()
 const { activeConversation, isLoading, isSending, error } = storeToRefs(messagingStore)
 
 const newMessage = ref('')
+const sendError = ref<string | null>(null)
 const messagesEndRef = ref<HTMLElement | null>(null)
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
+
+const MAX_MESSAGE_LENGTH = 4000
 
 const myId = computed(() => authStore.user?.id)
 
@@ -43,11 +46,17 @@ function scrollToBottom() {
 async function send() {
   const body = newMessage.value.trim()
   if (!body || isSending.value) return
+  if (body.length > MAX_MESSAGE_LENGTH) {
+    sendError.value = `Message is too long (max ${MAX_MESSAGE_LENGTH} characters).`
+    return
+  }
+  sendError.value = null
   newMessage.value = ''
   resetTextareaHeight()
   try {
     await messagingStore.sendMessage(props.conversationId, body)
-  } catch {
+  } catch (e) {
+    sendError.value = e instanceof Error ? e.message : 'Failed to send message.'
     newMessage.value = body
   }
 }
@@ -196,29 +205,38 @@ function initials(name: string): string {
       </div>
 
       <!-- Input bar -->
-      <div class="border-t border-divider px-5 py-3.5 flex items-end gap-3 bg-white shrink-0">
-        <textarea
-          ref="textareaRef"
-          v-model="newMessage"
-          placeholder="Message…"
-          rows="1"
-          class="flex-1 resize-none border border-divider rounded-2xl px-4 py-2.5 text-sm text-ink placeholder:text-muted/50 focus:outline-none focus:border-ink/30 transition-colors bg-page-bg max-h-32 leading-relaxed"
-          @keydown="handleKeydown"
-          @input="autoResize"
-        />
-        <button
-          class="w-10 h-10 rounded-full flex items-center justify-center transition-colors shrink-0 mb-0.5"
-          :class="
-            newMessage.trim() && !isSending
-              ? 'bg-ink text-white hover:bg-black cursor-pointer'
-              : 'bg-divider-light text-muted cursor-not-allowed'
-          "
-          :disabled="!newMessage.trim() || isSending"
-          aria-label="Send message"
-          @click="send"
+      <div class="border-t border-divider bg-white shrink-0">
+        <div
+          v-if="sendError"
+          class="mx-5 mt-3 px-3 py-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"
         >
-          <Send :size="15" />
-        </button>
+          {{ sendError }}
+        </div>
+        <div class="px-5 py-3.5 flex items-end gap-3">
+          <textarea
+            ref="textareaRef"
+            v-model="newMessage"
+            placeholder="Message…"
+            rows="1"
+            :maxlength="MAX_MESSAGE_LENGTH"
+            class="flex-1 resize-none border border-divider rounded-2xl px-4 py-2.5 text-sm text-ink placeholder:text-muted/50 focus:outline-none focus:border-ink/30 transition-colors bg-page-bg max-h-32 leading-relaxed"
+            @keydown="handleKeydown"
+            @input="autoResize"
+          />
+          <button
+            class="w-10 h-10 rounded-full flex items-center justify-center transition-colors shrink-0 mb-0.5"
+            :class="
+              newMessage.trim() && !isSending
+                ? 'bg-ink text-white hover:bg-black cursor-pointer'
+                : 'bg-divider-light text-muted cursor-not-allowed'
+            "
+            :disabled="!newMessage.trim() || isSending"
+            aria-label="Send message"
+            @click="send"
+          >
+            <Send :size="15" />
+          </button>
+        </div>
       </div>
     </template>
   </div>
