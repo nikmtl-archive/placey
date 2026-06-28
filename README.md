@@ -247,37 +247,6 @@ Full test documentation is in [docs/testing.md](docs/testing.md), including back
 
 ---
 
-### Frontend tests
-
-Frontend unit tests use [Vitest](https://vitest.dev/) and [`@vue/test-utils`](https://test-utils.vuejs.org/). All five Pinia stores are tested with mocked API calls (`vi.stubGlobal` / `vi.spyOn`).
-
-| Store               | Scenarios covered                                                                                                                                                                                                                                                                                                             |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `useAuthStore`      | Initial state (empty, restored from localStorage, corrupt data), login (success, failure, loading flag, persistence), register (success, duplicate email), logout (success, network error), patchUser, refreshSession (success, no token, deduplication), authHeaders, apiFetch (401 retry, clears session on failed refresh) |
-| `useFavoritesStore` | isFavorited, hydrate (success, failure), toggleFavorite (add optimistic, remove optimistic, rollback add on error, rollback remove on error), reset                                                                                                                                                                           |
-| `useListingsStore`  | fetchListings (success, HTTP error, query string for location/guests, optional filters, omits absent params, ignores AbortError, loading flag)                                                                                                                                                                                |
-| `useBookingStore`   | fetchMyBookings (success, error, non-array response), createBooking (success, conflict error, loading flag), cancelBooking (removes from list, clears lastBooking, error, loading flag), rateBooking (refreshes list, error, loading flag)                                                                                    |
-| `useMessagingStore` | fetchConversations (success, error), fetchConversation (sets active, resets before load, error), getOrCreateConversation (success, error), sendMessage (success + appends, wrong conversation, error, loading flag), fetchUnreadCount (success, silent error), resetActive                                                    |
-
-
-### Running frontend tests
-
-```bash
-cd placey-fe
-
-# Run once
-pnpm test
-
-# Watch mode
-pnpm test:watch
-
-# With coverage report
-pnpm test:coverage
-```
-
----
-
-
 ## Known Limitations
 - At the moment, there are no email notifications for new messages or bookings. Users must check the app to see updates.
 - Payments are out of scope. The booking flow does not include any payment processing, and bookings are confirmed without any financial transaction.
