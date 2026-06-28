@@ -13,7 +13,7 @@ export const useMessagingStore = defineStore('messaging', () => {
   const isSending = ref(false)
   const error = ref<string | null>(null)
 
-  let _eventSource: EventSource | null = null
+  let _sseAbort: AbortController | null = null
   let _retryCount = 0
 
   async function fetchConversations() {
@@ -90,36 +90,56 @@ export const useMessagingStore = defineStore('messaging', () => {
     }
   }
 
-  function connectStream() {
-    if (_eventSource) return
+  async function connectStream() {
+    if (_sseAbort) return
     const token = authStore.accessToken
     if (!token) return
 
-    _eventSource = new EventSource(`/api/messages/stream?access_token=${token}`)
+    _sseAbort = new AbortController()
+    const signal = _sseAbort.signal
 
-    _eventSource.onopen = () => {
+    try {
+      const res = await fetch('/api/messages/stream', {
+        headers: { Authorization: `Bearer ${token}` },
+        signal,
+      })
+
+      if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`)
+
       _retryCount = 0
-    }
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
 
-    _eventSource.onmessage = (e) => {
-      const msg: ChatMessage = JSON.parse(e.data)
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
 
-      if (activeConversation.value?.id === msg.conversationId) {
-        activeConversation.value.messages.push(msg)
-      } else {
-        unreadCount.value++
-        const conv = conversations.value.find((c) => c.id === msg.conversationId)
-        if (conv) {
-          conv.lastMessageBody = msg.body
-          conv.lastMessageAt = msg.createdAt
-          conv.unreadCount++
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+
+        for (const line of lines) {
+          if (!line.startsWith('data:')) continue
+          const raw = line.slice(5).trim()
+          if (!raw) continue
+          const msg: ChatMessage = JSON.parse(raw)
+          if (activeConversation.value?.id === msg.conversationId) {
+            activeConversation.value.messages.push(msg)
+          } else {
+            unreadCount.value++
+            const conv = conversations.value.find((c) => c.id === msg.conversationId)
+            if (conv) {
+              conv.lastMessageBody = msg.body
+              conv.lastMessageAt = msg.createdAt
+              conv.unreadCount++
+            }
+          }
         }
       }
-    }
-
-    _eventSource.onerror = () => {
-      _eventSource?.close()
-      _eventSource = null
+    } catch (e) {
+      if (signal.aborted) return
+      _sseAbort = null
       if (_retryCount < 5) {
         const delay = Math.min(1000 * Math.pow(2, _retryCount), 30_000)
         _retryCount++
@@ -127,12 +147,22 @@ export const useMessagingStore = defineStore('messaging', () => {
       } else {
         error.value = 'Live updates disconnected. Refresh the page to reconnect.'
       }
+      return
+    }
+
+    // Stream ended cleanly — retry unless disconnected intentionally
+    _sseAbort = null
+    if (_retryCount < 5) {
+      const delay = Math.min(1000 * Math.pow(2, _retryCount), 30_000)
+      _retryCount++
+      setTimeout(connectStream, delay)
     }
   }
 
   function disconnectStream() {
-    _eventSource?.close()
-    _eventSource = null
+    _sseAbort?.abort()
+    _sseAbort = null
+    _retryCount = 0
   }
 
   function resetActive() {

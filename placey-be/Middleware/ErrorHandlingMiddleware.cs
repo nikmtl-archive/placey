@@ -19,13 +19,13 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
 
     private static Task WriteErrorAsync(HttpContext context, Exception ex)
     {
-        var (status, title) = ex switch
+        var (status, title, detail) = ex switch
         {
-            KeyNotFoundException => (StatusCodes.Status404NotFound, "Not Found"),
-            ResourceDeletedException => (StatusCodes.Status410Gone, "Gone"),
-            UnauthorizedAccessException => (StatusCodes.Status403Forbidden, "Forbidden"),
-            InvalidOperationException => (StatusCodes.Status400BadRequest, "Bad Request"),
-            _ => (StatusCodes.Status500InternalServerError, "Internal Server Error"),
+            KeyNotFoundException => (StatusCodes.Status404NotFound, "Not Found", ex.Message),
+            ResourceDeletedException => (StatusCodes.Status410Gone, "Gone", ex.Message),
+            UnauthorizedAccessException => (StatusCodes.Status403Forbidden, "Forbidden", ex.Message),
+            InvalidOperationException => (StatusCodes.Status400BadRequest, "Bad Request", ex.Message),
+            _ => (StatusCodes.Status500InternalServerError, "Internal Server Error", "An unexpected error occurred."),
         };
 
         context.Response.ContentType = "application/problem+json";
@@ -36,7 +36,7 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
             type = $"https://httpstatuses.io/{status}",
             title,
             status,
-            detail = ex.Message,
+            detail,
         };
 
         return context.Response.WriteAsync(JsonSerializer.Serialize(problem));

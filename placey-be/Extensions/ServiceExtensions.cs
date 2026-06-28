@@ -47,24 +47,32 @@ public static class ServiceExtensions
                         Encoding.UTF8.GetBytes(config["Jwt:Secret"]!)
                     ),
                 };
-                options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
-                {
-                    OnMessageReceived = ctx =>
-                    {
-                        var token = ctx.Request.Query["access_token"];
-                        if (
-                            !string.IsNullOrEmpty(token)
-                            && ctx.Request.Path.StartsWithSegments("/messages/stream")
-                        )
-                        {
-                            ctx.Token = token;
-                        }
-                        return Task.CompletedTask;
-                    },
-                };
             });
 
         services.AddAuthorization();
+        return services;
+    }
+
+    public static IServiceCollection AddCorsPolicy(
+        this IServiceCollection services,
+        IConfiguration config
+    )
+    {
+        var origin = config["Cors:AllowedOrigin"];
+        services.AddCors(options =>
+        {
+            options.AddPolicy(
+                "Frontend",
+                policy =>
+                {
+                    if (!string.IsNullOrEmpty(origin))
+                        policy.WithOrigins(origin);
+                    else
+                        policy.WithOrigins();
+                    policy.AllowAnyMethod().AllowAnyHeader();
+                }
+            );
+        });
         return services;
     }
 

@@ -106,8 +106,9 @@ async function submit() {
   if (tab.value === 'login') {
     await authStore.login(email.value, password.value)
     if (!authStore.error) {
-      const redirect = route.query.redirect as string | undefined
-      router.push(redirect ?? '/')
+      const raw = route.query.redirect as string | undefined
+      const redirect = raw && raw.startsWith('/') && !raw.startsWith('//') ? raw : '/'
+      router.push(redirect)
     }
   } else {
     await authStore.register(email.value, password.value, name.value)

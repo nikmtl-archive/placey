@@ -117,7 +117,7 @@ Used by Docker Compose only. Copy `.env.example` to `.env` and fill in:
 | `POSTGRES_USER`          | Database username                                                      |
 | `POSTGRES_PASSWORD`      | Database password                                                      |
 | `POSTGRES_DB`            | Database name                                                          |
-| `JWT_SECRET`             | HMAC signing key — must be ≥ 32 characters (`openssl rand -base64 32`) |
+| `JWT_SECRET`             | HMAC signing key, must be ≥ 32 characters (`openssl rand -base64 32`) |
 | `ASPNETCORE_ENVIRONMENT` | `Development` or `Production`                                          |
 
 JWT issuer and audience are hardcoded to `placey` in `docker-compose.yml`. For local development outside Docker they are set in `appsettings.Development.json`.
@@ -211,12 +211,13 @@ Detailed documentation is available in the `docs/` folder.
 | [docs/messaging.md](docs/messaging.md)         | Messaging feature: SSE design, store, components, data model |
 | [docs/api-endpoints.md](docs/api-endpoints.md) | Full REST API reference with request/response shapes         |
 | [docs/testing.md](docs/testing.md)             | Test suites overview and manual testing checklist            |
+| [docs/SECURITY.md](docs/SECURITY.md)           | Security controls: auth, validation, headers, known limits   |
 
 ---
 
 ## Tests
 
-Full test documentation — backend service tests (66 unit tests across 7 service classes), frontend store tests (5 Pinia store test suites), and the manual testing checklist — is in [docs/testing.md](docs/testing.md).
+Full test documentation is in [docs/testing.md](docs/testing.md), including backend service tests (unit tests for service layer), frontend store tests (Pinia store test suites), and the manual testing checklist.
 
 ---
 
