@@ -42,7 +42,9 @@ In **Production**, `detail` is suppressed to avoid leaking internal information.
 
 ## Model validation (422)
 
-ASP.NET Core's built-in model validation handles `[Required]`, `[EmailAddress]`, `[Range]`, `[MinLength]`, `[StringLength]` annotations on DTO records. Validation failures return **422 Unprocessable Entity** before the controller action is even called.
+ASP.NET Core's built-in model validation handles `[Required]`, `[EmailAddress]`, `[Range]`, `[MinLength]`, `[MaxLength]`, `[StringLength]` annotations on DTO records. Validation failures return **422 Unprocessable Entity** before the controller action is even called. The response uses ASP.NET Core's default validation problem format with an `errors` map.
+
+Business-logic validations (e.g. blank name after trim, invalid file type, file too large) are thrown as `InvalidOperationException` inside the service layer and are caught by `ErrorHandlingMiddleware`, returning **400 Bad Request** in the standard `ProblemDetails` shape with a `detail` field containing the human-readable message. The frontend reads `body.detail` to display these to the user.
 
 ---
 

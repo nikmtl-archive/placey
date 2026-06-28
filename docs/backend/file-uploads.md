@@ -13,6 +13,15 @@
 
 Both upload endpoints accept `multipart/form-data` with the file in a field named `file`.
 
+**Validation rules (enforced by the service layer):**
+
+| Endpoint                    | Max size | Allowed types                           |
+| --------------------------- | -------- | --------------------------------------- |
+| `POST /users/me/avatar`     | 5 MB     | `image/jpeg`, `image/png`, `image/webp` |
+| `POST /listings/:id/photos` | 10 MB    | `image/jpeg`, `image/png`, `image/webp` |
+
+Violations return `400 Bad Request` with a `detail` message via `ErrorHandlingMiddleware`. The frontend also validates these constraints before uploading so the user sees an immediate error without a round-trip.
+
 ---
 
 ## Storage
@@ -57,9 +66,14 @@ volumes:
 
 ---
 
+## Photo deletion ordering
+
+The deletion flow commits the database record first, then attempts to remove the physical file:
+
+1. `db.ListingPhotos.Remove(photo)` + `SaveChangesAsync()` — atomically removes the DB record.
+2. `File.Delete(physicalPath)` — best-effort; failures are logged as warnings but do not affect the response. A failed file delete leaves an orphaned file on disk, which is preferable to a failed DB delete that leaves a dangling record.
+
 ## Limitations & future considerations
 
-- **No file type validation beyond extension**: the backend does not inspect the file's magic bytes; consider adding MIME type validation for production hardening.
-- **No size limit enforced in code**: ASP.NET Core's default multipart limit applies; configure `MultipartBodyLengthLimit` if needed.
 - **Local storage only**: for production at scale, consider migrating to cloud object storage (AWS S3, Azure Blob Storage, Cloudflare R2) to support horizontal scaling and CDN delivery.
 - **No image resizing**: photos are stored at their original size; consider adding server-side resize/compress to reduce storage and load times.

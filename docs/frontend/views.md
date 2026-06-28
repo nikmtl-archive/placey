@@ -84,7 +84,7 @@ Multipurpose form used for both creating and editing listings. Detects create vs
 Fields: title, description, street, city, country, category, property type, bedrooms, bathrooms, max guests, price per night, instant book toggle, amenities checkboxes.
 
 Photo management:
-- Upload photos (multipart form POST to `/api/listings/:id/photos`).
+- Upload photos (multipart form POST to `/api/listings/:id/photos`). Frontend validates type (JPEG/PNG/WebP) and size (≤ 10 MB) before upload.
 - Preview uploaded photos.
 - Delete individual photos.
 
@@ -159,8 +159,8 @@ Two-panel messaging inbox layout. See [../messaging.md](../messaging.md) for ful
 
 Account settings for the logged-in user.
 
-- Update display name and bio (PATCH `/api/users/me`).
-- Upload avatar photo (POST `/api/users/me/avatar`).
+- Update display name and bio (PATCH `/api/users/me`). Frontend validates: name required, name ≤ 100 chars, bio ≤ 500 chars before sending. Input elements have matching `maxlength` attributes.
+- Upload avatar photo (POST `/api/users/me/avatar`). Frontend validates type (JPEG/PNG/WebP) and size (≤ 5 MB) before upload, showing an immediate error without a round-trip.
 - Delete account (DELETE `/api/users/me`) — prompts for confirmation.
 
 ---

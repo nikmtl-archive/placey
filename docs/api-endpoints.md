@@ -272,7 +272,11 @@ Pending → Confirmed → Completed
 { "name": "Jane Smith", "bio": "I love hosting." }
 ```
 
-Omit a field (or set it to `null`) to leave it unchanged.
+Omit a field (or set it to `null`) to leave it unchanged. Constraints: `name` max 100 characters (must not be blank if provided), `bio` max 500 characters.
+
+**Request — upload avatar** (`POST /users/me/avatar`)
+
+`multipart/form-data`, field name `file`. Max size: 5 MB. Accepted types: `image/jpeg`, `image/png`, `image/webp`. Violations return `400` with a `detail` message.
 
 ---
 
