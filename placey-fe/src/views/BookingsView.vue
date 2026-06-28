@@ -14,7 +14,7 @@ function isUpcoming(booking: Booking) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const checkout = new Date(booking.checkOut + 'T00:00:00')
-  return checkout >= today && booking.status.toLowerCase() !== 'cancelled'
+  return checkout >= today
 }
 
 const upcomingBookings = computed(() => bookings.value.filter((b) => isUpcoming(b)))
