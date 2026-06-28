@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { useAuthStore } from './useAuthStore'
+import { useAuthStore, parseErrorMessage } from './useAuthStore'
 import type { ConversationSummary, ConversationDetail, ChatMessage } from '@/types'
 
 export const useMessagingStore = defineStore('messaging', () => {
@@ -13,7 +13,8 @@ export const useMessagingStore = defineStore('messaging', () => {
   const isSending = ref(false)
   const error = ref<string | null>(null)
 
-  let _eventSource: EventSource | null = null
+  let _sseAbort: AbortController | null = null
+  let _retryCount = 0
 
   async function fetchConversations() {
     isLoading.value = true
@@ -51,10 +52,7 @@ export const useMessagingStore = defineStore('messaging', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ otherUserId }),
     })
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}))
-      throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
-    }
+    if (!res.ok) throw new Error(await parseErrorMessage(res))
     const data: ConversationSummary = await res.json()
     return data.id
   }
@@ -70,10 +68,7 @@ export const useMessagingStore = defineStore('messaging', () => {
           body: JSON.stringify({ body }),
         },
       )
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.detail ?? err.message ?? `HTTP ${res.status}`)
-      }
+      if (!res.ok) throw new Error(await parseErrorMessage(res))
       const msg: ChatMessage = await res.json()
       if (activeConversation.value?.id === conversationId) {
         activeConversation.value.messages.push(msg)
@@ -95,39 +90,79 @@ export const useMessagingStore = defineStore('messaging', () => {
     }
   }
 
-  function connectStream() {
-    if (_eventSource) return
+  async function connectStream() {
+    if (_sseAbort) return
     const token = authStore.accessToken
     if (!token) return
 
-    _eventSource = new EventSource(`/api/messages/stream?access_token=${token}`)
+    _sseAbort = new AbortController()
+    const signal = _sseAbort.signal
 
-    _eventSource.onmessage = (e) => {
-      const msg: ChatMessage = JSON.parse(e.data)
+    try {
+      const res = await fetch('/api/messages/stream', {
+        headers: { Authorization: `Bearer ${token}` },
+        signal,
+      })
 
-      if (activeConversation.value?.id === msg.conversationId) {
-        activeConversation.value.messages.push(msg)
-      } else {
-        unreadCount.value++
-        const conv = conversations.value.find((c) => c.id === msg.conversationId)
-        if (conv) {
-          conv.lastMessageBody = msg.body
-          conv.lastMessageAt = msg.createdAt
-          conv.unreadCount++
+      if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`)
+
+      _retryCount = 0
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+
+        for (const line of lines) {
+          if (!line.startsWith('data:')) continue
+          const raw = line.slice(5).trim()
+          if (!raw) continue
+          const msg: ChatMessage = JSON.parse(raw)
+          if (activeConversation.value?.id === msg.conversationId) {
+            activeConversation.value.messages.push(msg)
+          } else {
+            unreadCount.value++
+            const conv = conversations.value.find((c) => c.id === msg.conversationId)
+            if (conv) {
+              conv.lastMessageBody = msg.body
+              conv.lastMessageAt = msg.createdAt
+              conv.unreadCount++
+            }
+          }
         }
       }
+    } catch {
+      if (signal.aborted) return
+      _sseAbort = null
+      if (_retryCount < 5) {
+        const delay = Math.min(1000 * Math.pow(2, _retryCount), 30_000)
+        _retryCount++
+        setTimeout(connectStream, delay)
+      } else {
+        error.value = 'Live updates disconnected. Refresh the page to reconnect.'
+      }
+      return
     }
 
-    _eventSource.onerror = () => {
-      _eventSource?.close()
-      _eventSource = null
-      setTimeout(connectStream, 5000)
+    // Stream ended cleanly — retry unless disconnected intentionally
+    _sseAbort = null
+    if (_retryCount < 5) {
+      const delay = Math.min(1000 * Math.pow(2, _retryCount), 30_000)
+      _retryCount++
+      setTimeout(connectStream, delay)
     }
   }
 
   function disconnectStream() {
-    _eventSource?.close()
-    _eventSource = null
+    _sseAbort?.abort()
+    _sseAbort = null
+    _retryCount = 0
   }
 
   function resetActive() {

@@ -118,7 +118,7 @@ Located at [placey-fe/src/stores/useMessagingStore.ts](../placey-fe/src/stores/u
 | `connectStream()`                      | Opens the SSE connection; on new message, appends to the active conversation or increments unread counters on the list entry |
 | `disconnectStream()`                   | Closes the SSE connection (called on logout)                                                                                 |
 
-**SSE reconnect**: on connection error the store waits 5 seconds then calls `connectStream()` again.
+**SSE reconnect**: on connection error the store uses exponential backoff (1 s, 2 s, 4 s, 8 s, 16 s, capped at 30 s) for up to 5 attempts. After 5 failed retries it sets `error` with a message prompting the user to refresh. A successful reconnect resets the retry counter.
 
 ### Components
 
@@ -135,8 +135,9 @@ Receives the `conversations` array as a prop and emits `select` / `retry`. Rende
 Receives `conversationId` as a prop. On mount it fetches the conversation and scrolls to the bottom. A watcher on `messages.length` keeps the view scrolled to the latest message as new ones arrive via SSE.
 
 - Send on `Enter` (Shift+Enter inserts a newline).
-- The textarea auto-resizes up to 128 px.
-- If sending fails the typed message is restored.
+- The textarea auto-resizes up to 128 px and enforces the 4000-character limit via `maxlength`.
+- If sending fails, the error is displayed inline above the input bar and the typed message is restored.
+- Messages over 4000 characters are rejected client-side before the request is sent.
 - Date separator pills are shown when the date changes between consecutive messages.
 
 ### TypeScript types

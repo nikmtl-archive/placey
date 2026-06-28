@@ -130,7 +130,7 @@ const router = createRouter({
       path: '/messages/:id?',
       name: 'messages',
       component: () => import('@/views/MessagesView.vue'),
-      meta: { requiresAuth: true, title: 'Placey -f Messages' },
+      meta: { requiresAuth: true, title: 'Placey - Messages' },
     },
 
     // Catch-all

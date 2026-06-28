@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '@/stores'
+import { useAuthStore, parseErrorMessage } from '@/stores/useAuthStore'
 import DateRangePicker from '@/components/DateRangePicker.vue'
 import { useAmenityIcons } from '@/composables/useAmenityIcons'
 
@@ -11,6 +11,8 @@ const authStore = useAuthStore()
 
 const CATEGORIES = ['Beach', 'Mountains', 'Urban', 'Luxe', 'Countryside', 'Island', 'Lake']
 const PROPERTY_TYPES = ['Apartment', 'House']
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
+const MAX_PHOTO_BYTES = 10 * 1024 * 1024
 
 // Mode: 'create' for /listing/new, 'edit' for /listing/:id/edit
 const listingId = route.params.id as string | undefined
@@ -99,8 +101,18 @@ async function uploadExistingPhoto(event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
-  photoUploading.value = true
   photoError.value = null
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    photoError.value = 'Only JPEG, PNG, WebP, and HEIC images are allowed.'
+    if (photoInput.value) photoInput.value.value = ''
+    return
+  }
+  if (file.size > MAX_PHOTO_BYTES) {
+    photoError.value = 'Image must be under 10 MB.'
+    if (photoInput.value) photoInput.value.value = ''
+    return
+  }
+  photoUploading.value = true
   try {
     const fd = new FormData()
     fd.append('file', file)
@@ -108,10 +120,7 @@ async function uploadExistingPhoto(event: Event) {
       method: 'POST',
       body: fd,
     })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw new Error(err.detail ?? err.message ?? `HTTP ${res.status}`)
-    }
+    if (!res.ok) throw new Error(await parseErrorMessage(res))
     const photo: Photo = await res.json()
     existingPhotos.value.push(photo)
   } catch (e: unknown) {
@@ -130,10 +139,7 @@ async function deleteExistingPhoto(photo: Photo) {
     const res = await authStore.apiFetch(`/api/listings/${listingId}/photos/${photo.id}`, {
       method: 'DELETE',
     })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw new Error(err.detail ?? err.message ?? `HTTP ${res.status}`)
-    }
+    if (!res.ok) throw new Error(await parseErrorMessage(res))
     existingPhotos.value = existingPhotos.value.filter((p) => p.id !== photo.id)
   } catch (e: unknown) {
     photoError.value = e instanceof Error ? e.message : 'Delete failed'
@@ -155,7 +161,8 @@ const isDragging = ref(false)
 function addFiles(files: FileList | null) {
   if (!files) return
   for (const file of Array.from(files)) {
-    if (!file.type.startsWith('image/')) continue
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) continue
+    if (file.size > MAX_PHOTO_BYTES) continue
     if (stagedPhotos.value.some((p) => p.file.name === file.name && p.file.size === file.size))
       continue
     stagedPhotos.value.push({ file, previewUrl: URL.createObjectURL(file) })
@@ -229,10 +236,7 @@ async function addBlocking() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(blockingForm.value),
     })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw new Error(err.detail ?? err.message ?? `HTTP ${res.status}`)
-    }
+    if (!res.ok) throw new Error(await parseErrorMessage(res))
     const block: BlockingItem = await res.json()
     blockings.value.push(block)
     blockingSaved.value = true
@@ -281,10 +285,7 @@ async function confirmDelete() {
   deleteError.value = null
   try {
     const res = await authStore.apiFetch(`/api/listings/${listingId}`, { method: 'DELETE' })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw new Error(err.detail ?? err.message ?? `HTTP ${res.status}`)
-    }
+    if (!res.ok) throw new Error(await parseErrorMessage(res))
     router.push('/host-dashboard')
   } catch (e: unknown) {
     deleteError.value = e instanceof Error ? e.message : 'Failed to delete listing'
@@ -338,10 +339,7 @@ async function submit() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.detail ?? err.message ?? `HTTP ${res.status}`)
-      }
+      if (!res.ok) throw new Error(await parseErrorMessage(res))
       saved.value = true
     } else {
       const res = await authStore.apiFetch('/api/listings', {
@@ -349,10 +347,7 @@ async function submit() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.detail ?? err.message ?? `HTTP ${res.status}`)
-      }
+      if (!res.ok) throw new Error(await parseErrorMessage(res))
       const created = await res.json()
       if (stagedPhotos.value.length > 0) {
         uploadProgress.value = { done: 0, total: stagedPhotos.value.length }

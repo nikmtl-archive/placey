@@ -5,6 +5,7 @@ import { Star, Image } from '@lucide/vue'
 import { useRouter } from 'vue-router'
 import type { Booking } from '@/types'
 import { useBookingStore } from '@/stores/useBookingStore'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 
 const props = defineProps<{
   bookings: Booking[]
@@ -16,6 +17,7 @@ const activeReviewBookingId = ref<string | null>(null)
 const reviewRating = ref(5)
 const reviewComment = ref('')
 const reviewError = ref<string | null>(null)
+const confirmCancelId = ref<string | null>(null)
 
 function getNightCount(checkIn: string, checkOut: string) {
   const start = new Date(checkIn)
@@ -23,7 +25,10 @@ function getNightCount(checkIn: string, checkOut: string) {
   return Math.max(0, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)))
 }
 
-async function cancelBooking(id: string) {
+async function cancelBooking() {
+  if (!confirmCancelId.value) return
+  const id = confirmCancelId.value
+  confirmCancelId.value = null
   await bookingStore.cancelBooking(id)
 }
 
@@ -134,7 +139,7 @@ async function submitReview(booking: Booking) {
           <button
             class="font-medium text-xs leading-4 text-center text-neutral-500 ml-4 mr-4 disabled:opacity-50"
             :disabled="bookingStore.isCancelling"
-            @click="cancelBooking(booking.id)"
+            @click="confirmCancelId = booking.id"
           >
             {{ bookingStore.isCancelling ? 'Cancelling…' : 'Cancel booking' }}
           </button>
@@ -218,4 +223,15 @@ async function submitReview(booking: Booking) {
       </div>
     </div>
   </div>
+
+  <ConfirmModal
+    v-if="confirmCancelId"
+    title="Cancel booking?"
+    message="Are you sure you want to cancel this booking? This cannot be undone."
+    confirm-label="Cancel booking"
+    cancel-label="Never mind"
+    :danger="true"
+    @confirm="cancelBooking"
+    @cancel="confirmCancelId = null"
+  />
 </template>

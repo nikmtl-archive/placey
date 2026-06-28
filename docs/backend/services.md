@@ -119,15 +119,19 @@ Soft-deleted listings (`IsDeleted = true`) are excluded from all search results 
 **Interface:** `IUserService`  
 **File:** [placey-be/Services/UserService.cs](../../placey-be/Services/UserService.cs)
 
-| Method                            | Description                                                                                       |
-| --------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `GetMeAsync(userId)`              | Returns private profile (includes email)                                                          |
-| `UpdateMeAsync(userId, request)`  | Updates non-null fields; null fields preserve existing values                                     |
-| `DeleteMeAsync(userId)`           | Sets IsDeleted, wipes PII fields (email → deleted@..., name cleared, bio cleared, avatar cleared) |
-| `UploadAvatarAsync(userId, file)` | Saves file to wwwroot, updates AvatarUrl                                                          |
-| `GetPublicAsync(userId)`          | Returns public profile (no email)                                                                 |
-| `GetListingsAsync(hostId)`        | Returns host's active listings                                                                    |
-| `GetReviewsAsync(hostId)`         | Returns reviews for the host's listings                                                           |
+| Method                            | Description                                                                                        |
+| --------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `GetMeAsync(userId)`              | Returns private profile (includes email)                                                           |
+| `UpdateMeAsync(userId, request)`  | Updates non-null fields; null fields preserve existing values. Rejects blank name.                 |
+| `DeleteMeAsync(userId)`           | Sets IsDeleted, wipes PII fields (email → deleted@..., name cleared, bio cleared, avatar cleared)  |
+| `UploadAvatarAsync(userId, file)` | Validates size (≤ 5 MB) and MIME type (JPEG/PNG/WebP), then saves to wwwroot and updates AvatarUrl |
+| `GetPublicAsync(userId)`          | Returns public profile (no email)                                                                  |
+| `GetListingsAsync(hostId)`        | Returns host's active listings                                                                     |
+| `GetReviewsAsync(hostId)`         | Returns reviews for the host's listings                                                            |
+
+**Profile update constraints (enforced by DTO + service):**
+- `Name`: optional (omit to keep existing), max 100 characters, must not be blank if provided.
+- `Bio`: optional (omit to keep existing), max 500 characters.
 
 ---
 

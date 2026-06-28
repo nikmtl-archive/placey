@@ -64,16 +64,31 @@ The JWT is passed as a query parameter because `EventSource` cannot send custom 
 The `useMessagingStore` manages the `EventSource` instance:
 - `connectStream()` creates the `EventSource` and wires `onmessage`.
 - On receiving a message, the store either appends it to `activeConversation.messages` (if the conversation is open) or increments the `unreadCount` and updates the conversation summary in the inbox list.
-- On `onerror`, the store waits 5 seconds then calls `connectStream()` again.
+- On `onerror`, the store uses exponential backoff (1 s → 2 s → 4 s → … capped at 30 s) for up to 5 retries. After 5 failures it sets `error` with a prompt to refresh. A successful reconnect (`onopen`) resets the retry counter.
 - `disconnectStream()` closes the connection on logout.
 
 ---
 
 ## Error handling patterns
 
-| Scenario             | What the store does                                                                                      |
-| -------------------- | -------------------------------------------------------------------------------------------------------- |
-| Non-OK HTTP response | Reads the `ProblemDetails` body and surfaces `detail` (or a generic fallback) in the store's `error` ref |
-| Network error        | Catches the thrown `TypeError` and sets a user-friendly message                                          |
-| 410 Gone             | `useListingStore` catches this specifically and sets `isDeleted = true`                                  |
-| `AbortError`         | Silently ignored (expected when a new search supersedes the previous one)                                |
+| Scenario             | What the store does                                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Non-OK HTTP response | Calls `parseErrorMessage(res)` to read `detail` from the `ProblemDetails` body; falls back to `HTTP <status>` |
+| Network error        | Catches the thrown `TypeError` and sets a user-friendly message                                               |
+| 410 Gone             | `useListingStore` catches this specifically and sets `isDeleted = true`                                       |
+| `AbortError`         | Silently ignored (expected when a new search supersedes the previous one)                                     |
+
+### `parseErrorMessage` helper
+
+`parseErrorMessage(res: Response): Promise<string>` is exported from `useAuthStore.ts` and used by all stores and views. It checks `Content-Type` before attempting JSON parsing — if the response is HTML (e.g. a 500 from an unhandled crash), it falls back to `HTTP <status>` rather than surfacing a parse error.
+
+```ts
+export async function parseErrorMessage(res: Response): Promise<string> {
+  const ct = res.headers.get('content-type') ?? ''
+  if (ct.includes('application/json') || ct.includes('application/problem+json')) {
+    const body = await res.json().catch(() => ({}))
+    return body.detail ?? body.message ?? `HTTP ${res.status}`
+  }
+  return `HTTP ${res.status}`
+}
+```

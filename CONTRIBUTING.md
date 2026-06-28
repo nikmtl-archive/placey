@@ -12,7 +12,7 @@ Branch off `main` for all work. Use the following prefixes:
 | ----------- | ------------------------------------------------------------- |
 | `feat/`     | New feature or user-facing behaviour                          |
 | `fix/`      | Bug fix                                                       |
-| `chore/`    | Tooling, config, dependencies, CI — no production code change |
+| `chore/`    | Tooling, config, dependencies, CI (no production code change) |
 | `docs/`     | Documentation only                                            |
 | `refactor/` | Code restructure with no behaviour change                     |
 | `test/`     | Adding or fixing tests                                        |
@@ -42,7 +42,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/).
 
 <optional body>
 
-<optional footer — e.g. "Closes #42">
+<optional footer> e.g. "Closes #42"
 ```
 
 **Types** (same set as branch prefixes): `feat`, `fix`, `chore`, `docs`, `refactor`, `test`
@@ -110,7 +110,7 @@ If not trivial, include at a minimum:
 | Force pushes                             | Blocked                                                  |
 | Branch deletion                          | Blocked                                                  |
 
-**Merge strategy:** squash or rebase only — merge commits are disabled to keep history linear.  
+**Merge strategy:** squash or rebase only. Merge commits are disabled to keep history linear.  
 
 ---
 
@@ -134,8 +134,8 @@ Two GitHub Actions workflows run on every PR. Both must be green before merging.
 cd placey-fe
 pnpm format      # auto-fix formatting
 pnpm lint        # auto-fix lint (where possible)
-pnpm ci:type-check
-pnpm ci:test
+pnpm type-check
+pnpm test
 ```
 
 ### Backend (`be-ci.yml`)

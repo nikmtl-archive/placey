@@ -1,6 +1,15 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
+export async function parseErrorMessage(res: Response): Promise<string> {
+  const ct = res.headers?.get('content-type') ?? 'application/json'
+  if (ct.includes('application/json') || ct.includes('application/problem+json')) {
+    const body = await res.json().catch(() => ({}))
+    return (body.detail ?? body.message ?? `HTTP ${res.status}`) as string
+  }
+  return `HTTP ${res.status}`
+}
+
 export interface AuthUser {
   id: string
   email: string
@@ -133,10 +142,7 @@ export const useAuthStore = defineStore('auth', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       })
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
-      }
+      if (!res.ok) throw new Error(await parseErrorMessage(res))
       setSession(await res.json())
       checkIsHost()
       fetchPendingReservationsCount()
@@ -156,10 +162,7 @@ export const useAuthStore = defineStore('auth', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, name }),
       })
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
-      }
+      if (!res.ok) throw new Error(await parseErrorMessage(res))
       setSession(await res.json())
       checkIsHost()
       fetchPendingReservationsCount()

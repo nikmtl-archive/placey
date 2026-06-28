@@ -42,33 +42,16 @@ public class MessageService(AppDbContext db, SseHub sseHub) : IMessageService
 
     public async Task<List<ConversationSummaryResponse>> GetConversationsAsync(Guid requesterId)
     {
-        var rows = await db
-            .Conversations.Where(c => c.User1Id == requesterId || c.User2Id == requesterId)
-            .Select(c => new
-            {
-                Conv = c,
-                User1 = c.User1,
-                User2 = c.User2,
-                LastMsg = c.Messages.OrderByDescending(m => m.CreatedAt).FirstOrDefault(),
-                UnreadCount = c.Messages.Count(m => !m.IsRead && m.SenderId != requesterId),
-            })
-            .OrderByDescending(x => x.LastMsg != null ? x.LastMsg.CreatedAt : x.Conv.CreatedAt)
+        var conversations = await db
+            .Conversations.Include(c => c.User1)
+            .Include(c => c.User2)
+            .Include(c => c.Messages)
+            .Where(c => c.User1Id == requesterId || c.User2Id == requesterId)
             .ToListAsync();
 
-        return rows.Select(x =>
-            {
-                var otherUser = x.Conv.User1Id == requesterId ? x.User2 : x.User1;
-                return new ConversationSummaryResponse(
-                    x.Conv.Id,
-                    otherUser.Id,
-                    otherUser.Name,
-                    otherUser.AvatarUrl,
-                    x.LastMsg?.Body,
-                    x.LastMsg?.CreatedAt,
-                    x.UnreadCount,
-                    x.Conv.CreatedAt
-                );
-            })
+        return conversations
+            .Select(c => ToSummary(c, requesterId))
+            .OrderByDescending(x => x.LastMessageAt ?? x.CreatedAt)
             .ToList();
     }
 
