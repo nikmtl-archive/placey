@@ -14,12 +14,12 @@ On 401, refresh the token via `POST /auth/refresh` before retrying.
 
 ## Auth
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|:----:|-------------|
-| POST | `/auth/register` | | Create an account |
-| POST | `/auth/login` | | Log in — returns access + refresh tokens |
-| POST | `/auth/refresh` | | Exchange a refresh token for a new token pair |
-| POST | `/auth/logout` | ✅ | Revoke the current refresh token |
+| Method | Endpoint         | Auth  | Description                                   |
+| ------ | ---------------- | :---: | --------------------------------------------- |
+| POST   | `/auth/register` |       | Create an account                             |
+| POST   | `/auth/login`    |       | Log in — returns access + refresh tokens      |
+| POST   | `/auth/refresh`  |       | Exchange a refresh token for a new token pair |
+| POST   | `/auth/logout`   |   ✅   | Revoke the current refresh token              |
 
 **Request — register**
 ```json
@@ -58,40 +58,40 @@ On 401, refresh the token via `POST /auth/refresh` before retrying.
 
 **Token lifetimes**
 
-| Token | Lifetime | Notes |
-|-------|----------|-------|
-| Access token (JWT) | 15 minutes | Sent in `Authorization` header |
-| Refresh token | 7 days | Rotated on each use — old token is immediately revoked |
+| Token              | Lifetime   | Notes                                                  |
+| ------------------ | ---------- | ------------------------------------------------------ |
+| Access token (JWT) | 15 minutes | Sent in `Authorization` header                         |
+| Refresh token      | 7 days     | Rotated on each use — old token is immediately revoked |
 
 ---
 
 ## Listings
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|:----:|-------------|
-| GET | `/listings` | | Search / filter listings |
-| GET | `/listings/:id` | | Get a single listing with host details |
-| POST | `/listings` | ✅ | Create a listing |
-| PATCH | `/listings/:id` | ✅ | Update a listing (host only) |
-| DELETE | `/listings/:id` | ✅ | Delete a listing (host only) |
-| GET | `/listings/:id/availability` | | Get availability ranges |
-| PATCH | `/listings/:id/availability` | ✅ | Add or update an availability range (host only) |
-| GET | `/listings/:id/reviews` | | Get all reviews for a listing |
+| Method | Endpoint                     | Auth  | Description                                     |
+| ------ | ---------------------------- | :---: | ----------------------------------------------- |
+| GET    | `/listings`                  |       | Search / filter listings                        |
+| GET    | `/listings/:id`              |       | Get a single listing with host details          |
+| POST   | `/listings`                  |   ✅   | Create a listing                                |
+| PATCH  | `/listings/:id`              |   ✅   | Update a listing (host only)                    |
+| DELETE | `/listings/:id`              |   ✅   | Delete a listing (host only)                    |
+| GET    | `/listings/:id/availability` |       | Get availability ranges                         |
+| PATCH  | `/listings/:id/availability` |   ✅   | Add or update an availability range (host only) |
+| GET    | `/listings/:id/reviews`      |       | Get all reviews for a listing                   |
 
 ### Search query parameters (`GET /listings`)
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `location` | string | Free-text match against city / country |
-| `checkIn` | date | `YYYY-MM-DD` |
-| `checkOut` | date | `YYYY-MM-DD` — excludes listings with conflicting bookings |
-| `guests` | int | Excludes listings where `maxGuests < guests` |
-| `category` | string | Beach, Mountains, Urban, Luxe, Countryside, Island, Lake |
-| `propertyType` | string | Apartment, House |
-| `minBedrooms` | int | |
-| `minPrice` / `maxPrice` | decimal | Price per night |
-| `page` | int | Default 1 |
-| `limit` | int | Default 20 |
+| Parameter               | Type    | Description                                                |
+| ----------------------- | ------- | ---------------------------------------------------------- |
+| `location`              | string  | Free-text match against city / country                     |
+| `checkIn`               | date    | `YYYY-MM-DD`                                               |
+| `checkOut`              | date    | `YYYY-MM-DD` — excludes listings with conflicting bookings |
+| `guests`                | int     | Excludes listings where `maxGuests < guests`               |
+| `category`              | string  | Beach, Mountains, Urban, Luxe, Countryside, Island, Lake   |
+| `propertyType`          | string  | Apartment, House                                           |
+| `minBedrooms`           | int     |                                                            |
+| `minPrice` / `maxPrice` | decimal | Price per night                                            |
+| `page`                  | int     | Default 1                                                  |
+| `limit`                 | int     | Default 20                                                 |
 
 Response:
 ```json
@@ -143,12 +143,12 @@ Response:
 
 ## Bookings
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|:----:|-------------|
-| POST | `/bookings` | ✅ | Request a booking |
-| GET | `/bookings/:id` | ✅ | Get booking detail (guest or host only) |
-| DELETE | `/bookings/:id` | ✅ | Cancel a booking (guest or host) |
-| PATCH | `/bookings/:id/status` | ✅ | Change booking status (host only) |
+| Method | Endpoint               | Auth  | Description                             |
+| ------ | ---------------------- | :---: | --------------------------------------- |
+| POST   | `/bookings`            |   ✅   | Request a booking                       |
+| GET    | `/bookings/:id`        |   ✅   | Get booking detail (guest or host only) |
+| DELETE | `/bookings/:id`        |   ✅   | Cancel a booking (guest or host)        |
+| PATCH  | `/bookings/:id/status` |   ✅   | Change booking status (host only)       |
 
 **Request — create booking**
 ```json
@@ -202,12 +202,12 @@ Pending → Confirmed → Completed
 
 ## Reviews
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|:----:|-------------|
-| POST | `/reviews` | ✅ | Submit a review |
-| DELETE | `/reviews/:id` | ✅ | Delete own review |
-| GET | `/listings/:id/reviews` | | All reviews for a listing |
-| GET | `/users/:id/reviews` | | All reviews for a host's listings |
+| Method | Endpoint                | Auth  | Description                       |
+| ------ | ----------------------- | :---: | --------------------------------- |
+| POST   | `/reviews`              |   ✅   | Submit a review                   |
+| DELETE | `/reviews/:id`          |   ✅   | Delete own review                 |
+| GET    | `/listings/:id/reviews` |       | All reviews for a listing         |
+| GET    | `/users/:id/reviews`    |       | All reviews for a host's listings |
 
 **Request — create review**
 ```json
@@ -243,11 +243,11 @@ Pending → Confirmed → Completed
 
 ## Favorites
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|:----:|-------------|
-| GET | `/favorites` | ✅ | Get current user's saved listings |
-| POST | `/favorites/:listingId` | ✅ | Save a listing (idempotent) |
-| DELETE | `/favorites/:listingId` | ✅ | Remove a listing from favorites (idempotent) |
+| Method | Endpoint                | Auth  | Description                                  |
+| ------ | ----------------------- | :---: | -------------------------------------------- |
+| GET    | `/favorites`            |   ✅   | Get current user's saved listings            |
+| POST   | `/favorites/:listingId` |   ✅   | Save a listing (idempotent)                  |
+| DELETE | `/favorites/:listingId` |   ✅   | Remove a listing from favorites (idempotent) |
 
 `GET /favorites` returns an array of full listing objects (same shape as `GET /listings` items).
 
@@ -255,17 +255,17 @@ Pending → Confirmed → Completed
 
 ## Users
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|:----:|-------------|
-| GET | `/users/me` | ✅ | Own profile (includes email) |
-| PATCH | `/users/me` | ✅ | Update name / bio |
-| DELETE | `/users/me` | ✅ | Delete own account |
-| POST | `/users/me/avatar` | ✅ | Upload profile photo (`multipart/form-data`, field: `file`) |
-| GET | `/users/me/listings` | ✅ | Own listings (as host) |
-| GET | `/users/me/bookings` | ✅ | Own bookings (as guest) |
-| GET | `/users/me/reservations` | ✅ | Bookings on own listings (as host) |
-| GET | `/users/:id` | | Public profile of any user |
-| GET | `/users/:id/reviews` | | Reviews written about a host's listings |
+| Method | Endpoint                 | Auth  | Description                                                 |
+| ------ | ------------------------ | :---: | ----------------------------------------------------------- |
+| GET    | `/users/me`              |   ✅   | Own profile (includes email)                                |
+| PATCH  | `/users/me`              |   ✅   | Update name / bio                                           |
+| DELETE | `/users/me`              |   ✅   | Delete own account                                          |
+| POST   | `/users/me/avatar`       |   ✅   | Upload profile photo (`multipart/form-data`, field: `file`) |
+| GET    | `/users/me/listings`     |   ✅   | Own listings (as host)                                      |
+| GET    | `/users/me/bookings`     |   ✅   | Own bookings (as guest)                                     |
+| GET    | `/users/me/reservations` |   ✅   | Bookings on own listings (as host)                          |
+| GET    | `/users/:id`             |       | Public profile of any user                                  |
+| GET    | `/users/:id/reviews`     |       | Reviews written about a host's listings                     |
 
 **Request — update profile**
 ```json
@@ -280,14 +280,14 @@ Omit a field (or set it to `null`) to leave it unchanged.
 
 All message endpoints require authentication.
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/messages` | All conversations for the current user |
-| POST | `/messages/conversations` | Get or create a conversation with another user |
-| GET | `/messages/conversations/:id` | Conversation with full message history (marks unread as read) |
-| POST | `/messages/conversations/:id/messages` | Send a message |
-| GET | `/messages/unread-count` | Total unread message count across all conversations |
-| GET | `/messages/stream` | SSE stream — pushes new messages in real time |
+| Method | Endpoint                               | Description                                                   |
+| ------ | -------------------------------------- | ------------------------------------------------------------- |
+| GET    | `/messages`                            | All conversations for the current user                        |
+| POST   | `/messages/conversations`              | Get or create a conversation with another user                |
+| GET    | `/messages/conversations/:id`          | Conversation with full message history (marks unread as read) |
+| POST   | `/messages/conversations/:id/messages` | Send a message                                                |
+| GET    | `/messages/unread-count`               | Total unread message count across all conversations           |
+| GET    | `/messages/stream`                     | SSE stream — pushes new messages in real time                 |
 
 ### Request shapes
 
@@ -376,14 +376,14 @@ All errors follow the RFC 7807 `ProblemDetails` format:
 }
 ```
 
-| HTTP status | When |
-|-------------|------|
-| 400 Bad Request | Invalid input, business rule violation |
-| 401 Unauthorized | Missing or expired JWT |
-| 403 Forbidden | Valid JWT but caller doesn't own the resource |
-| 404 Not Found | Resource doesn't exist |
-| 422 Unprocessable Entity | Model validation failure (`[Required]`, `[StringLength]`, etc.) |
-| 500 Internal Server Error | Unexpected server error |
+| HTTP status               | When                                                            |
+| ------------------------- | --------------------------------------------------------------- |
+| 400 Bad Request           | Invalid input, business rule violation                          |
+| 401 Unauthorized          | Missing or expired JWT                                          |
+| 403 Forbidden             | Valid JWT but caller doesn't own the resource                   |
+| 404 Not Found             | Resource doesn't exist                                          |
+| 422 Unprocessable Entity  | Model validation failure (`[Required]`, `[StringLength]`, etc.) |
+| 500 Internal Server Error | Unexpected server error                                         |
 
 ---
 

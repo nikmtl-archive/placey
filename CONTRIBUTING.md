@@ -8,14 +8,14 @@ This document covers the conventions expected before submitting a pull request: 
 
 Branch off `main` for all work. Use the following prefixes:
 
-| Prefix | When to use |
-|---|---|
-| `feat/` | New feature or user-facing behaviour |
-| `fix/` | Bug fix |
-| `chore/` | Tooling, config, dependencies, CI — no production code change |
-| `docs/` | Documentation only |
-| `refactor/` | Code restructure with no behaviour change |
-| `test/` | Adding or fixing tests |
+| Prefix      | When to use                                                   |
+| ----------- | ------------------------------------------------------------- |
+| `feat/`     | New feature or user-facing behaviour                          |
+| `fix/`      | Bug fix                                                       |
+| `chore/`    | Tooling, config, dependencies, CI — no production code change |
+| `docs/`     | Documentation only                                            |
+| `refactor/` | Code restructure with no behaviour change                     |
+| `test/`     | Adding or fixing tests                                        |
 
 **Format:** `<prefix>/<short-kebab-description>`
 
@@ -28,7 +28,7 @@ docs/api-auth-flow
 
 Rules:
 - Branch from an up-to-date `main`: `git fetch && git checkout -b feat/my-thing origin/main`
-- One concern per branch — don't mix a feature with unrelated fixes
+- One concern per branch
 - Delete the branch after it is merged
 
 ---
@@ -72,7 +72,7 @@ Rules:
 
 1. Make sure CI passes locally (see [CI checks](#ci-checks) below)
 2. Rebase onto `main` if your branch has fallen behind
-3. Keep the PR focused — one logical change per PR
+3. Keep the PR focused
 
 ### Title
 
@@ -86,41 +86,31 @@ fix(be): return 404 when listing is soft-deleted
 ### Description
 
 If not trivial, include at a minimum:
-- **What** changed and **why**
-- **How to test** — steps a reviewer can follow to verify the change manually
-- Any **screenshots** for UI changes
+- **What** changed (and why)
 - Related issue numbers (`Closes #12`)
 
 ### Review
 
 - At least one approval is officialy required before merging
-- Address all comments before merging — resolve threads yourself only when the concern has been fully addressed
-- Prefer `--no-ff` merges (squash is fine for small, atomic PRs)
-
+- Address all comments before merging 
+  
 ---
 
 ## Branch protection (`main`)
 
 `main` is protected. GitHub enforces the following on every PR targeting it:
 
-| Rule | Setting |
-|---|---|
-| Pull request required | Yes — direct pushes to `main` are blocked |
-| Required approvals | 1 |
-| Dismiss stale reviews on new commits | Yes |
-| Status checks must pass | Yes — both CI jobs must be green (see [CI checks](#ci-checks)) |
-| Branch must be up to date before merging | Yes |
-| Force pushes | Blocked |
-| Branch deletion | Blocked |
-
-**Required status checks** (must be added in GitHub after the first PR runs the workflows):
-- `Lint, Format & Type-check` — from `fe-ci.yml`
-- `Build, Format Check & Test` — from `be-ci.yml`
-
-> Both workflows run on every PR regardless of which files changed.
+| Rule                                     | Setting                                                  |
+| ---------------------------------------- | -------------------------------------------------------- |
+| Pull request required                    | Direct pushes to `main` are blocked                      |
+| Required approvals                       | 1 (with admin bypass)                                    |
+| Dismiss stale reviews on new commits     | Yes                                                      |
+| Status checks must pass                  | Both CI jobs must be green (see [CI checks](#ci-checks)) |
+| Branch must be up to date before merging | Yes                                                      |
+| Force pushes                             | Blocked                                                  |
+| Branch deletion                          | Blocked                                                  |
 
 **Merge strategy:** squash or rebase only — merge commits are disabled to keep history linear.  
-**Head branches** are deleted automatically after merge.
 
 ---
 
@@ -130,13 +120,13 @@ Two GitHub Actions workflows run on every PR. Both must be green before merging.
 
 ### Frontend (`fe-ci.yml`)
 
-Triggered when files under `placey-fe/` change.
 
-| Step | Command | What it checks |
-|---|---|---|
-| Format | `pnpm ci:format` | Prettier — all source files match the configured style |
-| Lint | `pnpm ci:lint` | oxlint + ESLint — no rule violations |
-| Type-check | `pnpm ci:type-check` | vue-tsc — no TypeScript errors |
+| Step       | Command              | What it checks                 |
+| ---------- | -------------------- | ------------------------------ |
+| Format     | `pnpm ci:format`     | Prettier (formatting)          |
+| Lint       | `pnpm ci:lint`       | oxlint + ESLint (linting)      |
+| Type-check | `pnpm ci:type-check` | vue-tsc (no TypeScript errors) |
+| Test       | `pnpm ci:test`       | Vitest (unit tests pass)       |
 
 **Fix locally before pushing:**
 
@@ -145,17 +135,16 @@ cd placey-fe
 pnpm format      # auto-fix formatting
 pnpm lint        # auto-fix lint (where possible)
 pnpm ci:type-check
+pnpm ci:test
 ```
 
 ### Backend (`be-ci.yml`)
 
-Triggered when files under `placey-be/`, `placey-be.Tests/`, or `placey.sln` change.
-
-| Step | Command | What it checks |
-|---|---|---|
-| Format | `dotnet csharpier check .` | CSharpier — all C# files match the configured style |
-| Build | `dotnet build` | No compilation errors |
-| Test | `dotnet test` | All 66 unit tests pass |
+| Step   | Command                    | What it checks         |
+| ------ | -------------------------- | ---------------------- |
+| Format | `dotnet csharpier check .` | CSharpier (formatting) |
+| Build  | `dotnet build`             | No compilation errors  |
+| Test   | `dotnet test`              | Unit tests pass        |
 
 **Fix locally before pushing:**
 
@@ -168,13 +157,13 @@ dotnet test placey.sln
 
 ### Tooling overview
 
-| Tool | Layer | Purpose |
-|---|---|---|
-| [Prettier](https://prettier.io) | Frontend | Opinionated code formatter (JS/TS/Vue/CSS) |
-| [oxlint](https://oxc.rs/docs/guide/usage/linter) | Frontend | Fast linter for correctness rules |
-| [ESLint](https://eslint.org) | Frontend | Vue-specific and TypeScript rules |
-| [vue-tsc](https://github.com/vuejs/language-tools) | Frontend | TypeScript type-checking for `.vue` files |
-| [CSharpier](https://csharpier.com) | Backend | Opinionated C# code formatter |
+| Tool                                               | Layer    | Purpose                                    |
+| -------------------------------------------------- | -------- | ------------------------------------------ |
+| [Prettier](https://prettier.io)                    | Frontend | Opinionated code formatter (JS/TS/Vue/CSS) |
+| [oxlint](https://oxc.rs/docs/guide/usage/linter)   | Frontend | Fast linter for correctness rules          |
+| [ESLint](https://eslint.org)                       | Frontend | Vue-specific and TypeScript rules          |
+| [vue-tsc](https://github.com/vuejs/language-tools) | Frontend | TypeScript type-checking for `.vue` files  |
+| [CSharpier](https://csharpier.com)                 | Backend  | Opinionated C# code formatter              |
 
 ---
 

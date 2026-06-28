@@ -148,7 +148,7 @@ Seed data includes example users, listings, bookings, reviews, and favorites:
 | Lakeside Cabin Retreat          | Bled, Slovenia         | €120        | 4          |
 | Bright Apartment near Old Town  | Tallinn, Estonia       | €70         | 2          |
 
-Seed data also includes completed bookings, reviews, and favorites so all API endpoints return realistic data immediately.
+Seed data also includes completed bookings, reviews, and favorites so main API endpoints return realistic data immediately.
 
 ### Troubleshooting
 
@@ -174,43 +174,49 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for branch naming, commit message convent
 
 ## Documentation
 
-Detailed documentation is available in the `docs/` folder:
+Detailed documentation is available in the `docs/` folder.
 
-| Document                                         | Description                                                          |
-| ------------------------------------------------ | -------------------------------------------------------------------- |
-| [docs/backend.md](docs/backend.md)               | Architecture, auth flow, database schema, error handling, migrations |
-| [docs/frontend.md](docs/frontend.md)             | Vue 3 app structure, routing, Pinia stores, components               |
-| [docs/messaging.md](docs/messaging.md)           | Messaging feature: SSE design, store, components, data model         |
-| [docs/api-endpoints.md](docs/api-endpoints.md)   | Full REST API reference with request/response shapes                 |
+### Backend
+
+| Document                                                         | Description                                                          |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [docs/backend/overview.md](docs/backend/overview.md)             | Stack, project structure, key dependencies                           |
+| [docs/backend/architecture.md](docs/backend/architecture.md)     | Three-layer design, DI wiring, request pipeline, Swagger             |
+| [docs/backend/auth.md](docs/backend/auth.md)                     | JWT, refresh tokens, BCrypt, resource-level authorization            |
+| [docs/backend/database.md](docs/backend/database.md)             | Full entity reference, relationships, constraints, enums, migrations |
+| [docs/backend/services.md](docs/backend/services.md)             | All 8 services + SseHub: responsibilities, methods, business rules   |
+| [docs/backend/error-handling.md](docs/backend/error-handling.md) | ErrorHandlingMiddleware, ProblemDetails, exception-to-status map     |
+| [docs/backend/file-uploads.md](docs/backend/file-uploads.md)     | Photo & avatar upload flow, storage, Docker volume                   |
+| [docs/backend/testing.md](docs/backend/testing.md)               | xUnit setup, in-memory DB, all 7 service test classes                |
+| [docs/backend/configuration.md](docs/backend/configuration.md)   | appsettings, environment variables, Docker Compose wiring            |
+
+### Frontend
+
+| Document                                                                 | Description                                                 |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------- |
+| [docs/frontend/overview.md](docs/frontend/overview.md)                   | Stack, project structure, design theme                      |
+| [docs/frontend/routing.md](docs/frontend/routing.md)                     | Route table, auth guard, scroll behaviour, lazy loading     |
+| [docs/frontend/state-management.md](docs/frontend/state-management.md)   | All 6 Pinia stores: state, computed, methods                |
+| [docs/frontend/components.md](docs/frontend/components.md)               | All 15 components: props, emits, purpose                    |
+| [docs/frontend/composables.md](docs/frontend/composables.md)             | useClickOutside, useAmenityIcons, useCategories             |
+| [docs/frontend/views.md](docs/frontend/views.md)                         | All 13 views: purpose, key behaviours, store usage          |
+| [docs/frontend/api-communication.md](docs/frontend/api-communication.md) | apiFetch wrapper, dev proxy, AbortController, SSE auth      |
+| [docs/frontend/testing.md](docs/frontend/testing.md)                     | Vitest setup, patterns, all 5 store test suites, coverage   |
+| [docs/frontend/tooling.md](docs/frontend/tooling.md)                     | Vite config, ESLint/Oxlint/Prettier, tsconfig, pnpm scripts |
+
+### Features & API
+
+| Document                                       | Description                                                  |
+| ---------------------------------------------- | ------------------------------------------------------------ |
+| [docs/messaging.md](docs/messaging.md)         | Messaging feature: SSE design, store, components, data model |
+| [docs/api-endpoints.md](docs/api-endpoints.md) | Full REST API reference with request/response shapes         |
+| [docs/testing.md](docs/testing.md)             | Test suites overview and manual testing checklist            |
 
 ---
 
 ## Tests
 
-### Backend tests
-
-Unit tests cover the service layers of the backend using an in-memory database (EF Core InMemory). No external dependencies (database, running server) are needed to run the suite.
-
-| Service           | Scenarios covered                                                                                                                                                                                                                                                                                        |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AuthService`     | Register (happy path, duplicate email), login (valid, unknown email, wrong password), refresh (valid, invalid, revoked token), logout (valid, unknown token)                                                                                                                                             |
-| `BookingService`  | Create (instant-book → Confirmed, non-instant → Pending, host self-booking, invalid dates, equal dates, date conflict, blocked dates, cancelled-then-rebook, listing not found), get by ID (guest, host, unauthorized, not found), cancel (guest, host, unauthorized, completed, not found), update status (host, non-host, not found) |
-| `ListingService`  | Create, get by ID (found, not found, deleted), update (host, non-host, not found), delete (host, non-host, cascades active bookings), search (no filter, location, guest count, category, property type, min bedrooms, price range, date range, pagination), add/delete blocking (host, non-host, not found), get blockings (ordering, includes confirmed bookings, excludes cancelled), get/delete photos (host, non-host, not found) |
-| `ReviewService`   | Create (valid completed booking, wrong guest, booking not completed, duplicate, booking not found), delete (author, non-author), get by listing, get by host user (matching, other user)                                                                                                                  |
-| `FavoriteService` | Add (valid, listing not found, idempotent), remove (existing, idempotent), get favorites (empty)                                                                                                                                                                                                         |
-| `UserService`     | Get me (found, not found), update me (fields updated, null fields preserved), delete me, get public profile (found, not found)                                                                                                                                                                           |
-| `MessageService`  | Get/create conversation (new pair, existing pair, reversed order, self, unknown user), list conversations (empty, after create, unread count and last message), send message (valid, conversation not found, non-member), get conversation (as participant with messages, non-member, not found, marks as read), unread count (zero, after message, after reading) |
-
-
-### Running backend tests
-
-```bash
-# Run from the repo root
-dotnet test placey-be.Tests/
-
-# Or run the full solution
-dotnet test placey.sln
-```
+Full test documentation — backend service tests (66 unit tests across 7 service classes), frontend store tests (5 Pinia store test suites), and the manual testing checklist — is in [docs/testing.md](docs/testing.md).
 
 ---
 
@@ -247,6 +253,7 @@ pnpm test:coverage
 
 ## Known Limitations
 - At the moment, there are no email notifications for new messages or bookings. Users must check the app to see updates.
+- Payments are out of scope. The booking flow does not include any payment processing, and bookings are confirmed without any financial transaction.
 
 ---
 
