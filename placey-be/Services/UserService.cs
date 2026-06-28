@@ -32,7 +32,11 @@ public class UserService(AppDbContext db, IWebHostEnvironment env) : IUserServic
             await db.Users.FindAsync(userId) ?? throw new KeyNotFoundException("User not found.");
 
         if (request.Name is not null)
-            user.Name = request.Name;
+        {
+            if (request.Name.Trim().Length == 0)
+                throw new InvalidOperationException("Name cannot be blank.");
+            user.Name = request.Name.Trim();
+        }
         if (request.Bio is not null)
             user.Bio = request.Bio;
 
@@ -121,10 +125,20 @@ public class UserService(AppDbContext db, IWebHostEnvironment env) : IUserServic
         return new PublicUserResponse(user.Id, user.Name, user.Bio, user.AvatarUrl, user.CreatedAt);
     }
 
+    private static readonly string[] AllowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
+    private const long MaxAvatarBytes = 5 * 1024 * 1024;
+
     public async Task<string> UploadAvatarAsync(Guid userId, IFormFile file)
     {
         var user =
             await db.Users.FindAsync(userId) ?? throw new KeyNotFoundException("User not found.");
+
+        if (file == null || file.Length == 0)
+            throw new InvalidOperationException("No file provided.");
+        if (file.Length > MaxAvatarBytes)
+            throw new InvalidOperationException("File exceeds the 5 MB limit.");
+        if (!AllowedImageTypes.Contains(file.ContentType.ToLowerInvariant()))
+            throw new InvalidOperationException("Only JPEG, PNG, and WebP images are allowed.");
 
         var uploads = Path.Combine(env.WebRootPath ?? "wwwroot", "avatars");
         Directory.CreateDirectory(uploads);

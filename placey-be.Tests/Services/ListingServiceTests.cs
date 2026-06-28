@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using placey_be.Middleware;
 using placey_be.Models.DTOs.Listings;
 using placey_be.Models.Entities;
@@ -16,7 +17,7 @@ public class ListingServiceTests
         var host = new User { Name = "Host", Email = "host@test.com", PasswordHash = "x" };
         db.Users.Add(host);
         db.SaveChanges();
-        return (new ListingService(db), host);
+        return (new ListingService(db, NullLogger<ListingService>.Instance), host);
     }
 
     private CreateListingRequest DefaultRequest(string city = "Berlin", string country = "Germany") =>
@@ -280,7 +281,7 @@ public class ListingServiceTests
         var guest = new User { Name = "Guest", Email = "guest@test.com", PasswordHash = "x" };
         db.Users.AddRange(host, guest);
         db.SaveChanges();
-        var svc = new ListingService(db);
+        var svc = new ListingService(db, NullLogger<ListingService>.Instance);
         var listing = await svc.CreateAsync(host.Id, DefaultRequest());
 
         db.Bookings.Add(new Booking
@@ -305,7 +306,7 @@ public class ListingServiceTests
         var guest = new User { Name = "Guest", Email = "guest@test.com", PasswordHash = "x" };
         db.Users.AddRange(host, guest);
         db.SaveChanges();
-        var svc = new ListingService(db);
+        var svc = new ListingService(db, NullLogger<ListingService>.Instance);
         var listing = await svc.CreateAsync(host.Id, DefaultRequest());
 
         db.Bookings.Add(new Booking
@@ -363,7 +364,7 @@ public class ListingServiceTests
         var guest = new User { Name = "Guest", Email = "guest@test.com", PasswordHash = "x" };
         db.Users.AddRange(host, guest);
         db.SaveChanges();
-        var svc = new ListingService(db);
+        var svc = new ListingService(db, NullLogger<ListingService>.Instance);
         var listing = await svc.CreateAsync(host.Id, DefaultRequest());
         var booking = new Booking
         {
@@ -388,7 +389,7 @@ public class ListingServiceTests
         var guest = new User { Name = "Guest", Email = "guest@test.com", PasswordHash = "x" };
         db.Users.AddRange(host, guest);
         db.SaveChanges();
-        var svc = new ListingService(db);
+        var svc = new ListingService(db, NullLogger<ListingService>.Instance);
         var booked = await svc.CreateAsync(host.Id, DefaultRequest("Berlin", "Germany"));
         var free = await svc.CreateAsync(host.Id, DefaultRequest("Vienna", "Austria"));
 
@@ -445,7 +446,7 @@ public class ListingServiceTests
         var host = new User { Name = "Host", Email = "host@test.com", PasswordHash = "x" };
         db.Users.Add(host);
         db.SaveChanges();
-        var svc = new ListingService(db);
+        var svc = new ListingService(db, NullLogger<ListingService>.Instance);
         var listing = await svc.CreateAsync(host.Id, DefaultRequest());
         var photo = new ListingPhoto { ListingId = listing.Id, Url = "/api/listing-photos/test.jpg", Order = 0 };
         db.ListingPhotos.Add(photo);

@@ -7,7 +7,11 @@ using placey_be.Services.Interfaces;
 
 namespace placey_be.Services;
 
-public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : IListingService
+public class ListingService(
+    AppDbContext db,
+    ILogger<ListingService> logger,
+    IWebHostEnvironment? env = null
+) : IListingService
 {
     public async Task<(List<ListingResponse> Items, int Total)> SearchAsync(ListingSearchParams p)
     {
@@ -264,6 +268,9 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
             .ToListAsync();
     }
 
+    private static readonly string[] AllowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
+    private const long MaxPhotoBytes = 10 * 1024 * 1024;
+
     public async Task<ListingPhotoResponse> UploadPhotoAsync(
         Guid listingId,
         Guid requesterId,
@@ -276,6 +283,13 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
 
         if (listing.HostId != requesterId)
             throw new UnauthorizedAccessException("Only the host can upload photos.");
+
+        if (file == null || file.Length == 0)
+            throw new InvalidOperationException("No file provided.");
+        if (file.Length > MaxPhotoBytes)
+            throw new InvalidOperationException("File exceeds the 10 MB limit.");
+        if (!AllowedImageTypes.Contains(file.ContentType.ToLowerInvariant()))
+            throw new InvalidOperationException("Only JPEG, PNG, and WebP images are allowed.");
 
         var webRoot = env?.WebRootPath ?? "wwwroot";
         var uploads = Path.Combine(webRoot, "listing-photos");
@@ -318,11 +332,24 @@ public class ListingService(AppDbContext db, IWebHostEnvironment? env = null) : 
 
         var webRoot = env?.WebRootPath ?? "wwwroot";
         var physicalPath = Path.Combine(webRoot, "listing-photos", Path.GetFileName(photo.Url));
-        if (File.Exists(physicalPath))
-            File.Delete(physicalPath);
 
+        // Commit DB record deletion first; file cleanup is best-effort
         db.ListingPhotos.Remove(photo);
         await db.SaveChangesAsync();
+
+        try
+        {
+            if (File.Exists(physicalPath))
+                File.Delete(physicalPath);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(
+                "Failed to delete photo file {Path}: {Message}",
+                physicalPath,
+                ex.Message
+            );
+        }
     }
 
     private static ListingResponse ToResponse(Listing l) =>
