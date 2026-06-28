@@ -11,7 +11,7 @@ const authStore = useAuthStore()
 
 const CATEGORIES = ['Beach', 'Mountains', 'Urban', 'Luxe', 'Countryside', 'Island', 'Lake']
 const PROPERTY_TYPES = ['Apartment', 'House']
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
 const MAX_PHOTO_BYTES = 10 * 1024 * 1024
 
 // Mode: 'create' for /listing/new, 'edit' for /listing/:id/edit
@@ -103,7 +103,7 @@ async function uploadExistingPhoto(event: Event) {
   if (!file) return
   photoError.value = null
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-    photoError.value = 'Only JPEG, PNG, and WebP images are allowed.'
+    photoError.value = 'Only JPEG, PNG, WebP, and HEIC images are allowed.'
     if (photoInput.value) photoInput.value.value = ''
     return
   }

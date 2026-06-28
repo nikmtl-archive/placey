@@ -16,7 +16,7 @@ const isUploadingAvatar = ref(false)
 const avatarError = ref<string | null>(null)
 const avatarInput = ref<HTMLInputElement | null>(null)
 
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024
 
 onMounted(() => {
@@ -70,7 +70,7 @@ async function uploadAvatar(event: Event) {
   avatarError.value = null
 
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-    avatarError.value = 'Only JPEG, PNG, and WebP images are allowed.'
+    avatarError.value = 'Only JPEG, PNG, WebP, and HEIC images are allowed.'
     if (avatarInput.value) avatarInput.value.value = ''
     return
   }
@@ -158,7 +158,7 @@ async function deleteAccount() {
           <input
             ref="avatarInput"
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
             class="hidden"
             @change="uploadAvatar"
           />

@@ -32,7 +32,11 @@ if (app.Environment.IsDevelopment())
     await DbSeeder.SeedAsync(db);
 }
 
-app.UseStaticFiles();
+var wwwroot = app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+Directory.CreateDirectory(wwwroot);
+var fileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(wwwroot);
+app.UseStaticFiles(new StaticFileOptions { FileProvider = fileProvider });
+app.UseStaticFiles(new StaticFileOptions { RequestPath = "/api", FileProvider = fileProvider });
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
