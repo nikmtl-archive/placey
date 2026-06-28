@@ -123,6 +123,7 @@ async function submitReview(booking: Booking) {
                 'border-amber-300 bg-amber-50 text-amber-600': booking.status === 'Pending',
                 'border-emerald-300 bg-emerald-50 text-emerald-600': booking.status === 'Confirmed',
                 'border-sky-200 bg-sky-50 text-sky-600': booking.status === 'Completed',
+                'border-neutral-300 bg-neutral-50 text-neutral-500': booking.status === 'Cancelled',
               }"
             >
               {{ booking.status }}
