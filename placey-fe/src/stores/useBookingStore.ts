@@ -97,8 +97,9 @@ export const useBookingStore = defineStore('booking', () => {
       })
       if (!res.ok) throw new Error(await parseErrorMessage(res))
 
-      bookings.value = bookings.value.filter((booking) => booking.id !== bookingId)
-      if (lastBooking.value?.id === bookingId) lastBooking.value = null
+      const booking = bookings.value.find((b) => b.id === bookingId)
+      if (booking) booking.status = 'Cancelled'
+      if (lastBooking.value?.id === bookingId) lastBooking.value.status = 'Cancelled'
     } catch (e: unknown) {
       error.value = e instanceof Error ? e.message : 'Failed to cancel booking'
       throw e
