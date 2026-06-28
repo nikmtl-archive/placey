@@ -6,7 +6,7 @@ import SearchBar from '@/components/SearchBar.vue'
   <section class="relative pt-10 pb-10 sm:pt-16 sm:pb-14 px-4 sm:px-8 lg:px-10 text-center">
     <!-- Subtle radial gradient blob -->
     <div
-      class="pointer-events-none absolute inset-0 overflow-hidden flex items-start justify-center -top-20"
+      class="pointer-events-none absolute inset-0 flex items-start justify-center -top-20"
     >
       <div
         class="w-[700px] h-[500px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(210,190,160,0.22)_0%,transparent_70%)]"
