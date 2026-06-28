@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore, parseErrorMessage } from '@/stores/useAuthStore'
 import ListingCard from '@/components/ListingCard.vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 import type { Listing } from '@/types'
 
 const authStore = useAuthStore()
@@ -92,6 +93,14 @@ async function fetchReservations() {
 
 const updatingId = ref<string | null>(null)
 const updateError = ref<string | null>(null)
+const confirmCancelId = ref<string | null>(null)
+
+function confirmCancel() {
+  if (!confirmCancelId.value) return
+  const id = confirmCancelId.value
+  confirmCancelId.value = null
+  updateReservationStatus(id, 'Cancelled')
+}
 
 async function updateReservationStatus(id: string, status: 'Confirmed' | 'Cancelled') {
   updatingId.value = id
@@ -526,7 +535,7 @@ onMounted(() => {
             <button
               class="text-xs font-medium text-muted hover:text-rose-600 transition-colors disabled:opacity-50 cursor-pointer"
               :disabled="updatingId === r.id"
-              @click="updateReservationStatus(r.id, 'Cancelled')"
+              @click="confirmCancelId = r.id"
             >
               Decline
             </button>
@@ -537,7 +546,7 @@ onMounted(() => {
             <button
               class="text-xs font-medium text-muted hover:text-rose-600 transition-colors disabled:opacity-50 cursor-pointer"
               :disabled="updatingId === r.id"
-              @click="updateReservationStatus(r.id, 'Cancelled')"
+              @click="confirmCancelId = r.id"
             >
               {{ updatingId === r.id ? 'Cancelling…' : 'Cancel reservation' }}
             </button>
@@ -546,4 +555,15 @@ onMounted(() => {
       </div>
     </div>
   </div>
+
+  <ConfirmModal
+    v-if="confirmCancelId"
+    title="Cancel reservation?"
+    message="Are you sure you want to cancel this reservation? This cannot be undone."
+    confirm-label="Cancel reservation"
+    cancel-label="Never mind"
+    :danger="true"
+    @confirm="confirmCancel"
+    @cancel="confirmCancelId = null"
+  />
 </template>
