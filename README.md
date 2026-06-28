@@ -133,8 +133,7 @@ JWT issuer and audience are hardcoded to `placey` in `docker-compose.yml`. For l
 > [!NOTE]
 > The seed data is automatically applied on first startup if the database is empty and the environment variable `ASPNETCORE_ENVIRONMENT` is set to `Development`. You can also run the seed script manually with `dotnet run --project placey-be/Placey.SeedData`.
 
-Seed data includes example users, listings, bookings, reviews, and favorites:
-
+Seed data includes example users, listings, bookings, reviews, and favorites. Images are not included in seeding. 
 **Users**
 
 | Name          | Email             | Role         | Password    |
