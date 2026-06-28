@@ -23,9 +23,21 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
         {
             KeyNotFoundException => (StatusCodes.Status404NotFound, "Not Found", ex.Message),
             ResourceDeletedException => (StatusCodes.Status410Gone, "Gone", ex.Message),
-            UnauthorizedAccessException => (StatusCodes.Status403Forbidden, "Forbidden", ex.Message),
-            InvalidOperationException => (StatusCodes.Status400BadRequest, "Bad Request", ex.Message),
-            _ => (StatusCodes.Status500InternalServerError, "Internal Server Error", "An unexpected error occurred."),
+            UnauthorizedAccessException => (
+                StatusCodes.Status403Forbidden,
+                "Forbidden",
+                ex.Message
+            ),
+            InvalidOperationException => (
+                StatusCodes.Status400BadRequest,
+                "Bad Request",
+                ex.Message
+            ),
+            _ => (
+                StatusCodes.Status500InternalServerError,
+                "Internal Server Error",
+                "An unexpected error occurred."
+            ),
         };
 
         context.Response.ContentType = "application/problem+json";

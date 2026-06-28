@@ -268,7 +268,14 @@ public class ListingService(
             .ToListAsync();
     }
 
-    private static readonly string[] AllowedImageTypes = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
+    private static readonly string[] AllowedImageTypes =
+    [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/heic",
+        "image/heif",
+    ];
     private const long MaxPhotoBytes = 10 * 1024 * 1024;
 
     public async Task<ListingPhotoResponse> UploadPhotoAsync(
@@ -289,7 +296,9 @@ public class ListingService(
         if (file.Length > MaxPhotoBytes)
             throw new InvalidOperationException("File exceeds the 10 MB limit.");
         if (!AllowedImageTypes.Contains(file.ContentType.ToLowerInvariant()))
-            throw new InvalidOperationException("Only JPEG, PNG, WebP, and HEIC images are allowed.");
+            throw new InvalidOperationException(
+                "Only JPEG, PNG, WebP, and HEIC images are allowed."
+            );
 
         var webRoot = env?.WebRootPath ?? "wwwroot";
         var uploads = Path.Combine(webRoot, "listing-photos");

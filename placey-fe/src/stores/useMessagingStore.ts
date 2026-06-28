@@ -137,7 +137,7 @@ export const useMessagingStore = defineStore('messaging', () => {
           }
         }
       }
-    } catch (e) {
+    } catch {
       if (signal.aborted) return
       _sseAbort = null
       if (_retryCount < 5) {
