@@ -575,7 +575,7 @@ function reviewDate(iso: string) {
               </div>
 
               <div v-else class="text-sm text-muted">
-                No reviews yet — be the first to stay here.
+                No reviews yet. Be the first to leave a review after your stay!
               </div>
             </div>
           </div>
