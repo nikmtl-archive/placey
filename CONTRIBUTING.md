@@ -134,8 +134,8 @@ Two GitHub Actions workflows run on every PR. Both must be green before merging.
 cd placey-fe
 pnpm format      # auto-fix formatting
 pnpm lint        # auto-fix lint (where possible)
-pnpm ci:type-check
-pnpm ci:test
+pnpm type-check
+pnpm test
 ```
 
 ### Backend (`be-ci.yml`)
