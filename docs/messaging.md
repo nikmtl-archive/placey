@@ -17,25 +17,25 @@ For the REST API shapes see [docs/api-endpoints.md](./api-endpoints.md#messages)
 
 ### `Conversation`
 
-| Column | Type | Notes |
-|--------|------|-------|
-| `Id` | `uuid` | PK, auto-generated |
-| `User1Id` | `uuid` | FK → `Users` |
-| `User2Id` | `uuid` | FK → `Users` |
+| Column      | Type        | Notes                |
+| ----------- | ----------- | -------------------- |
+| `Id`        | `uuid`      | PK, auto-generated   |
+| `User1Id`   | `uuid`      | FK → `Users`         |
+| `User2Id`   | `uuid`      | FK → `Users`         |
 | `CreatedAt` | `timestamp` | UTC, set on creation |
 
 A unique index on `(User1Id, User2Id)` enforces that at most one conversation exists between any two users. Participants are stored with the lower GUID as `User1` so the constraint is order-independent.
 
 ### `Message`
 
-| Column | Type | Notes |
-|--------|------|-------|
-| `Id` | `uuid` | PK, auto-generated |
-| `ConversationId` | `uuid` | FK → `Conversations` (cascade delete) |
-| `SenderId` | `uuid` | FK → `Users` |
-| `Body` | `varchar(4000)` | Message text |
-| `IsRead` | `bool` | Set to `true` when the recipient opens the conversation |
-| `CreatedAt` | `timestamp` | UTC, set on creation |
+| Column           | Type            | Notes                                                   |
+| ---------------- | --------------- | ------------------------------------------------------- |
+| `Id`             | `uuid`          | PK, auto-generated                                      |
+| `ConversationId` | `uuid`          | FK → `Conversations` (cascade delete)                   |
+| `SenderId`       | `uuid`          | FK → `Users`                                            |
+| `Body`           | `varchar(4000)` | Message text                                            |
+| `IsRead`         | `bool`          | Set to `true` when the recipient opens the conversation |
+| `CreatedAt`      | `timestamp`     | UTC, set on creation                                    |
 
 ### User additions
 
@@ -52,13 +52,13 @@ A unique index on `(User1Id, User2Id)` enforces that at most one conversation ex
 
 `IMessageService` / `MessageService` handle all business logic:
 
-| Method | What it does |
-|--------|-------------|
+| Method                         | What it does                                                                                                                                   |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GetOrCreateConversationAsync` | Validates the other user exists, normalises participant order, creates the conversation row if absent, returns a `ConversationSummaryResponse` |
-| `GetConversationsAsync` | Returns all conversations for a user ordered by most recent activity; computes unread count per conversation in a single query |
-| `GetConversationAsync` | Returns a conversation with its full message list; marks all unread messages (sent by the other user) as read atomically |
-| `SendMessageAsync` | Validates the caller is a participant, persists the message, then calls `SseHub.Push` to deliver it in real time to the recipient |
-| `GetUnreadCountAsync` | Returns the total number of unread messages across all conversations |
+| `GetConversationsAsync`        | Returns all conversations for a user ordered by most recent activity; computes unread count per conversation in a single query                 |
+| `GetConversationAsync`         | Returns a conversation with its full message list; marks all unread messages (sent by the other user) as read atomically                       |
+| `SendMessageAsync`             | Validates the caller is a participant, persists the message, then calls `SseHub.Push` to deliver it in real time to the recipient              |
+| `GetUnreadCountAsync`          | Returns the total number of unread messages across all conversations                                                                           |
 
 ### Real-time delivery — `SseHub`
 
@@ -97,26 +97,26 @@ Located at [placey-fe/src/stores/useMessagingStore.ts](../placey-fe/src/stores/u
 
 **State**
 
-| Ref | Type | Purpose |
-|-----|------|---------|
-| `conversations` | `ConversationSummary[]` | Inbox list |
-| `activeConversation` | `ConversationDetail \| null` | Currently open conversation |
-| `unreadCount` | `number` | Badge shown in the nav |
-| `isLoading` | `bool` | Conversation/message load spinner |
-| `isSending` | `bool` | Disables the send button during in-flight POST |
-| `error` | `string \| null` | Error message for UI |
+| Ref                  | Type                         | Purpose                                        |
+| -------------------- | ---------------------------- | ---------------------------------------------- |
+| `conversations`      | `ConversationSummary[]`      | Inbox list                                     |
+| `activeConversation` | `ConversationDetail \| null` | Currently open conversation                    |
+| `unreadCount`        | `number`                     | Badge shown in the nav                         |
+| `isLoading`          | `bool`                       | Conversation/message load spinner              |
+| `isSending`          | `bool`                       | Disables the send button during in-flight POST |
+| `error`              | `string \| null`             | Error message for UI                           |
 
 **Key actions**
 
-| Action | Description |
-|--------|-------------|
-| `fetchConversations()` | Loads the inbox |
-| `fetchConversation(id)` | Loads a single conversation and refreshes `unreadCount` |
-| `getOrCreateConversation(otherUserId)` | POSTs to create/retrieve a conversation; returns the conversation ID for navigation |
-| `sendMessage(conversationId, body)` | Sends a message and appends it to `activeConversation.messages` optimistically |
-| `fetchUnreadCount()` | Refreshes the nav badge |
-| `connectStream()` | Opens the SSE connection; on new message, appends to the active conversation or increments unread counters on the list entry |
-| `disconnectStream()` | Closes the SSE connection (called on logout) |
+| Action                                 | Description                                                                                                                  |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `fetchConversations()`                 | Loads the inbox                                                                                                              |
+| `fetchConversation(id)`                | Loads a single conversation and refreshes `unreadCount`                                                                      |
+| `getOrCreateConversation(otherUserId)` | POSTs to create/retrieve a conversation; returns the conversation ID for navigation                                          |
+| `sendMessage(conversationId, body)`    | Sends a message and appends it to `activeConversation.messages` optimistically                                               |
+| `fetchUnreadCount()`                   | Refreshes the nav badge                                                                                                      |
+| `connectStream()`                      | Opens the SSE connection; on new message, appends to the active conversation or increments unread counters on the list entry |
+| `disconnectStream()`                   | Closes the SSE connection (called on logout)                                                                                 |
 
 **SSE reconnect**: on connection error the store waits 5 seconds then calls `connectStream()` again.
 
