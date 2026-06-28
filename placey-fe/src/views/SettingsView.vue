@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useAuthStore } from '@/stores'
+import { useAuthStore, parseErrorMessage } from '@/stores/useAuthStore'
 import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
@@ -16,13 +16,29 @@ const isUploadingAvatar = ref(false)
 const avatarError = ref<string | null>(null)
 const avatarInput = ref<HTMLInputElement | null>(null)
 
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024
+
 onMounted(() => {
   name.value = authStore.user?.name ?? ''
   bio.value = authStore.user?.bio ?? ''
 })
 
 async function saveProfile() {
-  if (!name.value.trim()) return
+  const trimmedName = name.value.trim()
+  if (!trimmedName) {
+    saveError.value = 'Name is required.'
+    return
+  }
+  if (trimmedName.length > 100) {
+    saveError.value = 'Name must be 100 characters or fewer.'
+    return
+  }
+  if (bio.value.length > 500) {
+    saveError.value = 'Bio must be 500 characters or fewer.'
+    return
+  }
+
   isSaving.value = true
   saveError.value = null
   saveSuccess.value = false
@@ -31,12 +47,9 @@ async function saveProfile() {
     const res = await authStore.apiFetch('/api/users/me', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name.value.trim(), bio: bio.value.trim() || null }),
+      body: JSON.stringify({ name: trimmedName, bio: bio.value.trim() || null }),
     })
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}))
-      throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
-    }
+    if (!res.ok) throw new Error(await parseErrorMessage(res))
     const updated = await res.json()
     authStore.patchUser({ name: updated.name, bio: updated.bio ?? null })
     saveSuccess.value = true
@@ -55,6 +68,18 @@ async function uploadAvatar(event: Event) {
   if (!file) return
 
   avatarError.value = null
+
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    avatarError.value = 'Only JPEG, PNG, and WebP images are allowed.'
+    if (avatarInput.value) avatarInput.value.value = ''
+    return
+  }
+  if (file.size > MAX_AVATAR_BYTES) {
+    avatarError.value = 'Image must be under 5 MB.'
+    if (avatarInput.value) avatarInput.value.value = ''
+    return
+  }
+
   isUploadingAvatar.value = true
 
   try {
@@ -65,10 +90,7 @@ async function uploadAvatar(event: Event) {
       method: 'POST',
       body: formData,
     })
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}))
-      throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
-    }
+    if (!res.ok) throw new Error(await parseErrorMessage(res))
     const updated = await res.json()
     authStore.patchUser({ avatarUrl: updated.url })
   } catch (e: unknown) {
@@ -99,10 +121,7 @@ async function deleteAccount() {
   deleteError.value = null
   try {
     const res = await authStore.apiFetch('/api/users/me', { method: 'DELETE' })
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}))
-      throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
-    }
+    if (!res.ok) throw new Error(await parseErrorMessage(res))
     await authStore.logout()
     router.push('/')
   } catch (e: unknown) {
@@ -167,6 +186,7 @@ async function deleteAccount() {
             v-model="name"
             type="text"
             required
+            maxlength="100"
             autocomplete="name"
             placeholder="Your name"
             class="w-full border border-divider rounded-xl px-4 py-2.5 text-sm text-ink placeholder:text-muted/60 focus:outline-none focus:border-ink/40 transition-colors"
@@ -179,6 +199,7 @@ async function deleteAccount() {
             id="settings-bio"
             v-model="bio"
             rows="4"
+            maxlength="500"
             placeholder="Tell hosts and guests a little about yourself…"
             class="w-full border border-divider rounded-xl px-4 py-2.5 text-sm text-ink placeholder:text-muted/60 focus:outline-none focus:border-ink/40 transition-colors resize-none"
           />
