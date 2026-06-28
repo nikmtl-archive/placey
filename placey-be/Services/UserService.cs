@@ -125,14 +125,7 @@ public class UserService(AppDbContext db, IWebHostEnvironment env) : IUserServic
         return new PublicUserResponse(user.Id, user.Name, user.Bio, user.AvatarUrl, user.CreatedAt);
     }
 
-    private static readonly string[] AllowedImageTypes =
-    [
-        "image/jpeg",
-        "image/png",
-        "image/webp",
-        "image/heic",
-        "image/heif",
-    ];
+    private static readonly string[] AllowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
     private const long MaxAvatarBytes = 5 * 1024 * 1024;
 
     public async Task<string> UploadAvatarAsync(Guid userId, IFormFile file)
@@ -145,9 +138,7 @@ public class UserService(AppDbContext db, IWebHostEnvironment env) : IUserServic
         if (file.Length > MaxAvatarBytes)
             throw new InvalidOperationException("File exceeds the 5 MB limit.");
         if (!AllowedImageTypes.Contains(file.ContentType.ToLowerInvariant()))
-            throw new InvalidOperationException(
-                "Only JPEG, PNG, WebP, and HEIC images are allowed."
-            );
+            throw new InvalidOperationException("Only JPEG, PNG, and WebP images are allowed.");
 
         var uploads = Path.Combine(env.WebRootPath ?? "wwwroot", "avatars");
         Directory.CreateDirectory(uploads);
