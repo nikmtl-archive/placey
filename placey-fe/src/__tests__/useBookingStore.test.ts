@@ -107,7 +107,7 @@ describe('useBookingStore', () => {
   })
 
   describe('cancelBooking', () => {
-    it('removes booking from list on success', async () => {
+    it('sets booking status to Cancelled on success', async () => {
       const auth = useAuthStore()
       vi.spyOn(auth, 'apiFetch').mockImplementation(mockApiFetch(null, 204))
       const store = useBookingStore()
@@ -115,10 +115,11 @@ describe('useBookingStore', () => {
 
       await store.cancelBooking('b1')
 
-      expect(store.bookings).toHaveLength(0)
+      expect(store.bookings).toHaveLength(1)
+      expect(store.bookings[0].status).toBe('Cancelled')
     })
 
-    it('clears lastBooking when the cancelled booking matches', async () => {
+    it('sets lastBooking status to Cancelled when the cancelled booking matches', async () => {
       const auth = useAuthStore()
       vi.spyOn(auth, 'apiFetch').mockImplementation(mockApiFetch(null, 204))
       const store = useBookingStore()
@@ -128,7 +129,7 @@ describe('useBookingStore', () => {
 
       await store.cancelBooking('b1')
 
-      expect(store.lastBooking).toBeNull()
+      expect(store.lastBooking?.status).toBe('Cancelled')
     })
 
     it('throws and sets error on failure', async () => {
