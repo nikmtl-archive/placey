@@ -1,5 +1,7 @@
 .DS_Store
 .env
+# appsettings.Development.json is intentionally tracked. It contains only local dev
+# config (local DB, dev JWT secret) and is never used in production.
 appsettings.Development.json
 
 ### ASPNETCore ###
@@ -189,8 +191,6 @@ _pkginfo.txt
 # Visual Studio cache files
 # files ending in .cache can be ignored
 *.[Cc]ache
-# but keep track of directories ending in .cache
-!*.[Cc]ache/
 
 # Others
 ClientBin/
@@ -292,10 +292,4 @@ __pycache__/
 .ionide
 
 ### Vue ###
-# gitignore template for Vue.js projects
-#
-# Recommended template: Node.gitignore
-
 docs/_book
-
-test/
