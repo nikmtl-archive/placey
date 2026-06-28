@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Booking } from '@/types'
-import { useAuthStore } from './useAuthStore'
+import { useAuthStore, parseErrorMessage } from './useAuthStore'
 
 type BookingReviewFallback = {
   id: string
@@ -24,10 +24,7 @@ export const useBookingStore = defineStore('booking', () => {
     error.value = null
     try {
       const res = await authStore.apiFetch('/api/users/me/bookings')
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
-      }
+      if (!res.ok) throw new Error(await parseErrorMessage(res))
 
       const data = await res.json()
       bookings.value = Array.isArray(data) ? data : []
@@ -80,10 +77,7 @@ export const useBookingStore = defineStore('booking', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ listingId, checkIn, checkOut, guests }),
       })
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
-      }
+      if (!res.ok) throw new Error(await parseErrorMessage(res))
       lastBooking.value = await res.json()
       return lastBooking.value!
     } catch (e: unknown) {
@@ -101,10 +95,7 @@ export const useBookingStore = defineStore('booking', () => {
       const res = await authStore.apiFetch(`/api/bookings/${bookingId}`, {
         method: 'DELETE',
       })
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
-      }
+      if (!res.ok) throw new Error(await parseErrorMessage(res))
 
       bookings.value = bookings.value.filter((booking) => booking.id !== bookingId)
       if (lastBooking.value?.id === bookingId) lastBooking.value = null
@@ -126,10 +117,7 @@ export const useBookingStore = defineStore('booking', () => {
         body: JSON.stringify({ bookingId, rating, comment }),
       })
 
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
-      }
+      if (!res.ok) throw new Error(await parseErrorMessage(res))
 
       // Keep booking cards in sync so the new review appears on the right booking.
       await fetchMyBookings()

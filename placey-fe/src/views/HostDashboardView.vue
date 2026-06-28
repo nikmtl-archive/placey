@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useAuthStore } from '@/stores'
+import { useAuthStore, parseErrorMessage } from '@/stores/useAuthStore'
 import ListingCard from '@/components/ListingCard.vue'
 import type { Listing } from '@/types'
 
@@ -102,10 +102,7 @@ async function updateReservationStatus(id: string, status: 'Confirmed' | 'Cancel
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
     })
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}))
-      throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
-    }
+    if (!res.ok) throw new Error(await parseErrorMessage(res))
     const updated: Reservation = await res.json()
     const idx = reservations.value.findIndex((r) => r.id === id)
     if (idx !== -1) reservations.value[idx] = updated

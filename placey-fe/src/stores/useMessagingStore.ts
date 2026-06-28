@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { useAuthStore } from './useAuthStore'
+import { useAuthStore, parseErrorMessage } from './useAuthStore'
 import type { ConversationSummary, ConversationDetail, ChatMessage } from '@/types'
 
 export const useMessagingStore = defineStore('messaging', () => {
@@ -14,6 +14,7 @@ export const useMessagingStore = defineStore('messaging', () => {
   const error = ref<string | null>(null)
 
   let _eventSource: EventSource | null = null
+  let _retryCount = 0
 
   async function fetchConversations() {
     isLoading.value = true
@@ -51,10 +52,7 @@ export const useMessagingStore = defineStore('messaging', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ otherUserId }),
     })
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}))
-      throw new Error(body.detail ?? body.message ?? `HTTP ${res.status}`)
-    }
+    if (!res.ok) throw new Error(await parseErrorMessage(res))
     const data: ConversationSummary = await res.json()
     return data.id
   }
@@ -70,10 +68,7 @@ export const useMessagingStore = defineStore('messaging', () => {
           body: JSON.stringify({ body }),
         },
       )
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.detail ?? err.message ?? `HTTP ${res.status}`)
-      }
+      if (!res.ok) throw new Error(await parseErrorMessage(res))
       const msg: ChatMessage = await res.json()
       if (activeConversation.value?.id === conversationId) {
         activeConversation.value.messages.push(msg)
@@ -102,6 +97,10 @@ export const useMessagingStore = defineStore('messaging', () => {
 
     _eventSource = new EventSource(`/api/messages/stream?access_token=${token}`)
 
+    _eventSource.onopen = () => {
+      _retryCount = 0
+    }
+
     _eventSource.onmessage = (e) => {
       const msg: ChatMessage = JSON.parse(e.data)
 
@@ -121,7 +120,13 @@ export const useMessagingStore = defineStore('messaging', () => {
     _eventSource.onerror = () => {
       _eventSource?.close()
       _eventSource = null
-      setTimeout(connectStream, 5000)
+      if (_retryCount < 5) {
+        const delay = Math.min(1000 * Math.pow(2, _retryCount), 30_000)
+        _retryCount++
+        setTimeout(connectStream, delay)
+      } else {
+        error.value = 'Live updates disconnected. Refresh the page to reconnect.'
+      }
     }
   }
 
