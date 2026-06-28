@@ -25,9 +25,9 @@ watch(
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen">
+  <div class="flex flex-col">
     <NavBar />
-    <main class="flex-1">
+    <main class="min-h-screen">
       <RouterView />
     </main>
     <SiteFooter v-if="!isMessaging" />
