@@ -2,6 +2,8 @@
 
 Placey is a short-term property rental platform inspired by Airbnb. Hosts publish and manage accommodations; guests search, check availability, and book stays.
 
+![Placey homepage](docs/assets/screenshot-home.png)
+
 ---
 
 ## Features
@@ -53,6 +55,9 @@ placey/
 ---
 
 ## Setup
+
+> [!NOTE]
+> Placey is available to test under [placey.mtzel.com](https://placey.mtzel.com)
 
 ### Requirements
 
@@ -112,13 +117,13 @@ pnpm dev
 
 Used by Docker Compose only. Copy `.env.example` to `.env` and fill in:
 
-| Variable                 | Description                                                            |
-| ------------------------ | ---------------------------------------------------------------------- |
-| `POSTGRES_USER`          | Database username                                                      |
-| `POSTGRES_PASSWORD`      | Database password                                                      |
-| `POSTGRES_DB`            | Database name                                                          |
+| Variable                 | Description                                                           |
+| ------------------------ | --------------------------------------------------------------------- |
+| `POSTGRES_USER`          | Database username                                                     |
+| `POSTGRES_PASSWORD`      | Database password                                                     |
+| `POSTGRES_DB`            | Database name                                                         |
 | `JWT_SECRET`             | HMAC signing key, must be ≥ 32 characters (`openssl rand -base64 32`) |
-| `ASPNETCORE_ENVIRONMENT` | `Development` or `Production`                                          |
+| `ASPNETCORE_ENVIRONMENT` | `Development` or `Production`                                         |
 
 JWT issuer and audience are hardcoded to `placey` in `docker-compose.yml`. For local development outside Docker they are set in `appsettings.Development.json`.
 
@@ -163,6 +168,27 @@ AggregateError [ECONNREFUSED]:
 ```
 
 Make sure the backend is running and the proxy target in `vite.config.ts` matches the backend Port (default: `http://localhost:5001`).
+
+---
+
+## CI / CD
+
+### CI (GitHub Actions)
+
+Two workflows run on every pull request:
+
+| Workflow    | Trigger | Jobs                                                                     |
+| ----------- | ------- | ------------------------------------------------------------------------ |
+| Frontend CI | PR      | Prettier format check, oxlint + ESLint, vue-tsc type-check, Vitest tests |
+| Backend CI  | PR      | CSharpier format check, `dotnet build`, `dotnet test`                    |
+
+Workflows are defined in [.github/workflows/](.github/workflows/).
+
+### CD (Dokploy)
+
+Deployments are handled by [Dokploy](https://dokploy.com). On every push to `main`, Dokploy pulls the latest image and redeploys the application automatically. No manual deployment step is needed — merging a PR to `main` is sufficient to ship.
+
+The live deployment is available at [placey.mtzel.com](https://placey.mtzel.com).
 
 ---
 
@@ -225,13 +251,13 @@ Full test documentation is in [docs/testing.md](docs/testing.md), including back
 
 Frontend unit tests use [Vitest](https://vitest.dev/) and [`@vue/test-utils`](https://test-utils.vuejs.org/). All five Pinia stores are tested with mocked API calls (`vi.stubGlobal` / `vi.spyOn`).
 
-| Store                | Scenarios covered                                                                                                                                                                                    |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `useAuthStore`       | Initial state (empty, restored from localStorage, corrupt data), login (success, failure, loading flag, persistence), register (success, duplicate email), logout (success, network error), patchUser, refreshSession (success, no token, deduplication), authHeaders, apiFetch (401 retry, clears session on failed refresh) |
-| `useFavoritesStore`  | isFavorited, hydrate (success, failure), toggleFavorite (add optimistic, remove optimistic, rollback add on error, rollback remove on error), reset                                                  |
-| `useListingsStore`   | fetchListings (success, HTTP error, query string for location/guests, optional filters, omits absent params, ignores AbortError, loading flag)                                                        |
-| `useBookingStore`    | fetchMyBookings (success, error, non-array response), createBooking (success, conflict error, loading flag), cancelBooking (removes from list, clears lastBooking, error, loading flag), rateBooking (refreshes list, error, loading flag) |
-| `useMessagingStore`  | fetchConversations (success, error), fetchConversation (sets active, resets before load, error), getOrCreateConversation (success, error), sendMessage (success + appends, wrong conversation, error, loading flag), fetchUnreadCount (success, silent error), resetActive |
+| Store               | Scenarios covered                                                                                                                                                                                                                                                                                                             |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useAuthStore`      | Initial state (empty, restored from localStorage, corrupt data), login (success, failure, loading flag, persistence), register (success, duplicate email), logout (success, network error), patchUser, refreshSession (success, no token, deduplication), authHeaders, apiFetch (401 retry, clears session on failed refresh) |
+| `useFavoritesStore` | isFavorited, hydrate (success, failure), toggleFavorite (add optimistic, remove optimistic, rollback add on error, rollback remove on error), reset                                                                                                                                                                           |
+| `useListingsStore`  | fetchListings (success, HTTP error, query string for location/guests, optional filters, omits absent params, ignores AbortError, loading flag)                                                                                                                                                                                |
+| `useBookingStore`   | fetchMyBookings (success, error, non-array response), createBooking (success, conflict error, loading flag), cancelBooking (removes from list, clears lastBooking, error, loading flag), rateBooking (refreshes list, error, loading flag)                                                                                    |
+| `useMessagingStore` | fetchConversations (success, error), fetchConversation (sets active, resets before load, error), getOrCreateConversation (success, error), sendMessage (success + appends, wrong conversation, error, loading flag), fetchUnreadCount (success, silent error), resetActive                                                    |
 
 
 ### Running frontend tests
